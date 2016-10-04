@@ -11,13 +11,16 @@ public class Player {
     private Texture player;
 
     public Player(int x, int y){
-        position=new Vector3(x,y,0);
-        velocity=new Vector3(0,0,0);
+        position=new Vector3(50,50,0);
+        velocity=new Vector3(30,0,0);
         player=new Texture("idle.png");
     }
 
+    public void setVelocity(){
+        //velocity
+    }
+
     public void update(float dt){
-        velocity.add(ACCELERATION,0,0);
         velocity.scl(dt);
         position.add(velocity.x,0,0);
         velocity.scl(1/dt);

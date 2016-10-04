@@ -9,7 +9,7 @@ public class MenuState extends State{
     private Texture playBtn;
     public MenuState(GameStateManager gsm) {
         super(gsm);
-        playBtn = new Texture("Play.png");
+        playBtn = new Texture("PlayBtn.png");
     }
 
     @Override
