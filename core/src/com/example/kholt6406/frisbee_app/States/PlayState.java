@@ -16,13 +16,13 @@ public class PlayState extends State {
     private Skin touchpadSkin;
     private Drawable touchBackground;
     private Drawable touchKnob;
-
+    private Texture scoreboard;
     public PlayState(GameStateManager gsm) {
         super(gsm);
         player=new Player(50,100);
         cam.setToOrtho(false,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
         background = new Texture("field_background.png");
-
+        scoreboard=new Texture("scoreboard.png");
         touchpadSkin = new Skin();
         //Set background image
         touchpadSkin.add("touchBackground", new Texture("touchBackground.png"));
@@ -59,6 +59,8 @@ public class PlayState extends State {
         sb.begin();
         sb.draw(background, 0,0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         sb.draw(player.getTexture(),player.getPosition().x,player.getPosition().y);
+        sb.draw(scoreboard,(Gdx.graphics.getWidth()/2)-(scoreboard.getWidth()*3/2),Gdx.graphics.getHeight()-scoreboard.getHeight()*3,scoreboard.getWidth()*3,scoreboard.getHeight()*3);
+        //sb.draw(scoreboard,(Gdx.graphics.getWidth()/2)-(scoreboard.getWidth()),0);
         //touchpad.draw(sb, 0);
         sb.end();
     }
