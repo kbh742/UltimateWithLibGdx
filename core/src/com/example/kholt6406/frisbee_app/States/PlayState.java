@@ -48,7 +48,7 @@ public class PlayState extends State {
         //Create new TouchPad with the created style
         touchpad = new Touchpad(10, touchpadStyle);
         //setBounds(x,y,width,height)
-        touchpad.setBounds(15, 15, 400, 400);
+        touchpad.setBounds(30, 30, 400, 400);
 
         stage = new Stage();
         stage.addActor(touchpad);
