@@ -15,8 +15,6 @@ import com.example.kholt6406.frisbee_app.sprites.Player;
 public class PlayState extends State {
     private Player player;
     private Stage stage;
-    private SpriteBatch sb;
-    private Texture background;
     private Touchpad touchpad;
     private Touchpad.TouchpadStyle touchpadStyle;
     private Skin touchpadSkin;
