@@ -12,8 +12,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.example.kholt6406.frisbee_app.sprites.Player;
 
-
-
 public class PlayState extends State {
     private Player player;
     private Stage stage;
@@ -24,6 +22,7 @@ public class PlayState extends State {
     private Skin touchpadSkin;
     private Drawable touchBackground;
     private Drawable touchKnob;
+    private Texture background;
     private Texture scoreboard;
     FreeTypeFontGenerator freeTypeFontGenerator=new FreeTypeFontGenerator(Gdx.files.internal("lucon.ttf"));
     FreeTypeFontGenerator.FreeTypeFontParameter freeTypeFontParameter=new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -93,6 +92,7 @@ public class PlayState extends State {
         font.draw(sb, clock(), scoreboardX + scoreboard.getWidth() - scoreboard.getWidth() / 4, scoreboardY+scoreboard.getHeight()/2);
         touchpad.draw(sb,1);
         sb.end();
+
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
     }
