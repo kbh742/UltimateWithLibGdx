@@ -83,6 +83,11 @@ public class MenuState extends State{
             gsm.set(new ManagerState(gsm));
             dispose();
         }
+
+        if (settingsBtn.isPressed()){
+            gsm.set(new SettingsState(gsm));
+            dispose();
+        }
     }
 
     @Override

@@ -11,7 +11,7 @@ import com.example.kholt6406.frisbee_app.sprites.PlayerCard;
 /**
  * Created by kholt6406 on 10/17/2016.
  */
-public class ManagerState extends State {
+public class SettingsState extends State {
     private Stage stage;
     private Texture background;
 
@@ -19,9 +19,9 @@ public class ManagerState extends State {
     private Skin backBtnSkin;
     private ImageButton.ImageButtonStyle backBtnStyle;
 
-    public ManagerState(GameStateManager gsm) {
+    public SettingsState(GameStateManager gsm) {
         super(gsm);
-        background = new Texture("team_manager_menu.png");
+        background = new Texture("settings_menu.png");
 
         backBtnSkin = new Skin();
         backBtnSkin.add("backBtn", new Texture("button_back.png"));
@@ -30,10 +30,11 @@ public class ManagerState extends State {
         backBtnStyle.imageDown = backBtnSkin.getDrawable("backBtn");
         backBtn = new ImageButton(backBtnStyle);
         backBtn.setBounds((Gdx.graphics.getWidth()/3)*2-(backBtn.getWidth()/2),(Gdx.graphics.getHeight()/3)-(backBtn.getHeight()/2), backBtn.getWidth(), backBtn.getHeight());
-        
+
         stage = new Stage();
         stage.addActor(backBtn);
         Gdx.input.setInputProcessor(stage);
+
     }
 
     @Override
