@@ -1,10 +1,11 @@
 package com.example.kholt6406.frisbee_app.sprites;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector3;
 
 
-public class Player {
+public class Player extends Sprite{
     private static final int ACCELERATION=15;
     private Vector3 position;
     private float velocity;
