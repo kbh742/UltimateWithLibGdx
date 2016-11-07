@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -43,7 +44,7 @@ public class PlayState extends State {
 
     public PlayState(GameStateManager gsm) {
         super(gsm);
-        player1=new Player(50,100);
+        player1=new Player(800,800);
         cpuPlayer = new Player(100, 50);
         //cam.setToOrtho(false,w,h);
         camera = new PerspectiveCamera();
@@ -94,62 +95,85 @@ public class PlayState extends State {
         //handleInput();
         player1.update(dt);
 
-        player1.setX(player1.getPosition().x + touchpad.getKnobPercentX()*player1.getVelocity());
-        player1.setY(player1.getPosition().y + touchpad.getKnobPercentY()*player1.getVelocity());
+        float xPos = player1.getPosition().x;
+        float yPos = player1.getPosition().y;
+        float playerWd = player1.getTexture().getWidth()/2;
+        float playerHt = player1.getTexture().getHeight()/2;
 
-        // Get the bounding rectangle that describes the boundary of our sprite based on position, size, and scale.
-        final Rectangle bounds = player1.getBoundingRectangle();
+        player1.setX(xPos + touchpad.getKnobPercentX() * player1.getVelocity());
+        player1.setY(yPos + touchpad.getKnobPercentY() * player1.getVelocity());
 
-        // Get the bounding rectangle that our screen.  If using a camera you would create this based on the camera's
-        // position and viewport width/height instead.
-        final Rectangle screenBounds = new Rectangle(0, 0, w, h);
-
-        // Sprite
-        float left = bounds.getX();
-        float bottom = bounds.getY();
-        float top = bottom + bounds.getHeight();
-        float right = left + bounds.getWidth();
-
-        // Used for adjustments below since our origin is now the center.
-        final float halfWidth = bounds.getWidth() * .5f;
-        final float halfHeight = bounds.getHeight() * .5f;
-
-        // Screen
-        float screenLeft = screenBounds.getX();
-        float screenBottom = screenBounds.getY();
-        float screenTop = screenBottom + screenBounds.getHeight();
-        float screenRight = screenLeft + screenBounds.getWidth();
-
-        // Current position
-        float newX = player1.getPosition().x;
-        float newY = player1.getPosition().y;
-
-        // Correct horizontal axis
-        if(left < screenLeft)
-        {
-            // Clamp to left
-            newX = screenLeft + halfWidth;
+        if(xPos + playerWd <= 0) {
+           player1.setX(xPos + 1);
         }
-        else if(right > screenRight)
-        {
-            // Clamp to right
-            newX = screenRight - halfWidth;
+        if(xPos + playerWd >= w) {
+            player1.setX(xPos - 1);
+        }
+        if(yPos + playerHt <= 0) {
+            player1.setY(yPos +1);
+        }
+        if(yPos + playerHt >= h) {
+            player1.setY(yPos - 1);
         }
 
-        // Correct vertical axis
-        if(bottom < screenBottom)
-        {
-            // Clamp to bottom
-            newY = screenBottom + halfHeight;
-        }
-        else if(top > screenTop)
-        {
-            // Clamp to top
-            newY = screenTop - halfHeight;
-        }
 
-        // Set sprite position.
-        player1.setPosition(newX, newY);
+
+//        // Get the bounding rectangle that describes the boundary of our sprite based on position, size, and scale.
+//        final Rectangle bounds = player1.getBoundingRectangle();
+//
+//        // Get the bounding rectangle that our screen.  If using a camera you would create this based on the camera's
+//        // position and viewport width/height instead.
+//        final Rectangle screenBounds = new Rectangle(0, 0, w, h);
+//
+//        // Sprite
+//        float left = bounds.getX();
+//        float bottom = bounds.getY();
+//        float top = bottom + bounds.getHeight();
+//        float right = left + bounds.getWidth();
+//
+//        // Used for adjustments below since our origin is now the center.
+//        final float halfWidth = bounds.getWidth() * .5f;
+//        final float halfHeight = bounds.getHeight() * .5f;
+//
+//        // Screen
+//        float screenLeft = screenBounds.getX();
+//        float screenBottom = screenBounds.getY();
+//        float screenTop = screenBottom + screenBounds.getHeight();
+//        float screenRight = screenLeft + screenBounds.getWidth();
+//
+//        // Current position
+//        float newX = player1.getPosition().x;
+//        float newY = player1.getPosition().y;
+//
+//        // Correct horizontal axis
+//        if(left < screenLeft)
+//        {
+//            // Clamp to left
+//            newX = screenLeft + halfWidth;
+//        }
+//        else if(right > screenRight)
+//        {
+//            // Clamp to right
+//            newX = screenRight - halfWidth;
+//        }
+//
+//        // Correct vertical axis
+//        if(bottom < screenBottom)
+//        {
+//            // Clamp to bottom
+//            newY = screenBottom + halfHeight;
+//        }
+//        else if(top > screenTop)
+//        {
+//            // Clamp to top
+//            newY = screenTop - halfHeight;
+//        }
+//
+//        // Set sprite position.
+//        player1.setX(newX);
+//        player1.setY(newY);
+
+
     }
 
     @Override
