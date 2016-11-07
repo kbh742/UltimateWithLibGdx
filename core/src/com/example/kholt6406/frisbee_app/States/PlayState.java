@@ -22,6 +22,11 @@ import com.example.kholt6406.frisbee_app.sprites.Player;
 public class PlayState extends State {
     float w = Gdx.graphics.getWidth();
     float h = Gdx.graphics.getHeight();
+
+    float xPos;
+    float yPos;
+    float playerWd;
+    float playerHt;
     
     private Viewport fitViewport;
     private Camera camera;
@@ -95,10 +100,10 @@ public class PlayState extends State {
         //handleInput();
         player1.update(dt);
 
-        float xPos = player1.getPosition().x;
-        float yPos = player1.getPosition().y;
-        float playerWd = player1.getTexture().getWidth()/2;
-        float playerHt = player1.getTexture().getHeight()/2;
+        xPos = player1.getPosition().x;
+        yPos = player1.getPosition().y;
+        playerWd = player1.getTexture().getWidth()/2;
+        playerHt = player1.getTexture().getHeight()/2;
 
         player1.setX(xPos + touchpad.getKnobPercentX() * player1.getVelocity());
         player1.setY(yPos + touchpad.getKnobPercentY() * player1.getVelocity());
@@ -182,7 +187,7 @@ public class PlayState extends State {
 
         sb.begin();
         sb.draw(background, 0,0, w, h);
-        sb.draw(player1.getTexture(),player1.getPosition().x,player1.getPosition().y);
+        sb.draw(player1.getTexture(),xPos,yPos,xPos+playerWd,xPos+playerHt,playerWd*2,playerHt*2,1,1,0,Math.round(xPos),Math.round(yPos),Math.round(playerWd*2),Math.round(playerHt*2),false,false);
         sb.draw(cpuPlayer.getTexture(), cpuPlayer.getPosition().x, cpuPlayer.getPosition().y);
         sb.draw(scoreboard,scoreboardX,scoreboardY,scoreboard.getWidth()*3,scoreboard.getHeight()*3);
         font.draw(sb, clock(), scoreboardX + scoreboard.getWidth() - scoreboard.getWidth() / 4, scoreboardY+scoreboard.getHeight()/2);
