@@ -23,8 +23,8 @@ public class PlayState extends State {
     float w = Gdx.graphics.getWidth();
     float h = Gdx.graphics.getHeight();
 
-    float xPos;
-    float yPos;
+    float xPos=800;
+    float yPos=800;
     float playerWd;
     float playerHt;
     
@@ -44,6 +44,8 @@ public class PlayState extends State {
     FreeTypeFontGenerator.FreeTypeFontParameter freeTypeFontParameter=new FreeTypeFontGenerator.FreeTypeFontParameter();
     float scoreboardX;
     float scoreboardY;
+    float rotation;
+    float angle;
     BitmapFont font;
     double playTime=15;
 
@@ -61,7 +63,8 @@ public class PlayState extends State {
         font=freeTypeFontGenerator.generateFont(freeTypeFontParameter);
         scoreboardX=(w/2)-(scoreboard.getWidth()/2*3);
         scoreboardY=(h-scoreboard.getHeight()*3)-100;
-
+        playerWd = player1.getTexture().getWidth()/2;
+        playerHt = player1.getTexture().getHeight()/2;
         touchpadSkin = new Skin();
         //Set background image
         touchpadSkin.add("touchBackground", new Texture("joystick_base.png"));
@@ -99,14 +102,31 @@ public class PlayState extends State {
     protected void update(float dt) {
         //handleInput();
         player1.update(dt);
-
         xPos = player1.getPosition().x;
         yPos = player1.getPosition().y;
-        playerWd = player1.getTexture().getWidth()/2;
-        playerHt = player1.getTexture().getHeight()/2;
+        float deltaX=touchpad.getKnobPercentX();
+        float deltaY=touchpad.getKnobPercentY();
+        player1.setX(xPos+deltaX*player1.getVelocity());
+        player1.setY(yPos+deltaY*player1.getVelocity());
+        float deltaXAbs=Math.abs(deltaX);
+        float deltaYAbs=Math.abs(deltaY);
+        if (deltaX != 0  && deltaY != 0) {
 
-        player1.setX(xPos + touchpad.getKnobPercentX() * player1.getVelocity());
-        player1.setY(yPos + touchpad.getKnobPercentY() * player1.getVelocity());
+            angle = (float) Math.toDegrees(Math.atan(deltaXAbs / deltaYAbs));
+            if (deltaX < 0 && deltaY > 0) {
+                rotation = 360 - angle;
+            } else if (deltaX > 0 && deltaY < 0) {
+                rotation = 180 - angle;
+            } else if (deltaX < 0 && deltaY < 0) {
+                rotation = 180 + angle;
+            } else {
+                rotation = angle;
+            }
+        }
+
+
+
+
 
         if(xPos + playerWd <= 0) {
            player1.setX(xPos + 1);
@@ -187,7 +207,7 @@ public class PlayState extends State {
 
         sb.begin();
         sb.draw(background, 0,0, w, h);
-        sb.draw(player1.getTexture(),xPos,yPos,xPos+playerWd,xPos+playerHt,playerWd*2,playerHt*2,1,1,0,Math.round(xPos),Math.round(yPos),Math.round(playerWd*2),Math.round(playerHt*2),false,false);
+        sb.draw(player1.getTexture(),xPos,yPos,playerWd,playerHt,playerWd*2,playerHt*2,1,1,rotation,0,0,Math.round(playerWd*2),Math.round(playerHt*2),false,false);
         sb.draw(cpuPlayer.getTexture(), cpuPlayer.getPosition().x, cpuPlayer.getPosition().y);
         sb.draw(scoreboard,scoreboardX,scoreboardY,scoreboard.getWidth()*3,scoreboard.getHeight()*3);
         font.draw(sb, clock(), scoreboardX + scoreboard.getWidth() - scoreboard.getWidth() / 4, scoreboardY+scoreboard.getHeight()/2);
