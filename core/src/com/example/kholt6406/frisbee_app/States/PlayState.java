@@ -8,9 +8,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
@@ -27,9 +24,10 @@ public class PlayState extends State {
     float yPos=800;
     float playerWd;
     float playerHt;
-    
-    private Viewport fitViewport;
-    private Camera camera;
+
+/*    public final int WORLD_WIDTH=50;
+    public final int WORLD_HEIGHT=25;
+    float aspectRatio;*/
     private Player player1;
     private Player cpuPlayer;
     private Stage stage;
@@ -53,9 +51,8 @@ public class PlayState extends State {
         super(gsm);
         player1=new Player(800,800);
         cpuPlayer = new Player(100, 50);
-        //cam.setToOrtho(false,w,h);
-        camera = new PerspectiveCamera();
-        fitViewport = new FitViewport(w,h, camera);
+/*        aspectRatio= h/w;
+        cam.setToOrtho(false,WORLD_WIDTH*aspectRatio,WORLD_HEIGHT*aspectRatio);*/
         background = new Texture("field_background.png");
         scoreboard=new Texture("scoreboard.png");
 
@@ -113,12 +110,12 @@ public class PlayState extends State {
         if (deltaX != 0  && deltaY != 0) {
 
             angle = (float) Math.toDegrees(Math.atan(deltaXAbs / deltaYAbs));
-            if (deltaX < 0 && deltaY > 0) {
+            if (deltaX > 0 && deltaY > 0) {
                 rotation = 360 - angle;
             } else if (deltaX > 0 && deltaY < 0) {
-                rotation = 180 - angle;
-            } else if (deltaX < 0 && deltaY < 0) {
                 rotation = 180 + angle;
+            } else if (deltaX < 0 && deltaY < 0) {
+                rotation = 180 - angle;
             } else {
                 rotation = angle;
             }
@@ -207,7 +204,7 @@ public class PlayState extends State {
 
         sb.begin();
         sb.draw(background, 0,0, w, h);
-        sb.draw(player1.getTexture(),xPos,yPos,playerWd,playerHt,playerWd*2,playerHt*2,1,1,rotation,0,0,Math.round(playerWd*2),Math.round(playerHt*2),false,false);
+        sb.draw(player1.getTexture(),xPos,yPos,playerWd,playerHt,playerWd*2,playerHt*2,1,1,rotation+90,0,0,Math.round(playerWd*2),Math.round(playerHt*2),false,false);
         sb.draw(cpuPlayer.getTexture(), cpuPlayer.getPosition().x, cpuPlayer.getPosition().y);
         sb.draw(scoreboard,scoreboardX,scoreboardY,scoreboard.getWidth()*3,scoreboard.getHeight()*3);
         font.draw(sb, clock(), scoreboardX + scoreboard.getWidth() - scoreboard.getWidth() / 4, scoreboardY+scoreboard.getHeight()/2);
