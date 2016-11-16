@@ -2,8 +2,7 @@ package com.example.kholt6406.frisbee_app.States;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -13,8 +12,6 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.example.kholt6406.frisbee_app.sprites.Player;
 
 public class PlayState extends State {
@@ -28,9 +25,13 @@ public class PlayState extends State {
     float playerWd;
     float playerHt;
 
-/*    public final int WORLD_WIDTH=50;
+    OrthographicCamera camera;
+
+    public final int WORLD_WIDTH=50;
     public final int WORLD_HEIGHT=25;
-    float aspectRatio;*/
+    float xMultiplier=w/WORLD_WIDTH;
+    float yMultiplier=h/WORLD_HEIGHT;
+
     private Player player1;
     private Player cpuPlayer;
     private Stage stage;
@@ -55,9 +56,9 @@ public class PlayState extends State {
         super(gsm);
         player1=new Player(800,800);
         //cpuPlayer = new Player(100, 50);
-        //cam.setToOrtho(false,w,h);
-        camera = new PerspectiveCamera();
-        fitViewport = new FitViewport(w,h, camera);
+        camera=new OrthographicCamera();
+        camera.setToOrtho(false,WORLD_WIDTH*xMultiplier,WORLD_HEIGHT*yMultiplier);
+        camera.position.set(0,0,0);
         background = new Texture("field_background.png");
 
         scbdTexture = new Texture("scoreboard.png");
@@ -162,7 +163,7 @@ public class PlayState extends State {
 
     @Override
     protected void render(SpriteBatch sb) {
-        //sb.setProjectionMatrix(cam.combined);
+        sb.setProjectionMatrix(camera.combined);
 
         sb.begin();
         sb.draw(background, 0,0, w, h);
