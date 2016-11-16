@@ -28,7 +28,7 @@ public class Player extends Sprite{
         y = yPos;
     }
 
-    public void setVelocity() {}
+    public void setVelocity(int v) {velocity = v;}
 
     public void update(float dt){
         //velocity.scl(dt);
