@@ -2,8 +2,7 @@ package com.example.kholt6406.frisbee_app.States;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -12,8 +11,6 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.example.kholt6406.frisbee_app.sprites.Player;
 
 public class PlayState extends State {
@@ -25,9 +22,13 @@ public class PlayState extends State {
     float playerWd;
     float playerHt;
 
-/*    public final int WORLD_WIDTH=50;
+    OrthographicCamera camera;
+
+    public final int WORLD_WIDTH=50;
     public final int WORLD_HEIGHT=25;
-    float aspectRatio;*/
+    float xMultiplier=w/WORLD_WIDTH;
+    float yMultiplier=h/WORLD_HEIGHT;
+
     private Player player1;
     private Player cpuPlayer;
     private Stage stage;
@@ -51,8 +52,9 @@ public class PlayState extends State {
         super(gsm);
         player1=new Player(800,800);
         cpuPlayer = new Player(100, 50);
-/*        aspectRatio= h/w;
-        cam.setToOrtho(false,WORLD_WIDTH*aspectRatio,WORLD_HEIGHT*aspectRatio);*/
+        camera=new OrthographicCamera();
+        camera.setToOrtho(false,WORLD_WIDTH*xMultiplier,WORLD_HEIGHT*yMultiplier);
+        camera.position.set(0,0,0);
         background = new Texture("field_background.png");
         scoreboard=new Texture("scoreboard.png");
 
@@ -138,69 +140,11 @@ public class PlayState extends State {
             player1.setY(yPos - 1);
         }
 
-
-
-//        // Get the bounding rectangle that describes the boundary of our sprite based on position, size, and scale.
-//        final Rectangle bounds = player1.getBoundingRectangle();
-//
-//        // Get the bounding rectangle that our screen.  If using a camera you would create this based on the camera's
-//        // position and viewport width/height instead.
-//        final Rectangle screenBounds = new Rectangle(0, 0, w, h);
-//
-//        // Sprite
-//        float left = bounds.getX();
-//        float bottom = bounds.getY();
-//        float top = bottom + bounds.getHeight();
-//        float right = left + bounds.getWidth();
-//
-//        // Used for adjustments below since our origin is now the center.
-//        final float halfWidth = bounds.getWidth() * .5f;
-//        final float halfHeight = bounds.getHeight() * .5f;
-//
-//        // Screen
-//        float screenLeft = screenBounds.getX();
-//        float screenBottom = screenBounds.getY();
-//        float screenTop = screenBottom + screenBounds.getHeight();
-//        float screenRight = screenLeft + screenBounds.getWidth();
-//
-//        // Current position
-//        float newX = player1.getPosition().x;
-//        float newY = player1.getPosition().y;
-//
-//        // Correct horizontal axis
-//        if(left < screenLeft)
-//        {
-//            // Clamp to left
-//            newX = screenLeft + halfWidth;
-//        }
-//        else if(right > screenRight)
-//        {
-//            // Clamp to right
-//            newX = screenRight - halfWidth;
-//        }
-//
-//        // Correct vertical axis
-//        if(bottom < screenBottom)
-//        {
-//            // Clamp to bottom
-//            newY = screenBottom + halfHeight;
-//        }
-//        else if(top > screenTop)
-//        {
-//            // Clamp to top
-//            newY = screenTop - halfHeight;
-//        }
-//
-//        // Set sprite position.
-//        player1.setX(newX);
-//        player1.setY(newY);
-
-
     }
 
     @Override
     protected void render(SpriteBatch sb) {
-        //sb.setProjectionMatrix(cam.combined);
+        sb.setProjectionMatrix(camera.combined);
 
         sb.begin();
         sb.draw(background, 0,0, w, h);
