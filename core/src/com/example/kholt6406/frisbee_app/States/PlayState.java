@@ -9,12 +9,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.TextArea;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -27,8 +23,14 @@ public class PlayState extends State {
     float scbdWd;
     float scbdHt;
 
-    private Viewport fitViewport;
-    private Camera camera;
+    float xPos=800;
+    float yPos=800;
+    float playerWd;
+    float playerHt;
+
+/*    public final int WORLD_WIDTH=50;
+    public final int WORLD_HEIGHT=25;
+    float aspectRatio;*/
     private Player player1;
     private Player cpuPlayer;
     private Stage stage;
@@ -44,6 +46,8 @@ public class PlayState extends State {
     FreeTypeFontGenerator.FreeTypeFontParameter freeTypeFontParameter=new FreeTypeFontGenerator.FreeTypeFontParameter();
     float scoreboardX;
     float scoreboardY;
+    float rotation;
+    float angle;
     BitmapFont font;
     double playTime=300;
 
@@ -107,26 +111,43 @@ public class PlayState extends State {
     protected void update(float dt) {
         //handleInput();
         player1.update(dt);
+        xPos = player1.getPosition().x;
+        yPos = player1.getPosition().y;
+        float deltaX=touchpad.getKnobPercentX();
+        float deltaY=touchpad.getKnobPercentY();
+        player1.setX(xPos+deltaX*player1.getVelocity());
+        player1.setY(yPos+deltaY*player1.getVelocity());
+        float deltaXAbs=Math.abs(deltaX);
+        float deltaYAbs=Math.abs(deltaY);
+        if (deltaX != 0  && deltaY != 0) {
 
-        float xPos = player1.getPosition().x;
-        float yPos = player1.getPosition().y;
-        float playerWd = player1.getTexture().getWidth()/2;
-        float playerHt = player1.getTexture().getHeight()/2;
+            angle = (float) Math.toDegrees(Math.atan(deltaXAbs / deltaYAbs));
+            if (deltaX > 0 && deltaY > 0) {
+                rotation = 360 - angle;
+            } else if (deltaX > 0 && deltaY < 0) {
+                rotation = 180 + angle;
+            } else if (deltaX < 0 && deltaY < 0) {
+                rotation = 180 - angle;
+            } else {
+                rotation = angle;
+            }
+        }
 
-        player1.setX(xPos + touchpad.getKnobPercentX() * player1.getVelocity());
-        player1.setY(yPos + touchpad.getKnobPercentY() * player1.getVelocity());
+
+
+
 
         if(xPos + playerWd <= 0) {
-           player1.setX(1-playerWd);
+           player1.setX(xPos + 1);
         }
         if(xPos + playerWd >= w) {
-            player1.setX(w - 1 - playerWd);
+            player1.setX(xPos - 1);
         }
         if(yPos + playerHt <= 0) {
-            player1.setY(1 - playerHt);
+            player1.setY(yPos +1);
         }
         if(yPos + playerHt >= h) {
-            player1.setY(h - 1 - playerHt);
+            player1.setY(yPos - 1);
         }
 
 //        cpuPlayer.update(dt);
@@ -145,7 +166,7 @@ public class PlayState extends State {
 
         sb.begin();
         sb.draw(background, 0,0, w, h);
-        sb.draw(player1.getTexture(),player1.getPosition().x,player1.getPosition().y);
+        sb.draw(player1.getTexture(),xPos,yPos,playerWd,playerHt,playerWd*2,playerHt*2,1,1,rotation+90,0,0,Math.round(playerWd*2),Math.round(playerHt*2),false,false);
         //sb.draw(cpuPlayer.getTexture(), cpuPlayer.getPosition().x, cpuPlayer.getPosition().y);
         scoreboard.draw(sb);
         font.draw(sb, clock(), scoreboardX + (39*scbdWd)/56, scoreboardY + (2*scbdHt)/3);
