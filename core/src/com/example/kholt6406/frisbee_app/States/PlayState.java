@@ -20,8 +20,8 @@ public class PlayState extends State {
     float scbdWd;
     float scbdHt;
 
-    float xPos;
-    float yPos;
+    float xPos=800;
+    float yPos=800;
     float playerWd;
     float playerHt;
 
@@ -54,7 +54,7 @@ public class PlayState extends State {
 
     public PlayState(GameStateManager gsm) {
         super(gsm);
-        player1=new Player(600,600);
+        player1=new Player(800,800);
         //cpuPlayer = new Player(100, 50);
 //        camera=new OrthographicCamera();
 //        camera.setToOrtho(false,WORLD_WIDTH*xMultiplier,WORLD_HEIGHT*yMultiplier);
@@ -66,15 +66,17 @@ public class PlayState extends State {
         scbdWd = scbdTexture.getWidth()*3;
         scbdHt = scbdTexture.getHeight()*3;
         scoreboard.setSize(scbdWd, scbdHt);
-
-        freeTypeFontParameter.size=100;
-        font=freeTypeFontGenerator.generateFont(freeTypeFontParameter);
-
         scoreboardX=(w/2)-(scbdWd)/2;
         scoreboardY=h-scbdHt;
         scoreboard.setX(scoreboardX);
         scoreboard.setY(scoreboardY);
 
+        freeTypeFontParameter.size=100;
+        font=freeTypeFontGenerator.generateFont(freeTypeFontParameter);
+
+
+        playerWd = player1.getTexture().getWidth()/2;
+        playerHt = player1.getTexture().getHeight()/2;
         touchpadSkin = new Skin();
         //Set background image
         touchpadSkin.add("touchBackground", new Texture("joystick_base.png"));
@@ -133,6 +135,9 @@ public class PlayState extends State {
                 rotation = angle;
             }
         }
+
+
+
 
 
         if(xPos + playerWd <= 0) {

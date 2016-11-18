@@ -10,6 +10,7 @@ public class PlayerCard {
 
     public PlayerCard(String img, int spd, int stam, int thr, int cat, int def){
         playerImg = new Texture(img);
+
     }
 
 

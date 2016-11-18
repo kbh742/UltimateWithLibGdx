@@ -35,4 +35,6 @@ public class GameStateManager {
     public void render(SpriteBatch sb){
         states.peek().render(sb);
     }
+
+
 }
