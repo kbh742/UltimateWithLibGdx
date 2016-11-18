@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -16,9 +17,11 @@ import com.example.kholt6406.frisbee_app.sprites.Player;
 public class PlayState extends State {
     float w = Gdx.graphics.getWidth();
     float h = Gdx.graphics.getHeight();
+    float scbdWd;
+    float scbdHt;
 
-    float xPos=800;
-    float yPos=800;
+    float xPos;
+    float yPos;
     float playerWd;
     float playerHt;
 
@@ -30,7 +33,7 @@ public class PlayState extends State {
     float yMultiplier=h/WORLD_HEIGHT;
 
     private Player player1;
-    private Player cpuPlayer;
+    //private Player cpuPlayer;
     private Stage stage;
     private Touchpad touchpad;
     private Touchpad.TouchpadStyle touchpadStyle;
@@ -38,7 +41,8 @@ public class PlayState extends State {
     private Drawable touchBackground;
     private Drawable touchKnob;
     private Texture background;
-    private Texture scoreboard;
+    private Sprite scoreboard;
+    private Texture scbdTexture;
     FreeTypeFontGenerator freeTypeFontGenerator=new FreeTypeFontGenerator(Gdx.files.internal("lucon.ttf"));
     FreeTypeFontGenerator.FreeTypeFontParameter freeTypeFontParameter=new FreeTypeFontGenerator.FreeTypeFontParameter();
     float scoreboardX;
@@ -46,24 +50,31 @@ public class PlayState extends State {
     float rotation;
     float angle;
     BitmapFont font;
-    double playTime=15;
+    double playTime=300;
 
     public PlayState(GameStateManager gsm) {
         super(gsm);
-        player1=new Player(800,800);
-        cpuPlayer = new Player(100, 50);
-        camera=new OrthographicCamera();
-        camera.setToOrtho(false,WORLD_WIDTH*xMultiplier,WORLD_HEIGHT*yMultiplier);
-        camera.position.set(0,0,0);
+        player1=new Player(600,600);
+        //cpuPlayer = new Player(100, 50);
+//        camera=new OrthographicCamera();
+//        camera.setToOrtho(false,WORLD_WIDTH*xMultiplier,WORLD_HEIGHT*yMultiplier);
+//        camera.position.set(0,0,0);
         background = new Texture("field_background.png");
-        scoreboard=new Texture("scoreboard.png");
+
+        scbdTexture = new Texture("scoreboard.png");
+        scoreboard=new Sprite(scbdTexture);
+        scbdWd = scbdTexture.getWidth()*3;
+        scbdHt = scbdTexture.getHeight()*3;
+        scoreboard.setSize(scbdWd, scbdHt);
 
         freeTypeFontParameter.size=100;
         font=freeTypeFontGenerator.generateFont(freeTypeFontParameter);
-        scoreboardX=(w/2)-(scoreboard.getWidth()/2*3);
-        scoreboardY=(h-scoreboard.getHeight()*3)-100;
-        playerWd = player1.getTexture().getWidth()/2;
-        playerHt = player1.getTexture().getHeight()/2;
+
+        scoreboardX=(w/2)-(scbdWd)/2;
+        scoreboardY=h-scbdHt;
+        scoreboard.setX(scoreboardX);
+        scoreboard.setY(scoreboardY);
+
         touchpadSkin = new Skin();
         //Set background image
         touchpadSkin.add("touchBackground", new Texture("joystick_base.png"));
@@ -124,9 +135,6 @@ public class PlayState extends State {
         }
 
 
-
-
-
         if(xPos + playerWd <= 0) {
            player1.setX(xPos + 1);
         }
@@ -140,18 +148,26 @@ public class PlayState extends State {
             player1.setY(yPos - 1);
         }
 
+//        cpuPlayer.update(dt);
+//
+//        cpuPlayer.setVelocity(5);
+//        if(cpuPlayer.getPosition().x + cpuPlayer.getTexture().getWidth()/2 >= w){
+//            cpuPlayer.setX(w - cpuPlayer.getTexture().getWidth()/2 - 1);
+//            cpuPlayer.setVelocity((int) cpuPlayer.getVelocity() * -1);
+//        }
+//        cpuPlayer.setX(cpuPlayer.getPosition().x + cpuPlayer.getVelocity());
     }
 
     @Override
     protected void render(SpriteBatch sb) {
-        sb.setProjectionMatrix(camera.combined);
+        //sb.setProjectionMatrix(camera.combined);
 
         sb.begin();
         sb.draw(background, 0,0, w, h);
         sb.draw(player1.getTexture(),xPos,yPos,playerWd,playerHt,playerWd*2,playerHt*2,1,1,rotation+90,0,0,Math.round(playerWd*2),Math.round(playerHt*2),false,false);
-        sb.draw(cpuPlayer.getTexture(), cpuPlayer.getPosition().x, cpuPlayer.getPosition().y);
-        sb.draw(scoreboard,scoreboardX,scoreboardY,scoreboard.getWidth()*3,scoreboard.getHeight()*3);
-        font.draw(sb, clock(), scoreboardX + scoreboard.getWidth() - scoreboard.getWidth() / 4, scoreboardY+scoreboard.getHeight()/2);
+        //sb.draw(cpuPlayer.getTexture(), cpuPlayer.getPosition().x, cpuPlayer.getPosition().y);
+        scoreboard.draw(sb);
+        font.draw(sb, clock(), scoreboardX + (79*scbdWd)/112, scoreboardY + (2*scbdHt)/3);
         touchpad.draw(sb,1);
         sb.end();
 
@@ -166,16 +182,21 @@ public class PlayState extends State {
 
     public String clock(){
         playTime-=Gdx.graphics.getDeltaTime();
+        int seconds = (int)playTime % 60;
+        int minutes = (int)Math.floor(playTime/60);
         String time;
-        if (playTime>0) {
-            time = Double.toString(Math.floor(playTime));
+        if (playTime>0 && seconds >= 10) {
+            time = minutes + ":" + seconds;
+        }
+        else if(playTime>0 && seconds<10){
+            time = minutes + ":" + "0" + seconds;
         }
         else {
-            time="0";
+            time="0:00";
         }
-        if (time.indexOf('.') != -1){
-            time=time.substring(0,time.indexOf('.'));
-        }
+//        if (time.indexOf('.') != -1){
+//            time=time.substring(0,time.indexOf('.'));
+//        }
 
         return time;
     }
