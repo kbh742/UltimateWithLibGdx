@@ -30,6 +30,7 @@ public class MenuState extends State{
     public MenuState(GameStateManager gsm) {
         super(gsm);
         background = new Texture("official_background.png");
+        //String demensions=Gdx.graphics.getWidth()+","+Gdx.graphics.getHeight();
 
         playBtnSkin = new Skin();   //create button skin
         playBtnSkin.add("playBtn", new Texture("button_play_game.png"));    //add the image to the skin
@@ -88,6 +89,10 @@ public class MenuState extends State{
             gsm.set(new SettingsState(gsm));
             dispose();
         }
+        if(exitBtn.isPressed()){
+            Gdx.app.exit();
+            dispose();
+        }
     }
 
     @Override
@@ -113,17 +118,4 @@ public class MenuState extends State{
     public void dispose() {
 
     }
-
-//    public ImageButton create(String img){
-//
-//        btnSkin = new Skin();
-//        btnSkin.add("btnImg", new Texture(img));
-//        btnStyle = new ImageButton.ImageButtonStyle();
-//        btnStyle.imageUp = btnSkin.getDrawable("btnImg");
-//        btnStyle.imageDown = btnSkin.getDrawable("btnImg");
-//        btn = new ImageButton(btnStyle);
-//        btn.setBounds((Gdx.graphics.getWidth()/2)-(btn.getWidth()/2),(Gdx.graphics.getHeight()/5)*4-(btn.getHeight()/2), btn.getWidth(), btn.getHeight());
-//
-//        return btn;
-//    }
 }

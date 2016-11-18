@@ -12,4 +12,6 @@ public class PlayerCard {
         playerImg = new Texture(img);
 
     }
+
+
 }
