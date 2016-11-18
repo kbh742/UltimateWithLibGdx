@@ -12,6 +12,7 @@ public class Player {
     float x = 0;
     float y = 0;
 
+
     public Player(int x, int y){
         position=new Vector3(50,50,0);
         velocity= 10;
