@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -29,6 +30,9 @@ public class PlayState extends State {
     float xMultiplier=w/WORLD_WIDTH;
     float yMultiplier=h/WORLD_HEIGHT;
 
+    float scbdWd;
+    float scbdHt;
+
     private Player player1;
     private Player cpuPlayer;
     private Stage stage;
@@ -38,7 +42,8 @@ public class PlayState extends State {
     private Drawable touchBackground;
     private Drawable touchKnob;
     private Texture background;
-    private Texture scoreboard;
+    private Texture scbdTexture;
+    private Sprite scoreboard;
     FreeTypeFontGenerator freeTypeFontGenerator=new FreeTypeFontGenerator(Gdx.files.internal("lucon.ttf"));
     FreeTypeFontGenerator.FreeTypeFontParameter freeTypeFontParameter=new FreeTypeFontGenerator.FreeTypeFontParameter();
     float scoreboardX;
@@ -46,7 +51,7 @@ public class PlayState extends State {
     float rotation;
     float angle;
     BitmapFont font;
-    double playTime=15;
+    double playTime=60*5;
 
     public PlayState(GameStateManager gsm) {
         super(gsm);
@@ -56,7 +61,17 @@ public class PlayState extends State {
         camera.setToOrtho(false,WORLD_WIDTH*xMultiplier,WORLD_HEIGHT*yMultiplier);
         camera.position.set(0,0,0);
         background = new Texture("field_background.png");
-        scoreboard=new Texture("scoreboard.png");
+
+        scbdTexture = new Texture("scoreboard.png");
+        scoreboard=new Sprite(scbdTexture);
+        scbdWd = scbdTexture.getWidth()*3;
+        scbdHt = scbdTexture.getHeight()*3;
+        scoreboard.setSize(scbdWd, scbdHt);
+
+        scoreboardX=(w/2)-(scbdWd)/2;
+        scoreboardY=h-scbdHt;
+        scoreboard.setX(scoreboardX);
+        scoreboard.setY(scoreboardY);
 
         freeTypeFontParameter.size=100;
         font=freeTypeFontGenerator.generateFont(freeTypeFontParameter);
@@ -150,8 +165,8 @@ public class PlayState extends State {
         sb.draw(background, 0,0, w, h);
         sb.draw(player1.getTexture(),xPos,yPos,playerWd,playerHt,playerWd*2,playerHt*2,1,1,rotation+90,0,0,Math.round(playerWd*2),Math.round(playerHt*2),false,false);
         sb.draw(cpuPlayer.getTexture(), cpuPlayer.getPosition().x, cpuPlayer.getPosition().y);
-        sb.draw(scoreboard,scoreboardX,scoreboardY,scoreboard.getWidth()*3,scoreboard.getHeight()*3);
-        font.draw(sb, clock(), scoreboardX + scoreboard.getWidth() - scoreboard.getWidth() / 4, scoreboardY+scoreboard.getHeight()/2);
+        scoreboard.draw(sb);
+        font.draw(sb, clock(), scoreboardX + (79*scbdWd)/112, scoreboardY + (2*scbdHt)/3);
         touchpad.draw(sb,1);
         sb.end();
 
@@ -166,15 +181,17 @@ public class PlayState extends State {
 
     public String clock(){
         playTime-=Gdx.graphics.getDeltaTime();
+        int seconds = (int)playTime % 60;
+        int minutes = (int)Math.floor(playTime/60);
         String time;
-        if (playTime>0) {
-            time = Double.toString(Math.floor(playTime));
+        if (playTime>0 && seconds >= 10) {
+            time = minutes + ":" + seconds;
+        }
+        else if(playTime>0 && seconds<10){
+            time = minutes + ":" + "0" + seconds;
         }
         else {
-            time="0";
-        }
-        if (time.indexOf('.') != -1){
-            time=time.substring(0,time.indexOf('.'));
+            time = "0:00";
         }
 
         return time;
