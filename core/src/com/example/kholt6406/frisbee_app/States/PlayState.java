@@ -25,8 +25,8 @@ public class PlayState extends State {
 
     OrthographicCamera camera;
 
-    public final int WORLD_WIDTH=50;
-    public final int WORLD_HEIGHT=25;
+    public final int WORLD_WIDTH=1920;
+    public final int WORLD_HEIGHT=1080;
     float xMultiplier=w/WORLD_WIDTH;
     float yMultiplier=h/WORLD_HEIGHT;
 
