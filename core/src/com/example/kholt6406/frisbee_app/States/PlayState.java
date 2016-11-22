@@ -17,6 +17,8 @@ import com.example.kholt6406.frisbee_app.sprites.Player;
 public class PlayState extends State {
     float w = Gdx.graphics.getWidth();
     float h = Gdx.graphics.getHeight();
+    float scbdWd;
+    float scbdHt;
 
     float xPos=800;
     float yPos=800;
@@ -31,7 +33,7 @@ public class PlayState extends State {
     float yMultiplier=h/WORLD_HEIGHT;
 
     private Player player1;
-    private Player cpuPlayer;
+    //private Player cpuPlayer;
     private Stage stage;
     private Touchpad touchpad;
     private Touchpad.TouchpadStyle touchpadStyle;
@@ -39,6 +41,8 @@ public class PlayState extends State {
     private Drawable touchBackground;
     private Drawable touchKnob;
     private Texture background;
+    private Sprite scoreboard;
+    private Texture scbdTexture;
     FreeTypeFontGenerator freeTypeFontGenerator=new FreeTypeFontGenerator(Gdx.files.internal("lucon.ttf"));
     FreeTypeFontGenerator.FreeTypeFontParameter freeTypeFontParameter=new FreeTypeFontGenerator.FreeTypeFontParameter();
     float scoreboardX;
@@ -47,18 +51,14 @@ public class PlayState extends State {
     float angle;
     BitmapFont font;
     double playTime=300;
-    private Texture scbdTexture;
-    private int scbdWd;
-    private int scbdHt;
-    private Sprite scoreboard;
 
     public PlayState(GameStateManager gsm) {
         super(gsm);
         player1=new Player(800,800);
-        cpuPlayer = new Player(100, 50);
-        camera=new OrthographicCamera();
-        camera.setToOrtho(false,WORLD_WIDTH*xMultiplier,WORLD_HEIGHT*yMultiplier);
-        camera.position.set(0,0,0);
+        //cpuPlayer = new Player(100, 50);
+//        camera=new OrthographicCamera();
+//        camera.setToOrtho(false,WORLD_WIDTH*xMultiplier,WORLD_HEIGHT*yMultiplier);
+//        camera.position.set(0,0,0);
         background = new Texture("field_background.png");
 
         scbdTexture = new Texture("scoreboard.png");
@@ -153,16 +153,24 @@ public class PlayState extends State {
             player1.setY(yPos - 1);
         }
 
+//        cpuPlayer.update(dt);
+//
+//        cpuPlayer.setVelocity(5);
+//        if(cpuPlayer.getPosition().x + cpuPlayer.getTexture().getWidth()/2 >= w){
+//            cpuPlayer.setX(w - cpuPlayer.getTexture().getWidth()/2 - 1);
+//            cpuPlayer.setVelocity((int) cpuPlayer.getVelocity() * -1);
+//        }
+//        cpuPlayer.setX(cpuPlayer.getPosition().x + cpuPlayer.getVelocity());
     }
 
     @Override
     protected void render(SpriteBatch sb) {
-        sb.setProjectionMatrix(camera.combined);
+        //sb.setProjectionMatrix(camera.combined);
 
         sb.begin();
         sb.draw(background, 0,0, w, h);
         sb.draw(player1.getTexture(),xPos,yPos,playerWd,playerHt,playerWd*2,playerHt*2,1,1,rotation+90,0,0,Math.round(playerWd*2),Math.round(playerHt*2),false,false);
-        sb.draw(cpuPlayer.getTexture(), cpuPlayer.getPosition().x, cpuPlayer.getPosition().y);
+        //sb.draw(cpuPlayer.getTexture(), cpuPlayer.getPosition().x, cpuPlayer.getPosition().y);
         scoreboard.draw(sb);
         font.draw(sb, clock(), scoreboardX + (79*scbdWd)/112, scoreboardY + (2*scbdHt)/3);
         touchpad.draw(sb,1);
