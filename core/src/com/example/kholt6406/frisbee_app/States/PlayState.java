@@ -27,8 +27,8 @@ public class PlayState extends State {
 
     OrthographicCamera camera;
 
-    public final int WORLD_WIDTH=50;
-    public final int WORLD_HEIGHT=25;
+    public final int WORLD_WIDTH=1920;
+    public final int WORLD_HEIGHT=1080;
     float xMultiplier=w/WORLD_WIDTH;
     float yMultiplier=h/WORLD_HEIGHT;
 
@@ -122,6 +122,8 @@ public class PlayState extends State {
         yPos = player1.getPosition().y;
         float deltaX=touchpad.getKnobPercentX();
         float deltaY=touchpad.getKnobPercentY();
+        //deltaX *= xMultiplier;
+        //deltaY *= yMultiplier;
         player1.setX(xPos+deltaX*player1.getVelocity());
         player1.setY(yPos+deltaY*player1.getVelocity());
         float deltaXAbs=Math.abs(deltaX);
