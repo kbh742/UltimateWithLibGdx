@@ -118,6 +118,8 @@ public class PlayState extends State {
         yPos = player1.getPosition().y;
         float deltaX=touchpad.getKnobPercentX();
         float deltaY=touchpad.getKnobPercentY();
+        //deltaX *= xMultiplier;
+        //deltaY *= yMultiplier;
         player1.setX(xPos+deltaX*player1.getVelocity());
         player1.setY(yPos+deltaY*player1.getVelocity());
         float deltaXAbs=Math.abs(deltaX);
