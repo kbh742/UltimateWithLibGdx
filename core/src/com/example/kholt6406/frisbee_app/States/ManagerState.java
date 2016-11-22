@@ -5,16 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload;
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Source;
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Target;
-import com.example.kholt6406.frisbee_app.sprites.PlayerCard;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 
 
 /**
@@ -58,8 +49,8 @@ public class ManagerState extends State {
 
     public final int WORLD_WIDTH=1920;
     public final int WORLD_HEIGHT=1080;
-    float xMultiplier=w/WORLD_WIDTH;
-    float yMultiplier=h/WORLD_HEIGHT;
+    float xScl =w/WORLD_WIDTH;
+    float yScl =h/WORLD_HEIGHT;
 
     //private ImageButton backBtn;
     //private Skin backBtnSkin;
@@ -99,7 +90,7 @@ public class ManagerState extends State {
         playerBtnStyle1.imageUp = playerBtnSkin1.getDrawable("playerBtn1");  //sets the button appearance when it is not pressed
         playerBtnStyle1.imageDown = playerBtnSkin1.getDrawable("playerBtn1");    //sets the button appearance when it is pressed
         playerBtn1 = new ImageButton(playerBtnStyle1);    //initializes the ImageButton with the created style as a parameter
-        playerBtn1.setBounds(positions[2]*xMultiplier, positions[3]*yMultiplier, playerBtn1.getWidth(), playerBtn1.getHeight());  //tells the button where to go
+        playerBtn1.setBounds(positions[2]* xScl, positions[3]* yScl, playerBtn1.getWidth()*xScl, playerBtn1.getHeight()*yScl);  //tells the button where to go
 
         playerBtnSkin2 = new Skin();   //create button skin
         playerBtnSkin2.add("playerBtn2", new Texture("player_portrait_2.png"));    //add the image to the skin
@@ -107,7 +98,7 @@ public class ManagerState extends State {
         playerBtnStyle2.imageUp = playerBtnSkin2.getDrawable("playerBtn2");  //sets the button appearance when it is not pressed
         playerBtnStyle2.imageDown = playerBtnSkin2.getDrawable("playerBtn2");    //sets the button appearance when it is pressed
         playerBtn2 = new ImageButton(playerBtnStyle2);    //initializes the ImageButton with the created style as a parameter
-        playerBtn2.setBounds(positions[4]*xMultiplier, positions[5]*yMultiplier, playerBtn2.getWidth(), playerBtn2.getHeight());  //tells the button where to go
+        playerBtn2.setBounds(positions[4]* xScl, positions[5]* yScl, playerBtn2.getWidth()*xScl, playerBtn2.getHeight()*yScl);  //tells the button where to go
 
         playerBtnSkin3 = new Skin();   //create button skin
         playerBtnSkin3.add("playerBtn3", new Texture("player_portrait_3.png"));    //add the image to the skin
@@ -115,7 +106,7 @@ public class ManagerState extends State {
         playerBtnStyle3.imageUp = playerBtnSkin3.getDrawable("playerBtn3");  //sets the button appearance when it is not pressed
         playerBtnStyle3.imageDown = playerBtnSkin3.getDrawable("playerBtn3");    //sets the button appearance when it is pressed
         playerBtn3 = new ImageButton(playerBtnStyle3);    //initializes the ImageButton with the created style as a parameter
-        playerBtn3.setBounds(positions[6]*xMultiplier, positions[7]*yMultiplier, playerBtn3.getWidth(), playerBtn3.getHeight());  //tells the button where to go
+        playerBtn3.setBounds(positions[6]* xScl, positions[7]* yScl, playerBtn3.getWidth()*xScl, playerBtn3.getHeight()*yScl);  //tells the button where to go
 
         playerBtnSkin4 = new Skin();   //create button skin
         playerBtnSkin4.add("playerBtn4", new Texture("player_portrait_4.png"));    //add the image to the skin
@@ -123,7 +114,7 @@ public class ManagerState extends State {
         playerBtnStyle4.imageUp = playerBtnSkin4.getDrawable("playerBtn4");  //sets the button appearance when it is not pressed
         playerBtnStyle4.imageDown = playerBtnSkin4.getDrawable("playerBtn4");    //sets the button appearance when it is pressed
         playerBtn4 = new ImageButton(playerBtnStyle4);    //initializes the ImageButton with the created style as a parameter
-        playerBtn4.setBounds(positions[8]*xMultiplier, positions[9]*yMultiplier, playerBtn4.getWidth(), playerBtn4.getHeight());  //tells the button where to go
+        playerBtn4.setBounds(positions[8]* xScl, positions[9]* yScl, playerBtn4.getWidth()*xScl, playerBtn4.getHeight()*yScl);  //tells the button where to go
 
         playerBtnSkin5 = new Skin();   //create button skin
         playerBtnSkin5.add("playerBtn5", new Texture("player_portrait_5.png"));    //add the image to the skin
@@ -131,7 +122,7 @@ public class ManagerState extends State {
         playerBtnStyle5.imageUp = playerBtnSkin5.getDrawable("playerBtn5");  //sets the button appearance when it is not pressed
         playerBtnStyle5.imageDown = playerBtnSkin5.getDrawable("playerBtn5");    //sets the button appearance when it is pressed
         playerBtn5 = new ImageButton(playerBtnStyle5);    //initializes the ImageButton with the created style as a parameter
-        playerBtn5.setBounds(positions[10]*xMultiplier, positions[11]*yMultiplier, playerBtn5.getWidth(), playerBtn5.getHeight());  //tells the button where to go
+        playerBtn5.setBounds(positions[10]* xScl, positions[11]* yScl, playerBtn5.getWidth()*xScl, playerBtn5.getHeight()*yScl);  //tells the button where to go
 
 
 
@@ -230,12 +221,12 @@ public class ManagerState extends State {
         drawCounter++;
         sb.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        sb.draw(playerCard, positions[0]*xMultiplier, positions[1]*yMultiplier);
-        sb.draw(playerFrame, positions[2]*xMultiplier, positions[3]*yMultiplier);
-        sb.draw(playerFrame, positions[4]*xMultiplier, positions[5]*yMultiplier);
-        sb.draw(playerFrame, positions[6]*xMultiplier, positions[7]*yMultiplier);
-        sb.draw(playerFrame, positions[8]*xMultiplier, positions[9]*yMultiplier);
-        sb.draw(playerFrame, positions[10]*xMultiplier, positions[11]*yMultiplier);
+        sb.draw(playerCard, positions[0]* xScl, positions[1]* yScl);
+        sb.draw(playerFrame, positions[2]* xScl, positions[3]* yScl);
+        sb.draw(playerFrame, positions[4]* xScl, positions[5]* yScl);
+        sb.draw(playerFrame, positions[6]* xScl, positions[7]* yScl);
+        sb.draw(playerFrame, positions[8]* xScl, positions[9]* yScl);
+        sb.draw(playerFrame, positions[10]* xScl, positions[11]* yScl);
 
         //sb.draw(playerPortrait1, positions[2], positions[3]);
         //sb.draw(playerPortrait2, positions[4], positions[5]);
@@ -251,9 +242,9 @@ public class ManagerState extends State {
         playerBtn5.draw(sb, 1);
 
         if(selected >= 0){
-            sb.draw(playerSelected, (positions[(selected+1)*2]-10)*xMultiplier, (positions[(selected+1)*2+1]-10)*yMultiplier);
+            sb.draw(playerSelected, (positions[(selected+1)*2]-10)* xScl, (positions[(selected+1)*2+1]-10)* yScl);
             Texture playerPreview = new Texture("player_portrait_" + (selected+1) + ".png");
-            sb.draw(playerPreview, positions[12]*xMultiplier, positions[13]*yMultiplier);
+            sb.draw(playerPreview, positions[12]* xScl, positions[13]* yScl);
         }
         /*try {
             Thread.sleep(1000);
@@ -290,11 +281,11 @@ public class ManagerState extends State {
         positions[2*(card1+1)+1] = card2y;
         positions[2*(card2+1)] = card1x;
         positions[2*(card2+1)+1] = card1y;
-        playerBtn1.setBounds(positions[2]*xMultiplier, positions[3]*yMultiplier, playerBtn1.getWidth(), playerBtn1.getHeight());  //tells the button where to go
-        playerBtn2.setBounds(positions[4]*xMultiplier, positions[5]*yMultiplier, playerBtn2.getWidth(), playerBtn2.getHeight());  //tells the button where to go
-        playerBtn3.setBounds(positions[6]*xMultiplier, positions[7]*yMultiplier, playerBtn3.getWidth(), playerBtn3.getHeight());  //tells the button where to go
-        playerBtn4.setBounds(positions[8]*xMultiplier, positions[9]*yMultiplier, playerBtn4.getWidth(), playerBtn4.getHeight());  //tells the button where to go
-        playerBtn5.setBounds(positions[10]*xMultiplier, positions[11]*yMultiplier, playerBtn5.getWidth(), playerBtn5.getHeight());  //tells the button where to go
+        playerBtn1.setBounds(positions[2]* xScl, positions[3]* yScl, playerBtn1.getWidth()*xScl, playerBtn1.getHeight()*yScl);  //tells the button where to go
+        playerBtn2.setBounds(positions[4]* xScl, positions[5]* yScl, playerBtn2.getWidth()*xScl, playerBtn2.getHeight()*yScl);  //tells the button where to go
+        playerBtn3.setBounds(positions[6]* xScl, positions[7]* yScl, playerBtn3.getWidth()*xScl, playerBtn3.getHeight()*yScl);  //tells the button where to go
+        playerBtn4.setBounds(positions[8]* xScl, positions[9]* yScl, playerBtn4.getWidth()*xScl, playerBtn4.getHeight()*yScl);  //tells the button where to go
+        playerBtn5.setBounds(positions[10]* xScl, positions[11]* yScl, playerBtn5.getWidth()*xScl, playerBtn5.getHeight()*yScl);  //tells the button where to go
     }
 
     int[][] stats = new int[5][5];

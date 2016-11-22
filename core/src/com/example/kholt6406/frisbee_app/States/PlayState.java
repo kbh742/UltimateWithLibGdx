@@ -57,7 +57,7 @@ public class PlayState extends State {
         player1=new Player(800,800);
         //cpuPlayer = new Player(100, 50);
 //        camera=new OrthographicCamera();
-//        camera.setToOrtho(false,WORLD_WIDTH*xMultiplier,WORLD_HEIGHT*yMultiplier);
+//        camera.setToOrtho(false,WORLD_WIDTH*xScl,WORLD_HEIGHT*yScl);
 //        camera.position.set(0,0,0);
         background = new Texture("field_background.png");
 
@@ -118,6 +118,8 @@ public class PlayState extends State {
         yPos = player1.getPosition().y;
         float deltaX=touchpad.getKnobPercentX();
         float deltaY=touchpad.getKnobPercentY();
+        //deltaX *= xScl;
+        //deltaY *= yScl;
         player1.setX(xPos+deltaX*player1.getVelocity());
         player1.setY(yPos+deltaY*player1.getVelocity());
         float deltaXAbs=Math.abs(deltaX);
