@@ -20,8 +20,8 @@ public class PlayState extends State {
     float scbdWd;
     float scbdHt;
 
-    float xPos=800;
-    float yPos=800;
+    float xPos=600;
+    float yPos=600;
     float playerWd;
     float playerHt;
 
@@ -49,7 +49,9 @@ public class PlayState extends State {
     float scoreboardY;
     float rotation;
     float angle;
-    BitmapFont font;
+    BitmapFont clockText;
+    BitmapFont scoreText1;
+    BitmapFont scoreText2;
     double playTime=300;
 
     public PlayState(GameStateManager gsm) {
@@ -63,16 +65,18 @@ public class PlayState extends State {
 
         scbdTexture = new Texture("scoreboard.png");
         scoreboard=new Sprite(scbdTexture);
-        scbdWd = scbdTexture.getWidth()*3;
-        scbdHt = scbdTexture.getHeight()*3;
+        scbdWd = scbdTexture.getWidth()*2;
+        scbdHt = scbdTexture.getHeight()*2;
         scoreboard.setSize(scbdWd, scbdHt);
         scoreboardX=(w/2)-(scbdWd)/2;
         scoreboardY=h-scbdHt;
         scoreboard.setX(scoreboardX);
         scoreboard.setY(scoreboardY);
 
-        freeTypeFontParameter.size=100;
-        font=freeTypeFontGenerator.generateFont(freeTypeFontParameter);
+        freeTypeFontParameter.size=(int)(9*scbdHt)/16;
+        clockText =freeTypeFontGenerator.generateFont(freeTypeFontParameter);
+        scoreText1 = freeTypeFontGenerator.generateFont(freeTypeFontParameter);
+        scoreText2 = freeTypeFontGenerator.generateFont(freeTypeFontParameter);
 
 
         playerWd = player1.getTexture().getWidth()/2;
@@ -172,7 +176,9 @@ public class PlayState extends State {
         sb.draw(player1.getTexture(),xPos,yPos,playerWd,playerHt,playerWd*2,playerHt*2,1,1,rotation+90,0,0,Math.round(playerWd*2),Math.round(playerHt*2),false,false);
         //sb.draw(cpuPlayer.getTexture(), cpuPlayer.getPosition().x, cpuPlayer.getPosition().y);
         scoreboard.draw(sb);
-        font.draw(sb, clock(), scoreboardX + (79*scbdWd)/112, scoreboardY + (2*scbdHt)/3);
+        clockText.draw(sb, clock(), scoreboardX + (79*scbdWd)/112, scoreboardY + (2*scbdHt)/3);
+        scoreText1.draw(sb, score1(), scoreboardX + (2*scbdWd)/16, scoreboardY + (2*scbdHt)/3);
+        scoreText2.draw(sb, score2(), scoreboardX + (17*scbdWd)/32, scoreboardY + (2*scbdHt)/3);
         touchpad.draw(sb,1);
         sb.end();
 
@@ -199,11 +205,20 @@ public class PlayState extends State {
         else {
             time="0:00";
         }
-//        if (time.indexOf('.') != -1){
-//            time=time.substring(0,time.indexOf('.'));
-//        }
 
         return time;
+    }
+
+    public String score1(){
+        String score1 = "0";
+
+        return score1;
+    }
+
+    public String score2(){
+        String score2 = "0";
+
+        return score2;
     }
 
 }
