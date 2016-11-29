@@ -281,11 +281,11 @@ public class ManagerState extends State {
         positions[2*(card1+1)+1] = card2y;
         positions[2*(card2+1)] = card1x;
         positions[2*(card2+1)+1] = card1y;
-        playerBtn1.setBounds(positions[2]* xScl, positions[3]* yScl, playerBtn1.getWidth()*xScl, playerBtn1.getHeight()*yScl);  //tells the button where to go
-        playerBtn2.setBounds(positions[4]* xScl, positions[5]* yScl, playerBtn2.getWidth()*xScl, playerBtn2.getHeight()*yScl);  //tells the button where to go
-        playerBtn3.setBounds(positions[6]* xScl, positions[7]* yScl, playerBtn3.getWidth()*xScl, playerBtn3.getHeight()*yScl);  //tells the button where to go
-        playerBtn4.setBounds(positions[8]* xScl, positions[9]* yScl, playerBtn4.getWidth()*xScl, playerBtn4.getHeight()*yScl);  //tells the button where to go
-        playerBtn5.setBounds(positions[10]* xScl, positions[11]* yScl, playerBtn5.getWidth()*xScl, playerBtn5.getHeight()*yScl);  //tells the button where to go
+        playerBtn1.setBounds(positions[2]* xScl, positions[3]* yScl, playerBtn1.getWidth(), playerBtn1.getHeight());  //tells the button where to go
+        playerBtn2.setBounds(positions[4]* xScl, positions[5]* yScl, playerBtn2.getWidth(), playerBtn2.getHeight());  //tells the button where to go
+        playerBtn3.setBounds(positions[6]* xScl, positions[7]* yScl, playerBtn3.getWidth(), playerBtn3.getHeight());  //tells the button where to go
+        playerBtn4.setBounds(positions[8]* xScl, positions[9]* yScl, playerBtn4.getWidth(), playerBtn4.getHeight());  //tells the button where to go
+        playerBtn5.setBounds(positions[10]* xScl, positions[11]* yScl, playerBtn5.getWidth(), playerBtn5.getHeight());  //tells the button where to go
     }
 
     int[][] stats = new int[5][5];
