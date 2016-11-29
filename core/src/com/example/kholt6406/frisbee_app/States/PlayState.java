@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
@@ -35,6 +36,8 @@ public class PlayState extends State {
     private Player player1;
     //private Player cpuPlayer;
     private Stage stage;
+    private ImageButton pauseButton;
+    private ImageButton.ImageButtonStyle pauseButtonStyle;
     private Touchpad touchpad;
     private Touchpad.TouchpadStyle touchpadStyle;
     private Skin touchpadSkin;
@@ -60,7 +63,7 @@ public class PlayState extends State {
 //        camera.setToOrtho(false,WORLD_WIDTH*xMultiplier,WORLD_HEIGHT*yMultiplier);
 //        camera.position.set(0,0,0);
         background = new Texture("field_background.png");
-
+        //pauseButton=new ImageButton();
         scbdTexture = new Texture("scoreboard.png");
         scoreboard=new Sprite(scbdTexture);
         scbdWd = (scbdTexture.getWidth()*2)*xScl;
@@ -95,14 +98,14 @@ public class PlayState extends State {
         //setBounds(x,y,width,height)
         touchpad.setBounds(30*xScl, 30*yScl, 400*xScl, 400*yScl);
 
-        //Gdx.input.setCatchBackKey(true);
+
 
         stage = new Stage();
         stage.addActor(touchpad);
         Gdx.input.setInputProcessor(stage);
     }
 
-    @Override
+
     protected void handleInput() {
         if (Gdx.input.isKeyPressed(Input.Keys.BACK)){
             gsm.set(new MenuState(gsm));
@@ -112,7 +115,7 @@ public class PlayState extends State {
 
     @Override
     protected void update(float dt) {
-        //handleInput();
+        handleInput();
         player1.update(dt);
         xPos = player1.getPosition().x;
         yPos = player1.getPosition().y;

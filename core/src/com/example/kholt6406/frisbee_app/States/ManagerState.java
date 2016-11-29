@@ -1,6 +1,7 @@
 package com.example.kholt6406.frisbee_app.States;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -208,6 +209,11 @@ public class ManagerState extends State {
             Gdx.app.log("selected", "selected " + selected);
         }
 
+        if (Gdx.input.isKeyPressed(Input.Keys.BACK)){
+            gsm.set(new MenuState(gsm));
+            dispose();
+        }
+
     }
 
     @Override
@@ -221,12 +227,12 @@ public class ManagerState extends State {
         drawCounter++;
         sb.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        sb.draw(playerCard, positions[0]* xScl, positions[1]* yScl);
-        sb.draw(playerFrame, positions[2]* xScl, positions[3]* yScl);
-        sb.draw(playerFrame, positions[4]* xScl, positions[5]* yScl);
-        sb.draw(playerFrame, positions[6]* xScl, positions[7]* yScl);
-        sb.draw(playerFrame, positions[8]* xScl, positions[9]* yScl);
-        sb.draw(playerFrame, positions[10]* xScl, positions[11]* yScl);
+        sb.draw(playerCard, positions[0]* xScl, positions[1]* yScl, playerCard.getWidth()*xScl, playerCard.getHeight()*yScl);
+        sb.draw(playerFrame, positions[2]* xScl, positions[3]* yScl, playerFrame.getWidth()*xScl, playerFrame.getHeight()*yScl);
+        sb.draw(playerFrame, positions[4]* xScl, positions[5]* yScl, playerFrame.getWidth()*xScl, playerFrame.getHeight()*yScl);
+        sb.draw(playerFrame, positions[6]* xScl, positions[7]* yScl, playerFrame.getWidth()*xScl, playerFrame.getHeight()*yScl);
+        sb.draw(playerFrame, positions[8]* xScl, positions[9]* yScl, playerFrame.getWidth()*xScl, playerFrame.getHeight()*yScl);
+        sb.draw(playerFrame, positions[10]* xScl, positions[11]* yScl, playerFrame.getWidth()*xScl, playerFrame.getHeight()*yScl);
 
         //sb.draw(playerPortrait1, positions[2], positions[3]);
         //sb.draw(playerPortrait2, positions[4], positions[5]);
@@ -242,7 +248,7 @@ public class ManagerState extends State {
         playerBtn5.draw(sb, 1);
 
         if(selected >= 0){
-            sb.draw(playerSelected, (positions[(selected+1)*2]-10)* xScl, (positions[(selected+1)*2+1]-10)* yScl);
+            sb.draw(playerSelected, (positions[(selected+1)*2]-10)* xScl, (positions[(selected+1)*2+1]-10)* yScl, playerSelected.getWidth()*xScl, playerSelected.getHeight()*yScl);
             Texture playerPreview = new Texture("player_portrait_" + (selected+1) + ".png");
             sb.draw(playerPreview, positions[12]* xScl, positions[13]* yScl);
         }

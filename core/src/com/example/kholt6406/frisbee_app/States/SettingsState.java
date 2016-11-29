@@ -1,6 +1,7 @@
 package com.example.kholt6406.frisbee_app.States;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -36,7 +37,10 @@ public class SettingsState extends State {
 
     @Override
     protected void handleInput() {
-
+        if (Gdx.input.isKeyPressed(Input.Keys.BACK)){
+            gsm.set(new MenuState(gsm));
+            dispose();
+        }
     }
 
     @Override
