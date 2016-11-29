@@ -29,8 +29,8 @@ public class PlayState extends State {
 
     public final int WORLD_WIDTH=1920;
     public final int WORLD_HEIGHT=1080;
-    float xMultiplier=w/WORLD_WIDTH;
-    float yMultiplier=h/WORLD_HEIGHT;
+    float xScl=w/WORLD_WIDTH;
+    float yScl=h/WORLD_HEIGHT;
 
     private Player player1;
     //private Player cpuPlayer;
@@ -57,26 +57,26 @@ public class PlayState extends State {
         player1=new Player(800,800);
         //cpuPlayer = new Player(100, 50);
 //        camera=new OrthographicCamera();
-//        camera.setToOrtho(false,WORLD_WIDTH*xScl,WORLD_HEIGHT*yScl);
+//        camera.setToOrtho(false,WORLD_WIDTH*xMultiplier,WORLD_HEIGHT*yMultiplier);
 //        camera.position.set(0,0,0);
         background = new Texture("field_background.png");
 
         scbdTexture = new Texture("scoreboard.png");
         scoreboard=new Sprite(scbdTexture);
-        scbdWd = scbdTexture.getWidth()*3;
-        scbdHt = scbdTexture.getHeight()*3;
+        scbdWd = (scbdTexture.getWidth()*2)*xScl;
+        scbdHt = (scbdTexture.getHeight()*2)*yScl;
         scoreboard.setSize(scbdWd, scbdHt);
         scoreboardX=(w/2)-(scbdWd)/2;
         scoreboardY=h-scbdHt;
         scoreboard.setX(scoreboardX);
         scoreboard.setY(scoreboardY);
 
-        freeTypeFontParameter.size=100;
+        freeTypeFontParameter.size=(int)(9*scbdHt)/16;
         font=freeTypeFontGenerator.generateFont(freeTypeFontParameter);
 
 
-        playerWd = player1.getTexture().getWidth()/2;
-        playerHt = player1.getTexture().getHeight()/2;
+        playerWd = (player1.getTexture().getWidth()/2);
+        playerHt = (player1.getTexture().getHeight()/2);
         touchpadSkin = new Skin();
         //Set background image
         touchpadSkin.add("touchBackground", new Texture("joystick_base.png"));
@@ -93,7 +93,7 @@ public class PlayState extends State {
         //Create new TouchPad with the created style
         touchpad = new Touchpad(10, touchpadStyle);
         //setBounds(x,y,width,height)
-        touchpad.setBounds(30, 30, 400, 400);
+        touchpad.setBounds(30*xScl, 30*yScl, 400*xScl, 400*yScl);
 
         //Gdx.input.setCatchBackKey(true);
 
@@ -118,8 +118,8 @@ public class PlayState extends State {
         yPos = player1.getPosition().y;
         float deltaX=touchpad.getKnobPercentX();
         float deltaY=touchpad.getKnobPercentY();
-        //deltaX *= xScl;
-        //deltaY *= yScl;
+        deltaX*= xScl;
+        deltaY*= yScl;
         player1.setX(xPos+deltaX*player1.getVelocity());
         player1.setY(yPos+deltaY*player1.getVelocity());
         float deltaXAbs=Math.abs(deltaX);
@@ -171,7 +171,7 @@ public class PlayState extends State {
 
         sb.begin();
         sb.draw(background, 0,0, w, h);
-        sb.draw(player1.getTexture(),xPos,yPos,playerWd,playerHt,playerWd*2,playerHt*2,1,1,rotation+90,0,0,Math.round(playerWd*2),Math.round(playerHt*2),false,false);
+        sb.draw(player1.getTexture(),xPos,yPos, xScl *playerWd, yScl *playerHt, xScl *playerWd*2, yScl *playerHt*2,1,1,rotation+90,0,0,Math.round(playerWd*2),Math.round(playerHt*2),false,false);
         //sb.draw(cpuPlayer.getTexture(), cpuPlayer.getPosition().x, cpuPlayer.getPosition().y);
         scoreboard.draw(sb);
         font.draw(sb, clock(), scoreboardX + (79*scbdWd)/112, scoreboardY + (2*scbdHt)/3);
