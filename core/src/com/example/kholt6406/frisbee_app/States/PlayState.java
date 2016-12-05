@@ -37,7 +37,8 @@ public class PlayState extends State {
     //private Player cpuPlayer;
     private Stage stage;
     private ImageButton pauseButton;
-    private ImageButton.ImageButtonStyle pauseButtonStyle;
+    private ImageButton.ImageButtonStyle pauseButtonStyle=new ImageButton.ImageButtonStyle();
+    private Skin pauseButtonSkin=new Skin();
     private Touchpad touchpad;
     private Touchpad.TouchpadStyle touchpadStyle;
     private Skin touchpadSkin;
@@ -54,6 +55,7 @@ public class PlayState extends State {
     float angle;
     BitmapFont font;
     double playTime=300;
+    boolean stopped=false;
 
     public PlayState(GameStateManager gsm) {
         super(gsm);
@@ -63,7 +65,14 @@ public class PlayState extends State {
 //        camera.setToOrtho(false,WORLD_WIDTH*xMultiplier,WORLD_HEIGHT*yMultiplier);
 //        camera.position.set(0,0,0);
         background = new Texture("field_background.png");
-        //pauseButton=new ImageButton();
+
+
+/*        pauseButtonSkin.add("pauseButton","button_pause.png");
+        pauseButtonStyle=new ImageButton.ImageButtonStyle();
+        pauseButtonStyle.imageUp=pauseButtonSkin.getDrawable("pauseButton");
+        pauseButton=new ImageButton(pauseButtonStyle);
+        pauseButton.setBounds(w*xScl,(h-pauseButton.getHeight())*yScl,pauseButton.getWidth()*xScl,pauseButton.getHeight()*xScl);*/
+
         scbdTexture = new Texture("scoreboard.png");
         scoreboard=new Sprite(scbdTexture);
         scbdWd = (scbdTexture.getWidth()*2)*xScl;
@@ -102,6 +111,7 @@ public class PlayState extends State {
 
         stage = new Stage();
         stage.addActor(touchpad);
+        //stage.addActor(pauseButton);
         Gdx.input.setInputProcessor(stage);
     }
 
@@ -110,6 +120,9 @@ public class PlayState extends State {
         if (Gdx.input.isKeyPressed(Input.Keys.BACK)){
             gsm.set(new MenuState(gsm));
             dispose();
+        }
+        if (pauseButton.isPressed()){
+
         }
     }
 
@@ -139,6 +152,7 @@ public class PlayState extends State {
             } else {
                 rotation = angle;
             }
+            
         }
 
 
@@ -177,6 +191,7 @@ public class PlayState extends State {
         sb.draw(player1.getTexture(),xPos,yPos, xScl *playerWd, yScl *playerHt, xScl *playerWd*2, yScl *playerHt*2,1,1,rotation+90,0,0,Math.round(playerWd*2),Math.round(playerHt*2),false,false);
         //sb.draw(cpuPlayer.getTexture(), cpuPlayer.getPosition().x, cpuPlayer.getPosition().y);
         scoreboard.draw(sb);
+        //pauseButton.draw(sb,1);
         font.draw(sb, clock(), scoreboardX + (79*scbdWd)/112, scoreboardY + (2*scbdHt)/3);
         touchpad.draw(sb,1);
         sb.end();
@@ -191,22 +206,22 @@ public class PlayState extends State {
     }
 
     public String clock(){
-        playTime-=Gdx.graphics.getDeltaTime();
-        int seconds = (int)playTime % 60;
-        int minutes = (int)Math.floor(playTime/60);
         String time;
-        if (playTime>0 && seconds >= 10) {
-            time = minutes + ":" + seconds;
+        if (!stopped) {
+            playTime -= Gdx.graphics.getDeltaTime();
         }
-        else if(playTime>0 && seconds<10){
-            time = minutes + ":" + "0" + seconds;
-        }
-        else {
-            time="0:00";
-        }
-//        if (time.indexOf('.') != -1){
-//            time=time.substring(0,time.indexOf('.'));
-//        }
+            int seconds = (int)playTime % 60;
+            int minutes = (int)Math.floor(playTime/60);
+
+            if (playTime>0 && seconds >= 10) {
+                time = minutes + ":" + seconds;
+            }
+            else if(playTime>0 && seconds<10){
+                time = minutes + ":" + "0" + seconds;
+            }
+            else {
+                time="0:00";
+            }
 
         return time;
     }
