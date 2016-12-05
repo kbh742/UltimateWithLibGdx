@@ -29,11 +29,17 @@ public class PlayState extends State {
 
     public final int WORLD_WIDTH=1920;
     public final int WORLD_HEIGHT=1080;
-    float xMultiplier=w/WORLD_WIDTH;
-    float yMultiplier=h/WORLD_HEIGHT;
+    float xScl =w/WORLD_WIDTH;
+    float yScl =h/WORLD_HEIGHT;
 
     private Player player1;
     //private Player cpuPlayer;
+
+    private Sprite disk;
+    private Texture diskTexture;
+    float diskWd;
+    float diskHt;
+
     private Stage stage;
     private Touchpad touchpad;
     private Touchpad.TouchpadStyle touchpadStyle;
@@ -56,31 +62,37 @@ public class PlayState extends State {
 
     public PlayState(GameStateManager gsm) {
         super(gsm);
-        player1=new Player(800,800);
+        player1=new Player(600,600);
         //cpuPlayer = new Player(100, 50);
 //        camera=new OrthographicCamera();
-//        camera.setToOrtho(false,WORLD_WIDTH*xMultiplier,WORLD_HEIGHT*yMultiplier);
+//        camera.setToOrtho(false,WORLD_WIDTH*xScl,WORLD_HEIGHT*yScl);
 //        camera.position.set(0,0,0);
         background = new Texture("field_background.png");
 
         scbdTexture = new Texture("scoreboard.png");
         scoreboard=new Sprite(scbdTexture);
-        scbdWd = scbdTexture.getWidth()*2;
-        scbdHt = scbdTexture.getHeight()*2;
+        scbdWd = scbdTexture.getWidth()*2*xScl;
+        scbdHt = scbdTexture.getHeight()*2*yScl;
         scoreboard.setSize(scbdWd, scbdHt);
         scoreboardX=(w/2)-(scbdWd)/2;
         scoreboardY=h-scbdHt;
         scoreboard.setX(scoreboardX);
         scoreboard.setY(scoreboardY);
 
-        freeTypeFontParameter.size=(int)(9*scbdHt)/16;
+        freeTypeFontParameter.size=(int)(9*scbdHt)/18;
         clockText =freeTypeFontGenerator.generateFont(freeTypeFontParameter);
         scoreText1 = freeTypeFontGenerator.generateFont(freeTypeFontParameter);
         scoreText2 = freeTypeFontGenerator.generateFont(freeTypeFontParameter);
 
-
         playerWd = player1.getTexture().getWidth()/2;
         playerHt = player1.getTexture().getHeight()/2;
+
+        diskTexture = new Texture("frisbee_snake.png");
+        disk = new Sprite(diskTexture);
+        diskWd = diskTexture.getWidth()*xScl;
+        diskHt = diskTexture.getHeight()*yScl;
+        disk.setSize(diskWd, diskHt);
+
         touchpadSkin = new Skin();
         //Set background image
         touchpadSkin.add("touchBackground", new Texture("joystick_base.png"));
@@ -97,9 +109,7 @@ public class PlayState extends State {
         //Create new TouchPad with the created style
         touchpad = new Touchpad(10, touchpadStyle);
         //setBounds(x,y,width,height)
-        touchpad.setBounds(30, 30, 400, 400);
-
-        //Gdx.input.setCatchBackKey(true);
+        touchpad.setBounds(30*xScl, 30*yScl, 400*xScl, 400*yScl);
 
         stage = new Stage();
         stage.addActor(touchpad);
@@ -116,35 +126,48 @@ public class PlayState extends State {
 
     @Override
     protected void update(float dt) {
-        //handleInput();
+        handleInput();
+//        if(team1Scored == true){
+//            teamScore1++;
+//        }
+//        if(team2Scored == true){
+//            teamScore2++;
+//        }
         player1.update(dt);
+
+        player1.setHoldingDisk(true);
+        if(player1.hasDisk()){
+            player1.setVelocity(0);
+        }
         xPos = player1.getPosition().x;
         yPos = player1.getPosition().y;
         float deltaX=touchpad.getKnobPercentX();
         float deltaY=touchpad.getKnobPercentY();
-        //deltaX *= xMultiplier;
-        //deltaY *= yMultiplier;
+        deltaX *= xScl;
+        deltaY *= yScl;
         player1.setX(xPos+deltaX*player1.getVelocity());
         player1.setY(yPos+deltaY*player1.getVelocity());
         float deltaXAbs=Math.abs(deltaX);
         float deltaYAbs=Math.abs(deltaY);
+        int xMultiplier=1;
+        int yMultiplier=1;
         if (deltaX != 0  && deltaY != 0) {
 
             angle = (float) Math.toDegrees(Math.atan(deltaXAbs / deltaYAbs));
             if (deltaX > 0 && deltaY > 0) {
                 rotation = 360 - angle;
+                xMultiplier=-1;
             } else if (deltaX > 0 && deltaY < 0) {
                 rotation = 180 + angle;
+                yMultiplier=-1;
             } else if (deltaX < 0 && deltaY < 0) {
                 rotation = 180 - angle;
+                yMultiplier=-1;
+                xMultiplier=-1;
             } else {
                 rotation = angle;
             }
         }
-
-
-
-
 
         if(xPos + playerWd <= 0) {
            player1.setX(xPos + 1);
@@ -158,6 +181,9 @@ public class PlayState extends State {
         if(yPos + playerHt >= h) {
             player1.setY(yPos - 1);
         }
+
+        disk.setX(player1.getPosition().x + playerWd + xMultiplier*(200*(float)Math.cos(Math.toRadians(angle))) - diskWd/2); //need an initial position
+        disk.setY(player1.getPosition().y + playerHt + yMultiplier*(200*(float)Math.sin(Math.toRadians(angle))) - diskHt/2); //need an initial position
 
 //        cpuPlayer.update(dt);
 //
@@ -175,12 +201,13 @@ public class PlayState extends State {
 
         sb.begin();
         sb.draw(background, 0,0, w, h);
-        sb.draw(player1.getTexture(),xPos,yPos,playerWd,playerHt,playerWd*2,playerHt*2,1,1,rotation+90,0,0,Math.round(playerWd*2),Math.round(playerHt*2),false,false);
+        sb.draw(player1.getTexture(),xPos,yPos,playerWd* xScl,playerHt* yScl,playerWd*2*xScl,playerHt*2*yScl,1,1,rotation+90,0,0,Math.round(playerWd*2),Math.round(playerHt*2),false,false);
+        disk.draw(sb);
         //sb.draw(cpuPlayer.getTexture(), cpuPlayer.getPosition().x, cpuPlayer.getPosition().y);
         scoreboard.draw(sb);
-        clockText.draw(sb, clock(), scoreboardX + (79*scbdWd)/112, scoreboardY + (2*scbdHt)/3);
-        scoreText1.draw(sb, score1(), scoreboardX + (2*scbdWd)/16, scoreboardY + (2*scbdHt)/3);
-        scoreText2.draw(sb, score2(), scoreboardX + (17*scbdWd)/32, scoreboardY + (2*scbdHt)/3);
+        clockText.draw(sb, clock(), scoreboardX + (79*scbdWd)/112, scoreboardY + (5*scbdHt)/8);
+        scoreText1.draw(sb, score1(), scoreboardX + (2*scbdWd)/16, scoreboardY + (5*scbdHt)/8);
+        scoreText2.draw(sb, score2(), scoreboardX + (35*scbdWd)/64, scoreboardY + (5*scbdHt)/8);
         touchpad.draw(sb,1);
         sb.end();
 
@@ -213,12 +240,14 @@ public class PlayState extends State {
 
     public String score1(){
         String score1 = "0";
+        //score1 = "" + teamScore1;
 
         return score1;
     }
 
     public String score2(){
         String score2 = "0";
+        //score2 = "" + teamScore2;
 
         return score2;
     }

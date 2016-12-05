@@ -71,6 +71,7 @@ public class MenuState extends State{
         stage.addActor(settingsBtn);
         stage.addActor(exitBtn);
         Gdx.input.setInputProcessor(stage);
+        Gdx.input.setCatchBackKey(true);
     }
 
     @Override
