@@ -92,6 +92,8 @@ public class PlayState extends State {
         diskWd = diskTexture.getWidth()*xScl;
         diskHt = diskTexture.getHeight()*yScl;
         disk.setSize(diskWd, diskHt);
+        disk.setX(player1.getPosition().x + playerWd - diskWd/2);
+        disk.setY(player1.getPosition().y + playerHt - diskHt/2 + 200);
 
         touchpadSkin = new Skin();
         //Set background image
@@ -167,6 +169,9 @@ public class PlayState extends State {
             } else {
                 rotation = angle;
             }
+
+            disk.setX(player1.getPosition().x + playerWd - diskWd/2 + xMultiplier*(200*(float)Math.cos(Math.toRadians(angle))));
+            disk.setY(player1.getPosition().y + playerHt - diskHt/2 + yMultiplier*(200*(float)Math.sin(Math.toRadians(angle))));
         }
 
         if(xPos + playerWd <= 0) {
@@ -181,9 +186,6 @@ public class PlayState extends State {
         if(yPos + playerHt >= h) {
             player1.setY(yPos - 1);
         }
-
-        disk.setX(player1.getPosition().x + playerWd + xMultiplier*(200*(float)Math.cos(Math.toRadians(angle))) - diskWd/2); //need an initial position
-        disk.setY(player1.getPosition().y + playerHt + yMultiplier*(200*(float)Math.sin(Math.toRadians(angle))) - diskHt/2); //need an initial position
 
 //        cpuPlayer.update(dt);
 //
