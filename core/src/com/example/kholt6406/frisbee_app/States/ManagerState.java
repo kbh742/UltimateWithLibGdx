@@ -144,11 +144,10 @@ public class ManagerState extends State {
 
     @Override
     protected void handleInput() {
-        /*if (backBtn.isPressed()){
+        if (Gdx.input.isKeyPressed(Input.Keys.BACK)){
             gsm.set(new MenuState(gsm));
             dispose();
-        }*/
-
+        }
         if(playerBtn1.isPressed()&&(playerBtn1.isDisabled()==false)){
             if(selected == 0){
                 selected = -1;

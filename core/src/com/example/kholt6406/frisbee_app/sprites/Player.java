@@ -3,7 +3,6 @@ package com.example.kholt6406.frisbee_app.sprites;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 
 
 public class Player extends Sprite{
@@ -11,6 +10,7 @@ public class Player extends Sprite{
     private Vector2 position;
     private float velocity;
     private Texture player;
+    private boolean hasDisk;
     float x = 0;
     float y = 0;
 
@@ -21,6 +21,7 @@ public class Player extends Sprite{
         x=x0;
         y=y0;
     }
+    public void setHoldingDisk(boolean tf){ hasDisk = tf;}
 
     public void setX(float xPos) {x = xPos;}
 
@@ -45,4 +46,6 @@ public class Player extends Sprite{
     public Texture getTexture() {
         return player;
     }
+
+    public boolean hasDisk() {return hasDisk; }
 }
