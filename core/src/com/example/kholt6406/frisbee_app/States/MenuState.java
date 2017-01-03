@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.audio.Sound;
 
 public class MenuState extends State{
     private Stage stage;
@@ -27,10 +26,11 @@ public class MenuState extends State{
     private ImageButton exitBtn;
     private Skin exitBtnSkin;
     private ImageButton.ImageButtonStyle exitBtnStyle;
-    Sound sound;
 
     public MenuState(GameStateManager gsm) {
         super(gsm);
+
+        Gdx.input.setCatchBackKey(true);
 
         background = new Texture("official_background.png");
         //String demensions=Gdx.graphics.getWidth()+","+Gdx.graphics.getHeight();
@@ -66,8 +66,6 @@ public class MenuState extends State{
         exitBtnStyle.imageDown = exitBtnSkin.getDrawable("exitBtn");
         exitBtn = new ImageButton(exitBtnStyle);
         exitBtn.setBounds((Gdx.graphics.getWidth()/3)*2-(exitBtn.getWidth()/2),(Gdx.graphics.getHeight()/3)-(exitBtn.getHeight()/2), exitBtn.getWidth(), exitBtn.getHeight());
-
-        sound = Gdx.audio.newSound(Gdx.files.absolute("android/assets/menu_music_2.mp3"));
         
         //make the stage and add stuff to it, the stage somehow makes everything do stuff
         stage = new Stage();
@@ -76,9 +74,8 @@ public class MenuState extends State{
         stage.addActor(settingsBtn);
         stage.addActor(exitBtn);
         Gdx.input.setInputProcessor(stage);
+        Gdx.input.setCatchBackKey(true);
     }
-
-
 
     @Override
     public void handleInput() {
@@ -109,7 +106,6 @@ public class MenuState extends State{
 
     @Override
     public void render(SpriteBatch sb) {
-        sound.play();
         sb.begin();
         sb.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         playBtn.draw(sb, 1);

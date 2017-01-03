@@ -1,6 +1,7 @@
 package com.example.kholt6406.frisbee_app.States;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -11,7 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 
-/*
+/**
  * Created by kholt6406 on 10/17/2016.
  */
 public class ManagerState extends State {
@@ -162,11 +163,10 @@ public class ManagerState extends State {
 
     @Override
     protected void handleInput() {
-        /*if (backBtn.isPressed()){
+        if (Gdx.input.isKeyPressed(Input.Keys.BACK)){
             gsm.set(new MenuState(gsm));
             dispose();
-        }*/
-
+        }
         if(playerBtn1.isPressed()&&(playerBtn1.isDisabled()==false)){
             if(selected == 0){
                 selected = -1;
@@ -225,6 +225,11 @@ public class ManagerState extends State {
             playerBtn5.setDisabled(true);
             drawCounter = 0;
             Gdx.app.log("selected", "selected " + selected);
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.BACK)){
+            gsm.set(new MenuState(gsm));
+            dispose();
         }
 
     }
