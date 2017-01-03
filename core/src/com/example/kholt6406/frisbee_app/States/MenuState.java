@@ -37,7 +37,7 @@ public class MenuState extends State{
         playBtnStyle.imageUp = playBtnSkin.getDrawable("playBtn");  //sets the button appearance when it is not pressed
         playBtnStyle.imageDown = playBtnSkin.getDrawable("playBtn");    //sets the button appearance when it is pressed
         playBtn = new ImageButton(playBtnStyle);    //initializes the ImageButton with the created style as a parameter
-        playBtn.setBounds((Gdx.graphics.getWidth()/3)-(playBtn.getWidth()/2),(Gdx.graphics.getHeight()/3)*2-(playBtn.getHeight()/2), playBtn.getWidth(), playBtn.getHeight());  //tells the button where to go
+        playBtn.setBounds((Gdx.graphics.getWidth()/3)-(playBtn.getWidth()*PlayState.xScl/2),(Gdx.graphics.getHeight()/3)*2-(playBtn.getHeight()*PlayState.yScl/2), playBtn.getWidth()*PlayState.xScl, playBtn.getHeight()*PlayState.yScl);  //tells the button where to go
 
         managerBtnSkin = new Skin();
         managerBtnSkin.add("managerBtn", new Texture("button_team_manager.png"));
@@ -45,7 +45,7 @@ public class MenuState extends State{
         managerBtnStyle.imageUp = managerBtnSkin.getDrawable("managerBtn");
         managerBtnStyle.imageDown = managerBtnSkin.getDrawable("managerBtn");
         managerBtn = new ImageButton(managerBtnStyle);
-        managerBtn.setBounds((Gdx.graphics.getWidth()/3)*2-(managerBtn.getWidth()/2),(Gdx.graphics.getHeight()/3)*2-(managerBtn.getHeight()/2), managerBtn.getWidth(), managerBtn.getHeight());
+        managerBtn.setBounds((Gdx.graphics.getWidth()/3)*2-(managerBtn.getWidth()*PlayState.xScl/2),((Gdx.graphics.getHeight()/3)*2-(managerBtn.getHeight()*PlayState.yScl/2)), managerBtn.getWidth()*PlayState.xScl, managerBtn.getHeight()*PlayState.yScl);
 
         settingsBtnSkin = new Skin();
         settingsBtnSkin.add("settingsBtn", new Texture("button_settings.png"));
@@ -53,7 +53,7 @@ public class MenuState extends State{
         settingsBtnStyle.imageUp = settingsBtnSkin.getDrawable("settingsBtn");
         settingsBtnStyle.imageDown = settingsBtnSkin.getDrawable("settingsBtn");
         settingsBtn = new ImageButton(settingsBtnStyle);
-        settingsBtn.setBounds((Gdx.graphics.getWidth()/3)-(settingsBtn.getWidth()/2),(Gdx.graphics.getHeight()/3)-(settingsBtn.getHeight()/2), settingsBtn.getWidth(), settingsBtn.getHeight());
+        settingsBtn.setBounds((Gdx.graphics.getWidth()/3)-(settingsBtn.getWidth()*PlayState.xScl/2),(Gdx.graphics.getHeight()/3)-(settingsBtn.getHeight()*PlayState.yScl/2), settingsBtn.getWidth()*PlayState.xScl, settingsBtn.getHeight()*PlayState.yScl);
         
         //make the stage and add stuff to it, the stage somehow makes everything do stuff
         stage = new Stage();

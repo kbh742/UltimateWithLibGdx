@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.input.GestureDetector;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
@@ -15,8 +17,13 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.example.kholt6406.frisbee_app.sprites.Player;
 
 public class PlayState extends State {
-    float w = Gdx.graphics.getWidth();
-    float h = Gdx.graphics.getHeight();
+    public static float w = Gdx.graphics.getWidth();
+    public static float h = Gdx.graphics.getHeight();
+    public static final int WORLD_WIDTH=1920;
+    public static final int WORLD_HEIGHT=1080;
+    public static float xScl =w/WORLD_WIDTH;
+    public static float yScl =h/WORLD_HEIGHT;
+
     float scbdWd;
     float scbdHt;
 
@@ -26,11 +33,6 @@ public class PlayState extends State {
     float playerHt;
 
     OrthographicCamera camera;
-
-    public final int WORLD_WIDTH=1920;
-    public final int WORLD_HEIGHT=1080;
-    float xScl =w/WORLD_WIDTH;
-    float yScl =h/WORLD_HEIGHT;
 
     private Player player1;
     //private Player cpuPlayer;
@@ -62,7 +64,7 @@ public class PlayState extends State {
 
     public PlayState(GameStateManager gsm) {
         super(gsm);
-        player1=new Player(600,600);
+        player1=new Player(Math.round(600*xScl), Math.round(600*yScl));
         //cpuPlayer = new Player(100, 50);
 //        camera=new OrthographicCamera();
 //        camera.setToOrtho(false,WORLD_WIDTH*xScl,WORLD_HEIGHT*yScl);
@@ -84,16 +86,16 @@ public class PlayState extends State {
         scoreText1 = freeTypeFontGenerator.generateFont(freeTypeFontParameter);
         scoreText2 = freeTypeFontGenerator.generateFont(freeTypeFontParameter);
 
-        playerWd = player1.getTexture().getWidth()/2;
-        playerHt = player1.getTexture().getHeight()/2;
+        playerWd = (player1.getTexture().getWidth()/2); //not multiplied by xScl because it is done in draw method
+        playerHt = (player1.getTexture().getHeight()/2); //not multiplied by yScl because it is done in draw method
 
         diskTexture = new Texture("frisbee_snake.png");
         disk = new Sprite(diskTexture);
-        diskWd = diskTexture.getWidth()*xScl;
-        diskHt = diskTexture.getHeight()*yScl;
-        disk.setSize(diskWd, diskHt);
-        disk.setX(player1.getPosition().x + playerWd - diskWd/2);
-        disk.setY(player1.getPosition().y + playerHt - diskHt/2 + 200);
+        diskWd = diskTexture.getWidth();
+        diskHt = diskTexture.getHeight();
+        disk.setSize(diskWd*xScl, diskHt*yScl);
+        disk.setX(player1.getPosition().x + playerWd - diskWd/2 + 40);
+        disk.setY(player1.getPosition().y + playerHt - diskHt/2);
 
         touchpadSkin = new Skin();
         //Set background image
@@ -137,7 +139,7 @@ public class PlayState extends State {
 //        }
         player1.update(dt);
 
-        player1.setHoldingDisk(true);
+        //player1.setHoldingDisk(true);
         if(player1.hasDisk()){
             player1.setVelocity(0);
         }
@@ -149,29 +151,15 @@ public class PlayState extends State {
         deltaY *= yScl;
         player1.setX(xPos+deltaX*player1.getVelocity());
         player1.setY(yPos+deltaY*player1.getVelocity());
-        float deltaXAbs=Math.abs(deltaX);
-        float deltaYAbs=Math.abs(deltaY);
-        int xMultiplier=1;
-        int yMultiplier=1;
         if (deltaX != 0  && deltaY != 0) {
 
-            angle = (float) Math.toDegrees(Math.atan(deltaXAbs / deltaYAbs));
-            if (deltaX > 0 && deltaY > 0) {
-                rotation = 360 - angle;
-                xMultiplier=-1;
-            } else if (deltaX > 0 && deltaY < 0) {
-                rotation = 180 + angle;
-                yMultiplier=-1;
-            } else if (deltaX < 0 && deltaY < 0) {
-                rotation = 180 - angle;
-                yMultiplier=-1;
-                xMultiplier=-1;
-            } else {
-                rotation = angle;
+            rotation = (float) Math.toDegrees(Math.atan(deltaY / deltaX));
+            if(deltaX < 0){ //2nd quadrant
+                rotation += 180;
             }
 
-            disk.setX(player1.getPosition().x + playerWd - diskWd/2 + xMultiplier*(200*(float)Math.cos(Math.toRadians(angle))));
-            disk.setY(player1.getPosition().y + playerHt - diskHt/2 + yMultiplier*(200*(float)Math.sin(Math.toRadians(angle))));
+            disk.setX((player1.getPosition().x + playerWd - diskWd/2 + (40*(float)Math.cos(Math.toRadians(rotation))))); //Scales should only be applied when final positions or
+            disk.setY((player1.getPosition().y + playerHt - diskHt/2 + (40*(float)Math.sin(Math.toRadians(rotation))))); //sizes are being decided on
         }
 
         if(xPos + playerWd <= 0) {
@@ -203,8 +191,8 @@ public class PlayState extends State {
 
         sb.begin();
         sb.draw(background, 0,0, w, h);
-        sb.draw(player1.getTexture(),xPos,yPos,playerWd* xScl,playerHt* yScl,playerWd*2*xScl,playerHt*2*yScl,1,1,rotation+90,0,0,Math.round(playerWd*2),Math.round(playerHt*2),false,false);
         disk.draw(sb);
+        sb.draw(player1.getTexture(),xPos,yPos,playerWd* xScl,playerHt* yScl,playerWd*2*xScl,playerHt*2*yScl,1,1,rotation,0,0,Math.round(playerWd*2),Math.round(playerHt*2),false,false);
         //sb.draw(cpuPlayer.getTexture(), cpuPlayer.getPosition().x, cpuPlayer.getPosition().y);
         scoreboard.draw(sb);
         clockText.draw(sb, clock(), scoreboardX + (79*scbdWd)/112, scoreboardY + (5*scbdHt)/8);
