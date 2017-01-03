@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
@@ -42,8 +43,8 @@ public class PlayState extends State {
 
     private Stage stage;
     private ImageButton pauseButton;
-    private ImageButton.ImageButtonStyle pauseButtonStyle=new ImageButton.ImageButtonStyle();
-    private Skin pauseButtonSkin=new Skin();
+    private ImageButton.ImageButtonStyle pauseButtonStyle;
+    private Skin pauseButtonSkin;
     private Touchpad touchpad;
     private Touchpad.TouchpadStyle touchpadStyle;
     private Skin touchpadSkin;
@@ -63,9 +64,13 @@ public class PlayState extends State {
     BitmapFont scoreText2;
     double playTime=300;
     boolean stopped=false;
+    boolean before;
+
+    int drawCounter = 0;
 
     public PlayState(GameStateManager gsm) {
         super(gsm);
+        boolean x=before;
         player1=new Player(600,600);
         //cpuPlayer = new Player(100, 50);
 //        camera=new OrthographicCamera();
@@ -73,12 +78,12 @@ public class PlayState extends State {
 //        camera.position.set(0,0,0);
         background = new Texture("field_background.png");
 
-
-/*        pauseButtonSkin.add("pauseButton","button_pause.png");
-        pauseButtonStyle=new ImageButton.ImageButtonStyle();
-        pauseButtonStyle.imageUp=pauseButtonSkin.getDrawable("pauseButton");
-        pauseButton=new ImageButton(pauseButtonStyle);
-        pauseButton.setBounds(w*xScl,(h-pauseButton.getHeight())*yScl,pauseButton.getWidth()*xScl,pauseButton.getHeight()*xScl);*/
+        pauseButtonSkin= new Skin();   //create button skin
+        pauseButtonSkin.add("pauseButton", new Texture("button_pause.png"));    //add the image to the skin
+        pauseButtonStyle= new ImageButton.ImageButtonStyle();  //create button style
+        pauseButtonStyle.imageUp = pauseButtonSkin.getDrawable("pauseButton");  //sets the button appearance when it is not pressed
+        pauseButton = new ImageButton(pauseButtonStyle);    //initializes the ImageButton with the created style as a parameter
+        pauseButton.setBounds(0,(WORLD_HEIGHT-pauseButton.getHeight())*yScl,pauseButton.getWidth()*xScl,pauseButton.getHeight()*yScl);
 
         scbdTexture = new Texture("scoreboard.png");
         scoreboard=new Sprite(scbdTexture);
@@ -128,7 +133,7 @@ public class PlayState extends State {
 
         stage = new Stage();
         stage.addActor(touchpad);
-        //stage.addActor(pauseButton);
+        stage.addActor(pauseButton);
         Gdx.input.setInputProcessor(stage);
     }
 
@@ -138,7 +143,10 @@ public class PlayState extends State {
             gsm.set(new MenuState(gsm));
             dispose();
         }
-        if (pauseButton.isPressed()){
+        if(pauseButton.isPressed()&&(!pauseButton.isDisabled())){
+            pauseButton.setDisabled(true);
+            drawCounter=0;
+            stopped = !stopped;
 
         }
     }
@@ -146,65 +154,50 @@ public class PlayState extends State {
     @Override
     protected void update(float dt) {
         handleInput();
+        if (!stopped) {
 //        if(team1Scored == true){
 //            teamScore1++;
 //        }
 //        if(team2Scored == true){
 //            teamScore2++;
 //        }
-        player1.update(dt);
+            player1.update(dt);
 
-        player1.setHoldingDisk(true);
-        if(player1.hasDisk()){
-            player1.setVelocity(0);
-        }
-        xPos = player1.getPosition().x;
-        yPos = player1.getPosition().y;
-        float deltaX=touchpad.getKnobPercentX();
-        float deltaY=touchpad.getKnobPercentY();
-        deltaX *= xScl;
-        deltaY *= yScl;
-        player1.setX(xPos+deltaX*player1.getVelocity());
-        player1.setY(yPos+deltaY*player1.getVelocity());
-        float deltaXAbs=Math.abs(deltaX);
-        float deltaYAbs=Math.abs(deltaY);
-        int xMultiplier=1;
-        int yMultiplier=1;
-        if (deltaX != 0  && deltaY != 0) {
+            //player1.setHoldingDisk(true);
+            if (player1.hasDisk()) {
+                player1.setVelocity(0);
+            }
+            xPos = player1.getPosition().x;
+            yPos = player1.getPosition().y;
+            float deltaX = touchpad.getKnobPercentX();
+            float deltaY = touchpad.getKnobPercentY();
+            deltaX *= xScl;
+            deltaY *= yScl;
+            player1.setX(xPos + deltaX * player1.getVelocity());
+            player1.setY(yPos + deltaY * player1.getVelocity());
 
-            angle = (float) Math.toDegrees(Math.atan(deltaXAbs / deltaYAbs));
-            if (deltaX > 0 && deltaY > 0) {
-                rotation = 360 - angle;
-                xMultiplier=-1;
-            } else if (deltaX > 0 && deltaY < 0) {
-                rotation = 180 + angle;
-                yMultiplier=-1;
-            } else if (deltaX < 0 && deltaY < 0) {
-                rotation = 180 - angle;
-                yMultiplier=-1;
-                xMultiplier=-1;
-            } else {
-                rotation = angle;
+            if (deltaX != 0 && deltaY != 0) {
+                rotation = (float) Math.toDegrees(Math.atan(deltaY / deltaX));
+                if (deltaX < 0) {
+                    rotation += 180;
+                }
+                disk.setX((player1.getPosition().x + playerWd + (200 * (float) Math.cos(Math.toRadians(rotation)))));
+                disk.setY((player1.getPosition().y + playerHt + (200 * (float) Math.sin(Math.toRadians(rotation)))));
             }
 
-        }
 
-            disk.setX(player1.getPosition().x + playerWd - diskWd/2 + xMultiplier*(200*(float)Math.cos(Math.toRadians(angle))));
-            disk.setY(player1.getPosition().y + playerHt - diskHt/2 + yMultiplier*(200*(float)Math.sin(Math.toRadians(angle))));
-        }
-
-        if(xPos + playerWd <= 0) {
-           player1.setX(xPos + 1);
-        }
-        if(xPos + playerWd >= w) {
-            player1.setX(xPos - 1);
-        }
-        if(yPos + playerHt <= 0) {
-            player1.setY(yPos +1);
-        }
-        if(yPos + playerHt >= h) {
-            player1.setY(yPos - 1);
-        }
+            if (xPos + playerWd <= 0) {
+                player1.setX(xPos + 1);
+            }
+            if (xPos + playerWd >= w) {
+                player1.setX(xPos - 1);
+            }
+            if (yPos + playerHt <= 0) {
+                player1.setY(yPos + 1);
+            }
+            if (yPos + playerHt >= h) {
+                player1.setY(yPos - 1);
+            }
 
 //        cpuPlayer.update(dt);
 //
@@ -214,24 +207,29 @@ public class PlayState extends State {
 //            cpuPlayer.setVelocity((int) cpuPlayer.getVelocity() * -1);
 //        }
 //        cpuPlayer.setX(cpuPlayer.getPosition().x + cpuPlayer.getVelocity());
+        }
     }
 
     @Override
     protected void render(SpriteBatch sb) {
         //sb.setProjectionMatrix(camera.combined);
-
+        drawCounter++;
         sb.begin();
         sb.draw(background, 0,0, w, h);
-        sb.draw(player1.getTexture(),xPos,yPos,playerWd* xScl,playerHt* yScl,playerWd*2*xScl,playerHt*2*yScl,1,1,rotation+90,0,0,Math.round(playerWd*2),Math.round(playerHt*2),false,false);
+        sb.draw(player1.getTexture(),xPos,yPos,playerWd* xScl,playerHt* yScl,playerWd*2*xScl,playerHt*2*yScl,1,1,rotation,0,0,Math.round(playerWd*2),Math.round(playerHt*2),false,false);
         disk.draw(sb);
         //sb.draw(cpuPlayer.getTexture(), cpuPlayer.getPosition().x, cpuPlayer.getPosition().y);
         scoreboard.draw(sb);
         clockText.draw(sb, clock(), scoreboardX + (79*scbdWd)/112, scoreboardY + (5*scbdHt)/8);
         scoreText1.draw(sb, score1(), scoreboardX + (2*scbdWd)/16, scoreboardY + (5*scbdHt)/8);
         scoreText2.draw(sb, score2(), scoreboardX + (35*scbdWd)/64, scoreboardY + (5*scbdHt)/8);
-        //pauseButton.draw(sb,1);
-        font.draw(sb, clock(), scoreboardX + (79*scbdWd)/112, scoreboardY + (2*scbdHt)/3);
+        pauseButton.draw(sb,1);
         touchpad.draw(sb,1);
+
+        if (drawCounter>=10){
+            pauseButton.setDisabled(false);
+        }
+
         sb.end();
 
         stage.act(Gdx.graphics.getDeltaTime());
