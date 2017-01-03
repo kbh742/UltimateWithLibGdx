@@ -1,14 +1,17 @@
 package com.example.kholt6406.frisbee_app.States;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 
-/**
+/*
  * Created by kholt6406 on 10/17/2016.
  */
 public class ManagerState extends State {
@@ -55,8 +58,16 @@ public class ManagerState extends State {
     //private ImageButton backBtn;
     //private Skin backBtnSkin;
     private ImageButton.ImageButtonStyle backBtnStyle;
-    int[] positions = {1240, 150, 210, 500, 580, 500, 960, 500, 415, 200, 770, 200, 1280, 485};
+    int[] positions = {1240, 150, 235, 500, 600, 500, 975, 500, 440, 200, 785, 200, 1280, 485};
     int drawCounter = 0;
+    FreeTypeFontGenerator freeTypeFontGenerator=new FreeTypeFontGenerator(Gdx.files.internal("lucon.ttf"));
+    FreeTypeFontGenerator.FreeTypeFontParameter freeTypeFontParameter=new FreeTypeFontGenerator.FreeTypeFontParameter();
+
+
+    BitmapFont font;
+    BitmapFont font2;
+    BitmapFont font3;
+    public int size = 10;
 
 
     public ManagerState(GameStateManager gsm) {
@@ -125,7 +136,15 @@ public class ManagerState extends State {
         playerBtn5.setBounds(positions[10]* xScl, positions[11]* yScl, playerBtn5.getWidth()*xScl, playerBtn5.getHeight()*yScl);  //tells the button where to go
 
 
-
+        freeTypeFontParameter.size=36;
+        freeTypeFontParameter.color = Color.BLACK;
+        font=freeTypeFontGenerator.generateFont(freeTypeFontParameter);
+        freeTypeFontParameter.size=30;
+        freeTypeFontParameter.color = Color.BLACK;
+        font2=freeTypeFontGenerator.generateFont(freeTypeFontParameter);
+        freeTypeFontParameter.size=80;
+        freeTypeFontParameter.color = Color.BLACK;
+        font3=freeTypeFontGenerator.generateFont(freeTypeFontParameter);
         
         stage = new Stage();
         //stage.addActor(backBtn);
@@ -215,18 +234,23 @@ public class ManagerState extends State {
         handleInput();
     }
 
+    public void setCoolFont(int font){
+
+    }
+
     @Override
     protected void render(SpriteBatch sb) {
         sb.begin();
         drawCounter++;
         sb.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        sb.draw(playerCard, positions[0]* xScl, positions[1]* yScl);
-        sb.draw(playerFrame, positions[2]* xScl, positions[3]* yScl);
-        sb.draw(playerFrame, positions[4]* xScl, positions[5]* yScl);
-        sb.draw(playerFrame, positions[6]* xScl, positions[7]* yScl);
-        sb.draw(playerFrame, positions[8]* xScl, positions[9]* yScl);
-        sb.draw(playerFrame, positions[10]* xScl, positions[11]* yScl);
+
+        sb.draw(playerCard, positions[0]* xScl, positions[1]* yScl, playerCard.getWidth()*xScl, playerCard.getHeight()*yScl);
+        sb.draw(playerFrame, positions[2]* xScl, positions[3]* yScl, playerFrame.getWidth()*xScl, playerFrame.getHeight()*yScl);
+        sb.draw(playerFrame, positions[4]* xScl, positions[5]* yScl, playerFrame.getWidth()*xScl, playerFrame.getHeight()*yScl);
+        sb.draw(playerFrame, positions[6]* xScl, positions[7]* yScl, playerFrame.getWidth()*xScl, playerFrame.getHeight()*yScl);
+        sb.draw(playerFrame, positions[8]* xScl, positions[9]* yScl, playerFrame.getWidth()*xScl, playerFrame.getHeight()*yScl);
+        sb.draw(playerFrame, positions[10]* xScl, positions[11]* yScl, playerFrame.getWidth()*xScl, playerFrame.getHeight()*yScl);
 
         //sb.draw(playerPortrait1, positions[2], positions[3]);
         //sb.draw(playerPortrait2, positions[4], positions[5]);
@@ -234,6 +258,21 @@ public class ManagerState extends State {
         //sb.draw(playerPortrait4, positions[8], positions[9]);
         //sb.draw(playerPortrait5, positions[10], positions[11]);
         //backBtn.draw(sb, 1);
+        font.draw(sb, "Throw", 1300*xScl, 420*yScl);
+        font.draw(sb, "Catch", 1300*xScl, 370*yScl);
+        font.draw(sb, "Defense", 1300*xScl, 320*yScl);
+        font.draw(sb, "Speed", 1300*xScl, 270*yScl);
+        font.draw(sb, "Stamina", 1300*xScl, 220*yScl);
+
+        font2.draw(sb, "Overall", 1460*xScl, 620*yScl);
+
+
+        font.draw(sb, "100", 1500*xScl, 420*yScl);
+        font.draw(sb, "100", 1500*xScl, 370*yScl);
+        font.draw(sb, "100", 1500*xScl, 320*yScl);
+        font.draw(sb, "100", 1500*xScl, 270*yScl);
+        font.draw(sb, "100", 1500*xScl, 220*yScl);
+        font3.draw(sb, "100", 1450*xScl, 570*yScl);
 
         playerBtn1.draw(sb, 1);
         playerBtn2.draw(sb, 1);
@@ -242,7 +281,7 @@ public class ManagerState extends State {
         playerBtn5.draw(sb, 1);
 
         if(selected >= 0){
-            sb.draw(playerSelected, (positions[(selected+1)*2]-10)* xScl, (positions[(selected+1)*2+1]-10)* yScl);
+            sb.draw(playerSelected, (positions[(selected+1)*2]-10)* xScl, (positions[(selected+1)*2+1]-10)* yScl, playerSelected.getWidth()*xScl, playerSelected.getHeight()*yScl);
             Texture playerPreview = new Texture("player_portrait_" + (selected+1) + ".png");
             sb.draw(playerPreview, positions[12]* xScl, positions[13]* yScl);
         }

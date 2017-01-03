@@ -122,19 +122,12 @@ public class PlayState extends State {
         //deltaY *= yScl;
         player1.setX(xPos+deltaX*player1.getVelocity());
         player1.setY(yPos+deltaY*player1.getVelocity());
-        float deltaXAbs=Math.abs(deltaX);
-        float deltaYAbs=Math.abs(deltaY);
+        //float deltaXAbs=Math.abs(deltaX);
+        //float deltaYAbs=Math.abs(deltaY);
         if (deltaX != 0  && deltaY != 0) {
-
-            angle = (float) Math.toDegrees(Math.atan(deltaXAbs / deltaYAbs));
-            if (deltaX > 0 && deltaY > 0) {
-                rotation = 360 - angle;
-            } else if (deltaX > 0 && deltaY < 0) {
-                rotation = 180 + angle;
-            } else if (deltaX < 0 && deltaY < 0) {
-                rotation = 180 - angle;
-            } else {
-                rotation = angle;
+            rotation = ((float) Math.toDegrees(Math.atan(deltaY / deltaX)));
+            if(deltaX<0){
+                rotation += 180;
             }
         }
 
@@ -171,7 +164,7 @@ public class PlayState extends State {
 
         sb.begin();
         sb.draw(background, 0,0, w, h);
-        sb.draw(player1.getTexture(),xPos,yPos,playerWd,playerHt,playerWd*2,playerHt*2,1,1,rotation+90,0,0,Math.round(playerWd*2),Math.round(playerHt*2),false,false);
+        sb.draw(player1.getTexture(),xPos,yPos,playerWd,playerHt,playerWd*2,playerHt*2,1,1,rotation,0,0,Math.round(playerWd*2),Math.round(playerHt*2),false,false);
         //sb.draw(cpuPlayer.getTexture(), cpuPlayer.getPosition().x, cpuPlayer.getPosition().y);
         scoreboard.draw(sb);
         font.draw(sb, clock(), scoreboardX + (79*scbdWd)/112, scoreboardY + (2*scbdHt)/3);
