@@ -303,7 +303,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             }else if(velocityX<0){
                 Gdx.app.error("Swipe", "Left");
             }else{
-
+                Gdx.app.error("Swipe","No swipe");
             }
         }else{
             Gdx.app.error("Swipe", "Up or Down");
