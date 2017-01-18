@@ -34,7 +34,7 @@ public class PlayState extends State {
     float yScl =h/WORLD_HEIGHT;
 
     private Player player1;
-    //private Player cpuPlayer;
+    private Player cpuPlayer;
 
     private Sprite disk;
     private Texture diskTexture;
@@ -70,9 +70,8 @@ public class PlayState extends State {
 
     public PlayState(GameStateManager gsm) {
         super(gsm);
-        boolean x=before;
         player1=new Player(600,600);
-        //cpuPlayer = new Player(100, 50);
+        //cpuPlayer = new Player(800, 800);
 //        camera=new OrthographicCamera();
 //        camera.setToOrtho(false,WORLD_WIDTH*xMultiplier,WORLD_HEIGHT*yMultiplier);
 //        camera.position.set(0,0,0);
@@ -100,8 +99,8 @@ public class PlayState extends State {
         scoreText1 = freeTypeFontGenerator.generateFont(freeTypeFontParameter);
         scoreText2 = freeTypeFontGenerator.generateFont(freeTypeFontParameter);
 
-        playerWd = player1.getTexture().getWidth()/2;
-        playerHt = player1.getTexture().getHeight()/2;
+        playerWd = player1.getTexture().getWidth();
+        playerHt = player1.getTexture().getHeight();
 
         diskTexture = new Texture("frisbee_snake.png");
         disk = new Sprite(diskTexture);
@@ -151,6 +150,7 @@ public class PlayState extends State {
         }
     }
 
+
     @Override
     protected void update(float dt) {
         handleInput();
@@ -181,8 +181,9 @@ public class PlayState extends State {
                 if (deltaX < 0) {
                     rotation += 180;
                 }
-                disk.setX((player1.getPosition().x + playerWd + (200 * (float) Math.cos(Math.toRadians(rotation)))));
-                disk.setY((player1.getPosition().y + playerHt + (200 * (float) Math.sin(Math.toRadians(rotation)))));
+                int r = 150;
+                disk.setX((float)(player1.getPosition().x+(playerWd*xScl)/2-diskWd/2 + (r*(deltaX/Math.sqrt(deltaX*deltaX+deltaY*deltaY)))));
+                disk.setY((float)(player1.getPosition().y+(playerHt*yScl)/2-diskHt/2 + (r*(deltaY/Math.sqrt(deltaX*deltaX+deltaY*deltaY)))));
             }
 
 
@@ -199,14 +200,14 @@ public class PlayState extends State {
                 player1.setY(yPos - 1);
             }
 
-//        cpuPlayer.update(dt);
-//
-//        cpuPlayer.setVelocity(5);
-//        if(cpuPlayer.getPosition().x + cpuPlayer.getTexture().getWidth()/2 >= w){
-//            cpuPlayer.setX(w - cpuPlayer.getTexture().getWidth()/2 - 1);
-//            cpuPlayer.setVelocity((int) cpuPlayer.getVelocity() * -1);
-//        }
-//        cpuPlayer.setX(cpuPlayer.getPosition().x + cpuPlayer.getVelocity());
+/*        cpuPlayer.update(dt);
+
+        cpuPlayer.setVelocity(5);*/
+/*        if(cpuPlayer.getPosition().x + cpuPlayer.getTexture().getWidth()/2 >= w){
+            cpuPlayer.setX(w - cpuPlayer.getTexture().getWidth()/2 - 1);
+            cpuPlayer.setVelocity((int) cpuPlayer.getVelocity() * -1);
+        }
+        cpuPlayer.setX(cpuPlayer.getPosition().x + cpuPlayer.getVelocity());*/
         }
     }
 
@@ -216,9 +217,9 @@ public class PlayState extends State {
         drawCounter++;
         sb.begin();
         sb.draw(background, 0,0, w, h);
-        sb.draw(player1.getTexture(),xPos,yPos,playerWd* xScl,playerHt* yScl,playerWd*2*xScl,playerHt*2*yScl,1,1,rotation,0,0,Math.round(playerWd*2),Math.round(playerHt*2),false,false);
+        sb.draw(player1.getTexture(),xPos,yPos,playerWd/2*xScl,playerHt/2*yScl,playerWd*xScl,playerHt*yScl,1,1,rotation,0,0,Math.round(playerWd),Math.round(playerHt),false,false);
         disk.draw(sb);
-        //sb.draw(cpuPlayer.getTexture(), cpuPlayer.getPosition().x, cpuPlayer.getPosition().y);
+        //sb.draw(cpuPlayer.getTexture(),cpuPlayer.getPosition().x,cpuPlayer.getPosition().y,cpuPlayer.getWidth()/2*xScl,cpuPlayer.getHeight()/2*yScl,cpuPlayer.getWidth()*xScl,cpuPlayer.getHeight()*yScl,1,1,rotation,0,0,Math.round(cpuPlayer.getWidth()),Math.round(cpuPlayer.getHeight()),false,false);
         scoreboard.draw(sb);
         clockText.draw(sb, clock(), scoreboardX + (79*scbdWd)/112, scoreboardY + (5*scbdHt)/8);
         scoreText1.draw(sb, score1(), scoreboardX + (2*scbdWd)/16, scoreboardY + (5*scbdHt)/8);
