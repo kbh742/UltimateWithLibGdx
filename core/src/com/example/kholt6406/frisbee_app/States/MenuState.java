@@ -23,9 +23,6 @@ public class MenuState extends State{
     private Skin settingsBtnSkin;
     private ImageButton.ImageButtonStyle settingsBtnStyle;
 
-    private ImageButton exitBtn;
-    private Skin exitBtnSkin;
-    private ImageButton.ImageButtonStyle exitBtnStyle;
 
     public MenuState(GameStateManager gsm) {
         super(gsm);
@@ -59,20 +56,12 @@ public class MenuState extends State{
         settingsBtn = new ImageButton(settingsBtnStyle);
         settingsBtn.setBounds((Gdx.graphics.getWidth()/3)-(settingsBtn.getWidth()/2),(Gdx.graphics.getHeight()/3)-(settingsBtn.getHeight()/2), settingsBtn.getWidth(), settingsBtn.getHeight());
 
-        exitBtnSkin = new Skin();
-        exitBtnSkin.add("exitBtn", new Texture("button_exit.png"));
-        exitBtnStyle = new ImageButton.ImageButtonStyle();
-        exitBtnStyle.imageUp = exitBtnSkin.getDrawable("exitBtn");
-        exitBtnStyle.imageDown = exitBtnSkin.getDrawable("exitBtn");
-        exitBtn = new ImageButton(exitBtnStyle);
-        exitBtn.setBounds((Gdx.graphics.getWidth()/3)*2-(exitBtn.getWidth()/2),(Gdx.graphics.getHeight()/3)-(exitBtn.getHeight()/2), exitBtn.getWidth(), exitBtn.getHeight());
         
         //make the stage and add stuff to it, the stage somehow makes everything do stuff
         stage = new Stage();
         stage.addActor(playBtn);
         stage.addActor(managerBtn);
         stage.addActor(settingsBtn);
-        stage.addActor(exitBtn);
         Gdx.input.setInputProcessor(stage);
         Gdx.input.setCatchBackKey(true);
     }
@@ -93,10 +82,7 @@ public class MenuState extends State{
             gsm.set(new SettingsState(gsm));
             dispose();
         }
-        if(exitBtn.isPressed()){
-            Gdx.app.exit();
-            dispose();
-        }
+
     }
 
     @Override
@@ -111,7 +97,6 @@ public class MenuState extends State{
         playBtn.draw(sb, 1);
         managerBtn.draw(sb, 1);
         settingsBtn.draw(sb, 1);
-        exitBtn.draw(sb, 1);
         sb.end();
 
         stage.act(Gdx.graphics.getDeltaTime());
