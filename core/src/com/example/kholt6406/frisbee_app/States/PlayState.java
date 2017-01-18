@@ -8,8 +8,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.input.GestureDetector;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
@@ -31,8 +29,6 @@ public class PlayState extends State {
     float yPos=600;
     float playerWd;
     float playerHt;
-
-    OrthographicCamera camera;
 
     private Player player1;
     //private Player cpuPlayer;
@@ -56,7 +52,7 @@ public class PlayState extends State {
     float scoreboardX;
     float scoreboardY;
     float rotation;
-    float angle;
+
     BitmapFont clockText;
     BitmapFont scoreText1;
     BitmapFont scoreText2;

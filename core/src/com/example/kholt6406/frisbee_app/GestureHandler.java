@@ -24,6 +24,8 @@ public class GestureHandler implements GestureDetector.GestureListener {
 
     @Override
     public boolean fling(float velocityX, float velocityY, int button) {
+
+
         return false;
     }
 
