@@ -23,6 +23,7 @@ public class MenuState extends State{
     private Skin settingsBtnSkin;
     private ImageButton.ImageButtonStyle settingsBtnStyle;
 
+
     public MenuState(GameStateManager gsm) {
         super(gsm);
 
@@ -54,6 +55,7 @@ public class MenuState extends State{
         settingsBtnStyle.imageDown = settingsBtnSkin.getDrawable("settingsBtn");
         settingsBtn = new ImageButton(settingsBtnStyle);
         settingsBtn.setBounds((Gdx.graphics.getWidth()/3)-(settingsBtn.getWidth()/2),(Gdx.graphics.getHeight()/3)-(settingsBtn.getHeight()/2), settingsBtn.getWidth(), settingsBtn.getHeight());
+
         
         //make the stage and add stuff to it, the stage somehow makes everything do stuff
         stage = new Stage();
@@ -80,6 +82,7 @@ public class MenuState extends State{
             gsm.set(new SettingsState(gsm));
             dispose();
         }
+
     }
 
     @Override
