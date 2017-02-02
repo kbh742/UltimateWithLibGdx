@@ -60,16 +60,17 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     float scoreboardX;
     float scoreboardY;
     float rotation;
-    float angle;
     BitmapFont clockText;
     BitmapFont scoreText1;
     BitmapFont scoreText2;
     double playTime=300;
     boolean stopped=false;
-    boolean before;
+    int team1Score=0;
+    int team2Score=0;
 
     int drawCounter = 0;
-
+    boolean inLeftEndZone=false;
+    boolean inRightEndZone=false;
     public PlayState(GameStateManager gsm) {
         super(gsm);
         player1=new Player(600,600);
@@ -131,7 +132,6 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         touchpad.setBounds(30*xScl, 30*yScl, 400*xScl, 400*yScl);
 
 
-
         stage = new Stage();
         stage.addActor(touchpad);
         stage.addActor(pauseButton);
@@ -141,7 +141,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     @Override
     protected void handleInput() {
         if (Gdx.input.isKeyPressed(Input.Keys.BACK)){
-            gsm.set(new MenuState(gsm));
+            gsm.set(new WinState(gsm));
             dispose();
         }
         if(pauseButton.isPressed()&&(!pauseButton.isDisabled())){
@@ -157,12 +157,6 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     protected void update(float dt) {
         handleInput();
         if (!stopped) {
-//        if(team1Scored == true){
-//            teamScore1++;
-//        }
-//        if(team2Scored == true){
-//            teamScore2++;
-//        }
             player1.update(dt);
 
             //player1.setHoldingDisk(true);
@@ -189,17 +183,31 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             }
 
 
-            if (xPos + playerWd <= 0) {
+            if (xPos + playerWd/2*xScl <= 0) {
                 player1.setX(xPos + 1);
             }
-            if (xPos + playerWd >= w) {
+            if (xPos + playerWd/2*xScl >= w) {
                 player1.setX(xPos - 1);
             }
-            if (yPos + playerHt <= 0) {
+            if (yPos + playerHt/2*yScl <= 0) {
                 player1.setY(yPos + 1);
             }
-            if (yPos + playerHt >= h) {
+            if (yPos + playerHt/2*yScl >= h) {
                 player1.setY(yPos - 1);
+            }
+
+            if (xPos+playerWd/2*xScl <= w/6 && !inLeftEndZone){
+                team1Score++;
+                inLeftEndZone=true;
+            } else if (xPos+playerWd/2*xScl > w/6){
+                inLeftEndZone=false;
+            }
+
+            if (xPos+playerWd/2*xScl >= w-w/6 && !inRightEndZone){
+                team2Score++;
+                inRightEndZone=true;
+            } else if (xPos+playerWd/2*xScl < w-w/6){
+                inRightEndZone=false;
             }
 
 /*        cpuPlayer.update(dt);
@@ -224,8 +232,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         //sb.draw(cpuPlayer.getTexture(),cpuPlayer.getPosition().x,cpuPlayer.getPosition().y,cpuPlayer.getWidth()/2*xScl,cpuPlayer.getHeight()/2*yScl,cpuPlayer.getWidth()*xScl,cpuPlayer.getHeight()*yScl,1,1,rotation,0,0,Math.round(cpuPlayer.getWidth()),Math.round(cpuPlayer.getHeight()),false,false);
         scoreboard.draw(sb);
         clockText.draw(sb, clock(), scoreboardX + (79*scbdWd)/112, scoreboardY + (5*scbdHt)/8);
-        scoreText1.draw(sb, score1(), scoreboardX + (2*scbdWd)/16, scoreboardY + (5*scbdHt)/8);
-        scoreText2.draw(sb, score2(), scoreboardX + (35*scbdWd)/64, scoreboardY + (5*scbdHt)/8);
+        scoreText1.draw(sb, Integer.toString(team1Score), scoreboardX + (2*scbdWd)/16, scoreboardY + (5*scbdHt)/8);
+        scoreText2.draw(sb, Integer.toString(team2Score), scoreboardX + (35*scbdWd)/64, scoreboardY + (5*scbdHt)/8);
         pauseButton.draw(sb,1);
         touchpad.draw(sb,1);
 
@@ -263,20 +271,6 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             }
 
         return time;
-    }
-
-    public String score1(){
-        String score1 = "0";
-        //score1 = "" + teamScore1;
-
-        return score1;
-    }
-
-    public String score2(){
-        String score2 = "0";
-        //score2 = "" + teamScore2;
-
-        return score2;
     }
 
     @Override

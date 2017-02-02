@@ -7,17 +7,17 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g3d.particles.influencers.ColorInfluencer;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
+import java.util.Random;
 
-/**
- * Created by kholt6406 on 10/17/2016.
- */
-public class ManagerState extends State implements GestureDetector.GestureListener {
+
+public class ManagerState extends State {
     float w = Gdx.graphics.getWidth();
     float h = Gdx.graphics.getHeight();
     private Stage stage;
@@ -63,6 +63,7 @@ public class ManagerState extends State implements GestureDetector.GestureListen
     private ImageButton.ImageButtonStyle backBtnStyle;
     int[] positions = {1240, 150, 235, 500, 600, 500, 975, 500, 440, 200, 785, 200, 1280, 485};
     int drawCounter = 0;
+    static int[][] stats= new int[5][6];
     FreeTypeFontGenerator freeTypeFontGenerator=new FreeTypeFontGenerator(Gdx.files.internal("lucon.ttf"));
     FreeTypeFontGenerator.FreeTypeFontParameter freeTypeFontParameter=new FreeTypeFontGenerator.FreeTypeFontParameter();
 
@@ -75,6 +76,18 @@ public class ManagerState extends State implements GestureDetector.GestureListen
 
     public ManagerState(GameStateManager gsm) {
         super(gsm);
+        double sum=0;
+        for (int y=0; y<5; y++){
+            for (int x=0; x<5; x++){
+                Random random= new Random();
+                int num=random.nextInt(5-1)+1;
+                sum=sum+num;
+                stats[y][x]=num;
+            }
+            int avg=(int)Math.round(sum/5);
+            stats[y][5]=avg;
+            sum=0;
+        }
         background = new Texture("team_manager_menu.png");
 
 
@@ -169,7 +182,7 @@ public class ManagerState extends State implements GestureDetector.GestureListen
             gsm.set(new MenuState(gsm));
             dispose();
         }
-        if(playerBtn1.isPressed()&&(playerBtn1.isDisabled()==false)){
+        if(playerBtn1.isPressed()&&(!playerBtn1.isDisabled())){
             if(selected == 0){
                 selected = -1;
             } else if (selected == -1){
@@ -180,7 +193,7 @@ public class ManagerState extends State implements GestureDetector.GestureListen
             playerBtn1.setDisabled(true);
             drawCounter = 0;
         }
-        if(playerBtn2.isPressed()&&(playerBtn2.isDisabled()==false)){
+        if(playerBtn2.isPressed()&&(!playerBtn2.isDisabled())){
             if(selected == 1){
                 selected = -1;
             } else if (selected == -1){
@@ -192,7 +205,7 @@ public class ManagerState extends State implements GestureDetector.GestureListen
             drawCounter = 0;
             Gdx.app.log("selected", "selected " + selected);
         }
-        if(playerBtn3.isPressed()&&(playerBtn3.isDisabled()==false)){
+        if(playerBtn3.isPressed()&&(!playerBtn3.isDisabled())){
             if(selected == 2){
                 selected = -1;
             } else if (selected == -1){
@@ -204,7 +217,7 @@ public class ManagerState extends State implements GestureDetector.GestureListen
             drawCounter = 0;
             Gdx.app.log("selected", "selected " + selected);
         }
-        if(playerBtn4.isPressed()&&(playerBtn4.isDisabled()==false)){
+        if(playerBtn4.isPressed()&&(!playerBtn4.isDisabled())){
             if(selected == 3){
                 selected = -1;
             } else if (selected == -1){
@@ -216,7 +229,7 @@ public class ManagerState extends State implements GestureDetector.GestureListen
             drawCounter = 0;
             Gdx.app.log("selected", "selected " + selected);
         }
-        if(playerBtn5.isPressed()&&(playerBtn5.isDisabled()==false)){
+        if(playerBtn5.isPressed()&&(!playerBtn5.isDisabled())){
             if(selected == 4){
                 selected = -1;
             } else if (selected == -1){
@@ -273,13 +286,14 @@ public class ManagerState extends State implements GestureDetector.GestureListen
 
         font2.draw(sb, "Overall", 1460*xScl, 620*yScl);
 
-
-        font.draw(sb, "100", 1500*xScl, 420*yScl);
-        font.draw(sb, "100", 1500*xScl, 370*yScl);
-        font.draw(sb, "100", 1500*xScl, 320*yScl);
-        font.draw(sb, "100", 1500*xScl, 270*yScl);
-        font.draw(sb, "100", 1500*xScl, 220*yScl);
-        font3.draw(sb, "100", 1450*xScl, 570*yScl);
+        if (selected != -1) {
+            font.draw(sb, Integer.toString(stats[selected][0]), 1500 * xScl, 420 * yScl);
+            font.draw(sb, Integer.toString(stats[selected][1]), 1500 * xScl, 370 * yScl);
+            font.draw(sb, Integer.toString(stats[selected][2]), 1500 * xScl, 320 * yScl);
+            font.draw(sb, Integer.toString(stats[selected][3]), 1500 * xScl, 270 * yScl);
+            font.draw(sb, Integer.toString(stats[selected][4]), 1500 * xScl, 220 * yScl);
+            font3.draw(sb,Integer.toString(stats[selected][5]), 1450 * xScl, 570 * yScl);
+        }
 
         playerBtn1.draw(sb, 1);
         playerBtn2.draw(sb, 1);
@@ -334,7 +348,6 @@ public class ManagerState extends State implements GestureDetector.GestureListen
         playerBtn5.setBounds(positions[10]* xScl, positions[11]* yScl, playerBtn5.getWidth(), playerBtn5.getHeight());  //tells the button where to go
     }
 
-    int[][] stats = new int[5][5];
     String[] portraits = new String[5];
     boolean music = false;
     public void changeSpeed(int player, int variation) {
@@ -357,62 +370,5 @@ public class ManagerState extends State implements GestureDetector.GestureListen
         stats[player][4]+=variation;
     }
 
-    @Override
-    public boolean touchDown(float x, float y, int pointer, int button) {
-        return false;
-    }
 
-    @Override
-    public boolean tap(float x, float y, int count, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean longPress(float x, float y) {
-        return false;
-    }
-
-    @Override
-    public boolean fling(float velocityX, float velocityY, int button) {
-        Gdx.app.log("Swipe", "Completed");
-        if(Math.abs(velocityX)>Math.abs(velocityY)){
-            if(velocityX>0){
-                Gdx.app.log("Swipe", "Right");
-            }else if (velocityX<0){
-                Gdx.app.log("Swipe", "Left");
-            } else {
-                // Do nothing.
-                Gdx.app.log("Swipe", "Up or Down");
-            }
-        }else{
-
-            // Ignore the input, because we don't care about up/down swipes.
-        }
-        return true;
-    }
-
-    @Override
-    public boolean pan(float x, float y, float deltaX, float deltaY) {
-        return false;
-    }
-
-    @Override
-    public boolean panStop(float x, float y, int pointer, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean zoom(float initialDistance, float distance) {
-        return false;
-    }
-
-    @Override
-    public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2, Vector2 pointer1, Vector2 pointer2) {
-        return false;
-    }
-
-    @Override
-    public void pinchStop() {
-
-    }
 }
