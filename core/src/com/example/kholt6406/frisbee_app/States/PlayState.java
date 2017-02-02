@@ -63,10 +63,11 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     BitmapFont clockText;
     BitmapFont scoreText1;
     BitmapFont scoreText2;
-    double playTime=300;
+    double playTime=20;
     boolean stopped=false;
     int team1Score=0;
     int team2Score=0;
+    int points=0;
 
     int drawCounter = 0;
     boolean inLeftEndZone=false;
