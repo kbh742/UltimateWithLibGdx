@@ -2,12 +2,16 @@ package com.example.kholt6406.frisbee_app.States;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -15,9 +19,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.utils.Array;
 import com.example.kholt6406.frisbee_app.sprites.Player;
+import com.example.kholt6406.frisbee_app.swipe.SwipeHandler;
+import com.example.kholt6406.frisbee_app.swipe.mesh.SwipeTriStrip;
+import com.badlogic.gdx.graphics.GL20;
 
-public class PlayState extends State implements GestureDetector.GestureListener{
+public class PlayState extends State implements GestureDetector.GestureListener, InputProcessor {
     float w = Gdx.graphics.getWidth();
     float h = Gdx.graphics.getHeight();
     float scbdWd;
@@ -43,6 +51,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     float diskWd;
     float diskHt;
 
+
     private Stage stage;
     private ImageButton pauseButton;
     private ImageButton.ImageButtonStyle pauseButtonStyle;
@@ -67,6 +76,10 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     double playTime=300;
     boolean stopped=false;
     boolean before;
+    ShapeRenderer shapes;
+    SwipeTriStrip tris;
+    SwipeHandler swipe;
+    Texture tex;
 
     int drawCounter = 0;
 
@@ -95,6 +108,17 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         scoreboardY=h-scbdHt;
         scoreboard.setX(scoreboardX);
         scoreboard.setY(scoreboardY);
+
+        //Swipes
+
+        tris = new SwipeTriStrip();
+        swipe = new SwipeHandler(10);
+        swipe.minDistance = 10;
+        swipe.initialDistance = 10;
+        tex = new Texture("gradient.png");
+        tex.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        shapes = new ShapeRenderer();
+
 
         freeTypeFontParameter.size=(int)(9*scbdHt)/18;
         clockText =freeTypeFontGenerator.generateFont(freeTypeFontParameter);
@@ -135,7 +159,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         stage = new Stage();
         stage.addActor(touchpad);
         stage.addActor(pauseButton);
-        Gdx.input.setInputProcessor(stage);
+        Gdx.input.setInputProcessor(swipe);
     }
 
     @Override
@@ -215,9 +239,11 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
     @Override
     protected void render(SpriteBatch sb) {
+
         //sb.setProjectionMatrix(camera.combined);
         drawCounter++;
         sb.begin();
+
         sb.draw(background, 0,0, w, h);
         sb.draw(player1.getTexture(),xPos,yPos,playerWd/2*xScl,playerHt/2*yScl,playerWd*xScl,playerHt*yScl,1,1,rotation,0,0,Math.round(playerWd),Math.round(playerHt),false,false);
         disk.draw(sb);
@@ -228,20 +254,46 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         scoreText2.draw(sb, score2(), scoreboardX + (35*scbdWd)/64, scoreboardY + (5*scbdHt)/8);
         pauseButton.draw(sb,1);
         touchpad.draw(sb,1);
+        cam.update();
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        sb.setProjectionMatrix(cam.combined);
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        tex.bind();
+
+        //the endcap scale
+//		tris.endcap = 5f;
+
+        //the thickness of the line
+        tris.thickness = 30f;
+
+        //generate the triangle strip from our path
+        tris.update(swipe.path());
+
+        //the vertex color for tinting, i.e. for opacity
+        tris.color = Color.WHITE;
+
+        //render the triangles to the screen
+        tris.draw(cam);
+
+        //uncomment to see debug lines
+        drawDebug();
 
         if (drawCounter>=10){
             pauseButton.setDisabled(false);
         }
 
-        sb.end();
+
 
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
+        sb.end();
     }
 
     @Override
     public void dispose() {
-
+        shapes.dispose();
+        tex.dispose();
     }
 
     public String clock(){
@@ -279,6 +331,53 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         return score2;
     }
 
+
+    void drawDebug() {
+        Gdx.app.log("Swipe", "SmartSwipeDebug");
+        Array<Vector2> input = swipe.input();
+
+        //draw the raw input
+        shapes.begin(ShapeRenderer.ShapeType.Line);
+        shapes.setColor(Color.GRAY);
+        for (int i=0; i<input.size-1; i++) {
+            Vector2 p = input.get(i);
+            Vector2 p2 = input.get(i+1);
+            shapes.line(p.x, p.y, p2.x, p2.y);
+        }
+        shapes.end();
+
+        //draw the smoothed and simplified path
+        shapes.begin(ShapeRenderer.ShapeType.Line);
+        shapes.setColor(Color.RED);
+        Array<Vector2> out = swipe.path();
+        for (int i=0; i<out.size-1; i++) {
+            Vector2 p = out.get(i);
+            Vector2 p2 = out.get(i+1);
+            shapes.line(p.x, p.y, p2.x, p2.y);
+        }
+        shapes.end();
+
+
+        //render our perpendiculars
+        shapes.begin(ShapeRenderer.ShapeType.Line);
+        Vector2 perp = new Vector2();
+
+        for (int i=1; i<input.size-1; i++) {
+            Vector2 p = input.get(i);
+            Vector2 p2 = input.get(i+1);
+
+            shapes.setColor(Color.LIGHT_GRAY);
+            perp.set(p).sub(p2).nor();
+            perp.set(perp.y, -perp.x);
+            perp.scl(10f);
+            shapes.line(p.x, p.y, p.x+perp.x, p.y+perp.y);
+            perp.scl(-1f);
+            shapes.setColor(Color.BLUE);
+            shapes.line(p.x, p.y, p.x+perp.x, p.y+perp.y);
+        }
+        shapes.end();
+    }
+
     @Override
     public boolean touchDown(float x, float y, int pointer, int button) {
         return false;
@@ -296,17 +395,17 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
     @Override
     public boolean fling(float velocityX, float velocityY, int button) {
-        Gdx.app.error("Swipe", "Completed");
+        Gdx.app.log("Swipe", "Completed");
         if(Math.abs(velocityX)>Math.abs(velocityY)){
             if(velocityX>0){
-                Gdx.app.error("Swipe", "Right");
+                Gdx.app.log("Swipe", "Right");
             }else if(velocityX<0){
-                Gdx.app.error("Swipe", "Left");
+                Gdx.app.log("Swipe", "Left");
             }else{
-                Gdx.app.error("Swipe","No swipe");
+                Gdx.app.log("Swipe","No swipe");
             }
         }else{
-            Gdx.app.error("Swipe", "Up or Down");
+            Gdx.app.log("Swipe", "Up or Down");
 
         }
         return true;
@@ -335,5 +434,45 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     @Override
     public void pinchStop() {
 
+    }
+
+    @Override
+    public boolean keyDown(int keycode) {
+        return false;
+    }
+
+    @Override
+    public boolean keyUp(int keycode) {
+        return false;
+    }
+
+    @Override
+    public boolean keyTyped(char character) {
+        return false;
+    }
+
+    @Override
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
+
+    @Override
+    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
+
+    @Override
+    public boolean touchDragged(int screenX, int screenY, int pointer) {
+        return false;
+    }
+
+    @Override
+    public boolean mouseMoved(int screenX, int screenY) {
+        return false;
+    }
+
+    @Override
+    public boolean scrolled(int amount) {
+        return false;
     }
 }
