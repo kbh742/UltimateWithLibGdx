@@ -49,6 +49,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     float diskVy;
     float diskCurve;
 
+    int catchableDistance;
+
     boolean p1Threw = false;
     boolean cpuThrew = false;
 
@@ -123,6 +125,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         disk.setSize(diskWd, diskHt);
         disk.setX(player1.getPosition().x + playerWd/2 - diskWd/2);
         disk.setY(player1.getPosition().y + playerHt/2 - diskHt/2 + 40);
+
+        catchableDistance = 100;
 
         player1.setHoldingDisk(true);
 
@@ -225,19 +229,19 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             diskVx = (float) (Math.cos(alpha)*sideV - Math.sin(alpha)*straightV);
             diskVy = (float) (Math.sin(alpha)*sideV + Math.cos(alpha)*straightV);*/
 
-            if(!player1.hasDisk()){
-                disk.setX(disk.getX() + diskVx);
-                disk.setY(disk.getY() + diskVy);
-            }
+
+            disk.setX(disk.getX() + diskVx);
+            disk.setY(disk.getY() + diskVy);
+
 
             double player1DistToDisk = Math.sqrt(Math.pow(player1.getPosition().x+playerWd/2-(disk.getX()+diskWd/2),2) + Math.pow(player1.getPosition().y+playerHt/2-(disk.getY()+diskHt/2),2));
             //Gdx.app.log("LALALALA", player1DistToDisk + "");
-            if(player1DistToDisk <= 80 && !player1.hasDisk() && !p1Threw){
+            if(player1DistToDisk <= catchableDistance && !player1.hasDisk() && !p1Threw){
                 player1.setHoldingDisk(true);
                 diskVx = 0;
                 diskVy = 0;
             }
-            else if(player1DistToDisk > 80){
+            else if(player1DistToDisk > catchableDistance){
                 player1.setHoldingDisk(false);
                 p1Threw = false;
             }
@@ -248,17 +252,26 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             float cpuY = cpuPlayer.getPosition().y;
             float cpuWd = cpuPlayer.getTexture().getWidth();
             float cpuHt = cpuPlayer.getTexture().getHeight();
-            double cpuDistToDisk = Math.sqrt(Math.pow(cpuX+cpuWd/2-disk.getX(),2) + Math.pow(cpuY+cpuHt/2-disk.getY(),2));
+            double cpuDistToDisk = Math.sqrt(Math.pow(cpuX+cpuWd/2-(disk.getX()+diskWd/2),2) + Math.pow(cpuY+cpuHt/2-(disk.getY()+diskHt/2),2));
 
             if(cpuDistToDisk <= 300 && diskVx != 0 && diskVy != 0){
-                cpuRotation = (float) Math.toDegrees(Math.atan(diskVy/diskVx)) +180;
+                cpuRotation = (float) Math.toDegrees(Math.atan(diskVy/diskVx));
+                if(diskVx < 0){
+                    cpuRotation+= 180;
+                }
+                if(cpuRotation < 0){
+                    cpuRotation+=360;
+                }
+                //cpuRotation+=180;
             }
-            if(cpuDistToDisk <= 80 && !cpuPlayer.hasDisk() && !cpuThrew){
+            Gdx.app.log("CPUROTATION", cpuRotation + "");
+
+            if(cpuDistToDisk <= catchableDistance && !cpuPlayer.hasDisk() && !cpuThrew){
                 cpuPlayer.setHoldingDisk(true);
                 diskVx = 0;
                 diskVy = 0;
             }
-            else if(cpuDistToDisk > 80 ){
+            else if(cpuDistToDisk > catchableDistance ){
                 cpuPlayer.setHoldingDisk(false);
                 cpuThrew = false;
             }
