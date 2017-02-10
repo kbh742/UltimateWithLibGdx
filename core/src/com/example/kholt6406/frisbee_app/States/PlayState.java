@@ -19,8 +19,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.example.kholt6406.frisbee_app.sprites.Player;
 
 public class PlayState extends State implements GestureDetector.GestureListener{
-    float w = Gdx.graphics.getWidth();
-    float h = Gdx.graphics.getHeight();
+    static float w = Gdx.graphics.getWidth();
+    static float h = Gdx.graphics.getHeight();
     float scbdWd;
     float scbdHt;
 
@@ -31,10 +31,10 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
     OrthographicCamera camera;
 
-    public final int WORLD_WIDTH=1920;
-    public final int WORLD_HEIGHT=1080;
-    float xScl =w/WORLD_WIDTH;
-    float yScl =h/WORLD_HEIGHT;
+    public static final int WORLD_WIDTH=1920;
+    public static final int WORLD_HEIGHT=1080;
+    static float xScl =w/WORLD_WIDTH;
+    static float yScl =h/WORLD_HEIGHT;
 
     private Player player1;
     private Player cpuPlayer;
@@ -67,11 +67,11 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     BitmapFont clockText;
     BitmapFont scoreText1;
     BitmapFont scoreText2;
-    double playTime=20;
+    double playTime=500;
     boolean stopped=false;
     int team1Score=0;
     int team2Score=0;
-    int points=0;
+    static int points;
 
     int drawCounter = 0;
     boolean inLeftEndZone=false;
@@ -150,7 +150,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     @Override
     protected void handleInput() {
         if (Gdx.input.isKeyPressed(Input.Keys.BACK)){
-            gsm.set(new WinState(gsm));
+            gsm.set(new MenuState(gsm));
             dispose();
         }
         if(pauseButton.isPressed()&&(!pauseButton.isDisabled())){
@@ -178,8 +178,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             yPos = player1.getPosition().y;
             float deltaX = touchpad.getKnobPercentX();
             float deltaY = touchpad.getKnobPercentY();
-            //deltaX *= xScl;
-            //deltaY *= yScl;
+            deltaX *= xScl;
+            deltaY *= yScl;
             player1.setX(xPos + deltaX * player1.getVelocity());
             player1.setY(yPos + deltaY * player1.getVelocity());
 
@@ -228,7 +228,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             float cpuWd = cpuPlayer.getTexture().getWidth();
             float cpuHt = cpuPlayer.getTexture().getHeight();
             double cpuDistToDisk = Math.sqrt(Math.pow(cpuX+cpuWd/2-disk.getX(),2) + Math.pow(cpuY+cpuHt/2-disk.getY(),2));
-            //Gdx.app.log("hello", cpuDistToDisk + "");
+            //Gdx.app.log("hello", cpuDis
+            // tToDisk + "");
 
             if(cpuDistToDisk <= 300 && diskVx != 0 && diskVy != 0){
                 cpuRotation = (float) Math.toDegrees(Math.atan(diskVy/diskVx)) +180;
@@ -238,17 +239,17 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 diskVy = 0;
             }
 
-            if (xPos+playerWd/2*xScl <= w/6 && !inLeftEndZone){
+            if (disk.getX()+diskWd/2*xScl <= w/6 && !inLeftEndZone && player1.hasDisk()){
                 team1Score++;
                 inLeftEndZone=true;
-            } else if (xPos+playerWd/2*xScl > w/6){
+            } else if (disk.getX()+diskWd/2*xScl > w/6){
                 inLeftEndZone=false;
             }
 
-            if (xPos+playerWd/2*xScl >= w-w/6 && !inRightEndZone){
+            if (disk.getX()+diskWd/2*xScl >= w-w/6 && !inRightEndZone && player1.hasDisk()){
                 team2Score++;
                 inRightEndZone=true;
-            } else if (xPos+playerWd/2*xScl < w-w/6){
+            } else if (disk.getX()+diskWd/2*xScl < w-w/6){
                 inRightEndZone=false;
             }
 
@@ -308,6 +309,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             }
             else {
                 time="0:00";
+                points=Math.abs(team1Score-team2Score);
+                gsm.set(new WinState(gsm));
             }
 
         return time;
@@ -333,8 +336,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         Gdx.app.log("Swipe", "Completed");
         player1.setHoldingDisk(false);
 
-        diskVx = 5*(velocityX/((float)Math.sqrt(velocityX*velocityX + velocityY*velocityY))); //makes total V=5 with x and y components matching the proportions of the swipe
-        diskVy = -5*(velocityY/((float)Math.sqrt(velocityX*velocityX + velocityY*velocityY)));
+        diskVx = (5*(velocityX/((float)Math.sqrt(velocityX*velocityX + velocityY*velocityY))))*xScl; //makes total V=5 with x and y components matching the proportions of the swipe
+        diskVy = -5*(velocityY/((float)Math.sqrt(velocityX*velocityX + velocityY*velocityY)))*yScl;
 
         return true;
     }

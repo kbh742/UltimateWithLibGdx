@@ -3,29 +3,50 @@ package com.example.kholt6406.frisbee_app.States;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 public class WinState extends State {
     private Stage stage;
     private Texture background;
     private Texture winText;
+    private GlyphLayout glyphLayoutTest = new GlyphLayout();
+    private GlyphLayout glyphLayout = new GlyphLayout();
     private Texture greenBackground;
     float w = Gdx.graphics.getWidth();
     float h= Gdx.graphics.getHeight();
-    float realWidth;
+    FreeTypeFontGenerator freeTypeFontGeneratorTest =new FreeTypeFontGenerator(Gdx.files.internal("lucon.ttf"));
+    FreeTypeFontGenerator freeTypeFontGenerator =new FreeTypeFontGenerator(Gdx.files.internal("lucon.ttf"));
+    FreeTypeFontGenerator.FreeTypeFontParameter freeTypeFontParameterTest =new FreeTypeFontGenerator.FreeTypeFontParameter();
+    FreeTypeFontGenerator.FreeTypeFontParameter freeTypeFontParameter =new FreeTypeFontGenerator.FreeTypeFontParameter();
+    BitmapFont testText;
+    BitmapFont pointsText;
 
-    private Skin backBtnSkin;
-    private ImageButton.ImageButtonStyle backBtnStyle;
+    int points;
 
     public WinState(GameStateManager gsm) {
         super(gsm);
         background = new Texture("win.png");
         greenBackground = new Texture("green_background.png");
         winText= new Texture("win_text1.png");
-        realWidth=background.getWidth()-200;
+        points=PlayState.points;
+        freeTypeFontParameterTest.size=200;
+        freeTypeFontParameterTest.incremental=true;
+        testText = freeTypeFontGeneratorTest.generateFont(freeTypeFontParameterTest);
+        glyphLayoutTest.setText(testText,"Points: "+Integer.toString(points));
+        float ratio= glyphLayoutTest.width/200;
+        float fontSize =(w/3)/ratio;
+        freeTypeFontParameter.size=Math.round(fontSize);
+        freeTypeFontParameter.incremental=true;
+        pointsText=freeTypeFontGenerator.generateFont(freeTypeFontParameter);
+        glyphLayout.setText(pointsText,"Points: "+Integer.toString(points));
+
+
+
+
 
 
 /*        backBtnSkin = new Skin();
@@ -41,10 +62,10 @@ public class WinState extends State {
 
     @Override
     protected void handleInput() {
-/*        if (Gdx.input.isKeyPressed(Input.Keys.BACK)){
+        if (Gdx.input.isKeyPressed(Input.Keys.BACK)){
             gsm.set(new MenuState(gsm));
             dispose();
-        }*/
+        }
     }
 
     @Override
@@ -56,8 +77,9 @@ public class WinState extends State {
     protected void render(SpriteBatch sb) {
         sb.begin();
         sb.draw(greenBackground,0,0,w,h);
-        sb.draw(background, 100, 0, Gdx.graphics.getWidth()-200, Gdx.graphics.getHeight()/2);
-        sb.draw(winText, (w/2)-(winText.getWidth()/2), h-winText.getHeight(), winText.getWidth(), winText.getHeight());
+        sb.draw(background, 100*PlayState.xScl, 0, w-(200*PlayState.xScl), h/2);
+        sb.draw(winText, (w/2)-((winText.getWidth()*PlayState.xScl/3*2)/2), h-(winText.getHeight()*PlayState.yScl/3*2), winText.getWidth()*PlayState.xScl/3*2, winText.getHeight()*PlayState.yScl/3*2);
+        pointsText.draw(sb, glyphLayout, (w/2)-(glyphLayout.width/2), h/3*2);
         sb.end();
 
         stage.act(Gdx.graphics.getDeltaTime());
