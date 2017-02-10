@@ -2,6 +2,7 @@ package com.example.kholt6406.frisbee_app.States;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -42,6 +43,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     private Texture diskTexture;
     float diskWd;
     float diskHt;
+    float diskVx;
+    float diskVy;
 
     private Stage stage;
     private ImageButton pauseButton;
@@ -60,6 +63,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     float scoreboardX;
     float scoreboardY;
     float rotation;
+    float cpuRotation;
     BitmapFont clockText;
     BitmapFont scoreText1;
     BitmapFont scoreText2;
@@ -74,8 +78,9 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     boolean inRightEndZone=false;
     public PlayState(GameStateManager gsm) {
         super(gsm);
-        player1=new Player(600,600);
-        //cpuPlayer = new Player(800, 800);
+        player1=new Player(400,400);
+        cpuPlayer = new Player(800, 600);
+        cpuRotation = 0;
 //        camera=new OrthographicCamera();
 //        camera.setToOrtho(false,WORLD_WIDTH*xMultiplier,WORLD_HEIGHT*yMultiplier);
 //        camera.position.set(0,0,0);
@@ -111,8 +116,10 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         diskWd = diskTexture.getWidth()*xScl;
         diskHt = diskTexture.getHeight()*yScl;
         disk.setSize(diskWd, diskHt);
-        disk.setX(player1.getPosition().x + playerWd - diskWd/2);
-        disk.setY(player1.getPosition().y + playerHt - diskHt/2 + 200);
+        disk.setX(player1.getPosition().x + playerWd/2 - diskWd/2);
+        disk.setY(player1.getPosition().y + playerHt/2 - diskHt/2 + 40);
+
+        player1.setHoldingDisk(true);
 
         touchpadSkin = new Skin();
         //Set background image
@@ -136,7 +143,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         stage = new Stage();
         stage.addActor(touchpad);
         stage.addActor(pauseButton);
-        Gdx.input.setInputProcessor(stage);
+        //Gdx.input.setInputProcessor(stage);
+        Gdx.input.setInputProcessor(new InputMultiplexer(stage, new GestureDetector(this)));
     }
 
     @Override
@@ -160,16 +168,18 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         if (!stopped) {
             player1.update(dt);
 
-            //player1.setHoldingDisk(true);
             if (player1.hasDisk()) {
                 player1.setVelocity(0);
+            }
+            else if (!player1.hasDisk()){
+                player1.setVelocity(10);
             }
             xPos = player1.getPosition().x;
             yPos = player1.getPosition().y;
             float deltaX = touchpad.getKnobPercentX();
             float deltaY = touchpad.getKnobPercentY();
-            deltaX *= xScl;
-            deltaY *= yScl;
+            //deltaX *= xScl;
+            //deltaY *= yScl;
             player1.setX(xPos + deltaX * player1.getVelocity());
             player1.setY(yPos + deltaY * player1.getVelocity());
 
@@ -178,9 +188,11 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 if (deltaX < 0) {
                     rotation += 180;
                 }
-                int r = 150;
-                disk.setX((float)(player1.getPosition().x+(playerWd*xScl)/2-diskWd/2 + (r*(deltaX/Math.sqrt(deltaX*deltaX+deltaY*deltaY)))));
-                disk.setY((float)(player1.getPosition().y+(playerHt*yScl)/2-diskHt/2 + (r*(deltaY/Math.sqrt(deltaX*deltaX+deltaY*deltaY)))));
+                int r = 80;
+                if(player1.hasDisk()) {
+                    disk.setX((float) (player1.getPosition().x + (playerWd * xScl) / 2 - diskWd / 2 + (r * (deltaX / Math.sqrt(deltaX * deltaX + deltaY * deltaY)))));
+                    disk.setY((float) (player1.getPosition().y + (playerHt * yScl) / 2 - diskHt / 2 + (r * (deltaY / Math.sqrt(deltaX * deltaX + deltaY * deltaY)))));
+                }
             }
 
 
@@ -197,6 +209,35 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 player1.setY(yPos - 1);
             }
 
+            if(!player1.hasDisk()){
+                disk.setX(disk.getX() + diskVx);
+                disk.setY(disk.getY() + diskVy);
+            }
+
+            double player1DistToDisk = Math.sqrt(Math.pow(xPos+playerWd/2-disk.getX(),2) + Math.pow(yPos+playerHt/2-disk.getY(),2));
+            if(player1DistToDisk <= 100){
+                diskVx = 0;
+                diskVy = 0;
+                player1.setHoldingDisk(true);
+            }
+
+
+            cpuPlayer.update(dt);
+            float cpuX = cpuPlayer.getPosition().x;
+            float cpuY = cpuPlayer.getPosition().y;
+            float cpuWd = cpuPlayer.getTexture().getWidth();
+            float cpuHt = cpuPlayer.getTexture().getHeight();
+            double cpuDistToDisk = Math.sqrt(Math.pow(cpuX+cpuWd/2-disk.getX(),2) + Math.pow(cpuY+cpuHt/2-disk.getY(),2));
+            //Gdx.app.log("hello", cpuDistToDisk + "");
+
+            if(cpuDistToDisk <= 300 && diskVx != 0 && diskVy != 0){
+                cpuRotation = (float) Math.toDegrees(Math.atan(diskVy/diskVx)) +180;
+            }
+            if(cpuDistToDisk <= 100){
+                diskVx = 0;
+                diskVy = 0;
+            }
+
             if (xPos+playerWd/2*xScl <= w/6 && !inLeftEndZone){
                 team1Score++;
                 inLeftEndZone=true;
@@ -211,14 +252,12 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 inRightEndZone=false;
             }
 
-/*        cpuPlayer.update(dt);
-
-        cpuPlayer.setVelocity(5);*/
-/*        if(cpuPlayer.getPosition().x + cpuPlayer.getTexture().getWidth()/2 >= w){
-            cpuPlayer.setX(w - cpuPlayer.getTexture().getWidth()/2 - 1);
-            cpuPlayer.setVelocity((int) cpuPlayer.getVelocity() * -1);
-        }
-        cpuPlayer.setX(cpuPlayer.getPosition().x + cpuPlayer.getVelocity());*/
+//            cpuPlayer.setVelocity(1);
+//            if(cpuPlayer.getPosition().x + cpuPlayer.getTexture().getWidth()/2 >= w){
+//                cpuPlayer.setX(w - cpuPlayer.getTexture().getWidth()/2 - 1);
+//                cpuPlayer.setVelocity((int) cpuPlayer.getVelocity() * -1);
+//            }
+//            cpuPlayer.setX(cpuPlayer.getPosition().x + cpuPlayer.getVelocity());
         }
     }
 
@@ -230,7 +269,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         sb.draw(background, 0,0, w, h);
         sb.draw(player1.getTexture(),xPos,yPos,playerWd/2*xScl,playerHt/2*yScl,playerWd*xScl,playerHt*yScl,1,1,rotation,0,0,Math.round(playerWd),Math.round(playerHt),false,false);
         disk.draw(sb);
-        //sb.draw(cpuPlayer.getTexture(),cpuPlayer.getPosition().x,cpuPlayer.getPosition().y,cpuPlayer.getWidth()/2*xScl,cpuPlayer.getHeight()/2*yScl,cpuPlayer.getWidth()*xScl,cpuPlayer.getHeight()*yScl,1,1,rotation,0,0,Math.round(cpuPlayer.getWidth()),Math.round(cpuPlayer.getHeight()),false,false);
+        sb.draw(cpuPlayer.getTexture(),cpuPlayer.getPosition().x,cpuPlayer.getPosition().y,cpuPlayer.getTexture().getWidth()/2*xScl,cpuPlayer.getTexture().getHeight()/2*yScl,cpuPlayer.getTexture().getWidth()*xScl,cpuPlayer.getTexture().getHeight()*yScl,1,1,cpuRotation,0,0,Math.round(cpuPlayer.getTexture().getWidth()),Math.round(cpuPlayer.getTexture().getHeight()),false,false);
         scoreboard.draw(sb);
         clockText.draw(sb, clock(), scoreboardX + (79*scbdWd)/112, scoreboardY + (5*scbdHt)/8);
         scoreText1.draw(sb, Integer.toString(team1Score), scoreboardX + (2*scbdWd)/16, scoreboardY + (5*scbdHt)/8);
@@ -291,19 +330,12 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
     @Override
     public boolean fling(float velocityX, float velocityY, int button) {
-        Gdx.app.error("Swipe", "Completed");
-        if(Math.abs(velocityX)>Math.abs(velocityY)){
-            if(velocityX>0){
-                Gdx.app.error("Swipe", "Right");
-            }else if(velocityX<0){
-                Gdx.app.error("Swipe", "Left");
-            }else{
-                Gdx.app.error("Swipe","No swipe");
-            }
-        }else{
-            Gdx.app.error("Swipe", "Up or Down");
+        Gdx.app.log("Swipe", "Completed");
+        player1.setHoldingDisk(false);
 
-        }
+        diskVx = 5*(velocityX/((float)Math.sqrt(velocityX*velocityX + velocityY*velocityY))); //makes total V=5 with x and y components matching the proportions of the swipe
+        diskVy = -5*(velocityY/((float)Math.sqrt(velocityX*velocityX + velocityY*velocityY)));
+
         return true;
     }
 
