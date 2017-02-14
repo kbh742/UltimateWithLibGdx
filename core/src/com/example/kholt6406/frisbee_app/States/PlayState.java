@@ -503,11 +503,15 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         //Gdx.app.log("Smart Swipe", "Last Point: "+lastPoint);
         if(firstPoint.x - (disk.getX()+diskWd/2)<=20 && firstPoint.y - (disk.getY()+diskHt/2)<=20){
             double averageVelocity = 0;
+            double acceleration = 0;
+            double arcLength = 0;
             for (int i = 0; i<input.size-2; i++){
                 double pointDistance = Math.sqrt(Math.pow((input.get(i+1).x-input.get(i).x),2)+Math.pow((input.get(i+1).y-input.get(i).y),2));
-                averageVelocity+=pointDistance;
+                arcLength+=pointDistance;
             }
-            averageVelocity = averageVelocity/input.size-2;
+            averageVelocity = arcLength/input.size-2;
+            double crowDistance = Math.sqrt(Math.pow((input.first().x-input.get(input.size-1).x),2)+Math.pow((input.first().y-input.get(input.size-1).y),2));
+            acceleration = arcLength/crowDistance;
             //Gdx.app.log("Smart Swipe", "Average Velocity: "+averageVelocity);
             double dirX = (input.get(input.size-5).x-input.get(input.size-1).x);
             double dirY = (input.get(input.size-5).y-input.get(input.size-1).y);
@@ -568,46 +572,5 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     @Override
     public void pinchStop() {
 
-    }
-
-    @Override
-    public boolean keyDown(int keycode) {
-        return false;
-    }
-
-    @Override
-    public boolean keyUp(int keycode) {
-        return false;
-    }
-
-    @Override
-    public boolean keyTyped(char character) {
-        return false;
-    }
-
-    @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-
-        return false;
-    }
-
-    @Override
-    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean touchDragged(int screenX, int screenY, int pointer) {
-        return false;
-    }
-
-    @Override
-    public boolean mouseMoved(int screenX, int screenY) {
-        return false;
-    }
-
-    @Override
-    public boolean scrolled(int amount) {
-        return false;
     }
 }
