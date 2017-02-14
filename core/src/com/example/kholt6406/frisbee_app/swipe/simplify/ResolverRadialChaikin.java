@@ -67,7 +67,7 @@ public class ResolverRadialChaikin implements SwipeResolver {
 
         //last element
         output.add(input.get(input.size-1));
-        Gdx.app.log("ResolverRadialChaikin", "smoothing");
+        //Gdx.app.log("ResolverRadialChaikin", "smoothing");
     }
 
     //simple distance-based simplification

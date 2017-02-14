@@ -22,6 +22,8 @@ public class SwipeHandler extends InputAdapter {
     /** The minimum distance between two points in a drawn line (starting at the second point). */
     public int minDistance = 20;
 
+
+
     private Vector2 lastPoint = new Vector2();
 
     private boolean isDrawing = false;
@@ -47,6 +49,11 @@ public class SwipeHandler extends InputAdapter {
      * Returns the simplified list of points representing this swipe.
      * @return
      */
+
+    public Array<Vector2> meo_Input() {
+        return inputPoints;
+    }
+
     public Array<Vector2> path() {
         return simplified;
     }
@@ -69,6 +76,7 @@ public class SwipeHandler extends InputAdapter {
         //starting point
         lastPoint = new Vector2(screenX, Gdx.graphics.getHeight()-screenY);
         inputPoints.insert(lastPoint);
+       //Gdx.app.log("Smart swipe", ""+lastPoint);
 
         resolve();
         return true;
@@ -82,7 +90,6 @@ public class SwipeHandler extends InputAdapter {
     }
 
     public boolean touchDragged(int screenX, int screenY, int pointer) {
-        Gdx.app.log("ResolverRadialChaikin", "smoothing");
         if (pointer!=inputPointer)
             return false;
         isDrawing = true;
@@ -103,6 +110,7 @@ public class SwipeHandler extends InputAdapter {
         inputPoints.insert(v);
 
         lastPoint = v;
+        //Gdx.app.log("Smart Swipe", ""+lastPoint);
 
         //simplify our new line
         resolve();
