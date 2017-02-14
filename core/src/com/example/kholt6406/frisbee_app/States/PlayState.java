@@ -25,9 +25,11 @@ import com.example.kholt6406.frisbee_app.swipe.SwipeHandler;
 import com.example.kholt6406.frisbee_app.swipe.mesh.SwipeTriStrip;
 import com.badlogic.gdx.graphics.GL20;
 
-public class PlayState extends State implements GestureDetector.GestureListener, InputProcessor {
-    float w = Gdx.graphics.getWidth();
-    float h = Gdx.graphics.getHeight();
+import java.util.ArrayList;
+
+public class PlayState extends State implements GestureDetector.GestureListener{
+    static float w = Gdx.graphics.getWidth();
+    static float h = Gdx.graphics.getHeight();
     float scbdWd;
     float scbdHt;
 
@@ -38,10 +40,10 @@ public class PlayState extends State implements GestureDetector.GestureListener,
 
     OrthographicCamera camera;
 
-    public final int WORLD_WIDTH=1920;
-    public final int WORLD_HEIGHT=1080;
-    float xScl =w/WORLD_WIDTH;
-    float yScl =h/WORLD_HEIGHT;
+    public static final int WORLD_WIDTH=1920;
+    public static final int WORLD_HEIGHT=1080;
+    static float xScl =w/WORLD_WIDTH;
+    static float yScl =h/WORLD_HEIGHT;
 
     private Player player1;
     private Player cpuPlayer;
@@ -50,7 +52,14 @@ public class PlayState extends State implements GestureDetector.GestureListener,
     private Texture diskTexture;
     float diskWd;
     float diskHt;
+    float diskVx;
+    float diskVy;
+    float diskCurve;
 
+    int catchableDistance;
+
+    boolean p1Threw = false;
+    boolean cpuThrew = false;
 
     private Stage stage;
     private ImageButton pauseButton;
@@ -69,24 +78,29 @@ public class PlayState extends State implements GestureDetector.GestureListener,
     float scoreboardX;
     float scoreboardY;
     float rotation;
-    float angle;
+    float cpuRotation;
     BitmapFont clockText;
     BitmapFont scoreText1;
     BitmapFont scoreText2;
-    double playTime=300;
+    double playTime=500;
     boolean stopped=false;
     boolean before;
     ShapeRenderer shapes;
     SwipeTriStrip tris;
     SwipeHandler swipe;
     Texture tex;
+    int team1Score=0;
+    int team2Score=0;
+    static int points;
 
     int drawCounter = 0;
-
+    boolean inLeftEndZone=false;
+    boolean inRightEndZone=false;
     public PlayState(GameStateManager gsm) {
         super(gsm);
-        player1=new Player(600,600);
-        //cpuPlayer = new Player(800, 800);
+        player1=new Player(400,400);
+        cpuPlayer = new Player(800, 600);
+        cpuRotation = 0;
 //        camera=new OrthographicCamera();
 //        camera.setToOrtho(false,WORLD_WIDTH*xMultiplier,WORLD_HEIGHT*yMultiplier);
 //        camera.position.set(0,0,0);
@@ -133,8 +147,12 @@ public class PlayState extends State implements GestureDetector.GestureListener,
         diskWd = diskTexture.getWidth()*xScl;
         diskHt = diskTexture.getHeight()*yScl;
         disk.setSize(diskWd, diskHt);
-        disk.setX(player1.getPosition().x + playerWd - diskWd/2);
-        disk.setY(player1.getPosition().y + playerHt - diskHt/2 + 200);
+        disk.setX(player1.getPosition().x + playerWd/2 - diskWd/2);
+        disk.setY(player1.getPosition().y + playerHt/2 - diskHt/2 + 40);
+
+        catchableDistance = 100;
+
+        player1.setHoldingDisk(true);
 
         touchpadSkin = new Skin();
         //Set background image
@@ -153,7 +171,6 @@ public class PlayState extends State implements GestureDetector.GestureListener,
         touchpad = new Touchpad(10, touchpadStyle);
         //setBounds(x,y,width,height)
         touchpad.setBounds(30*xScl, 30*yScl, 400*xScl, 400*yScl);
-
 
 
         stage = new Stage();
@@ -176,12 +193,11 @@ public class PlayState extends State implements GestureDetector.GestureListener,
         }
     }
 
+
     @Override
     protected void update(float dt) {
         handleInput();
         if (!stopped) {
-
-
 //        if(team1Scored == true){
 //            teamScore1++;
 //        }
@@ -193,6 +209,9 @@ public class PlayState extends State implements GestureDetector.GestureListener,
             //player1.setHoldingDisk(true);
             if (player1.hasDisk()) {
                 player1.setVelocity(0);
+            }
+            else if (!player1.hasDisk()){
+                player1.setVelocity(10);
             }
             xPos = player1.getPosition().x;
             yPos = player1.getPosition().y;
@@ -211,33 +230,106 @@ public class PlayState extends State implements GestureDetector.GestureListener,
                 if(rotation<0){
                     rotation += 360;
                 }
-                int r = 150;
-                disk.setX((float)(player1.getPosition().x+(playerWd*xScl)/2-diskWd/2 + (r*(deltaX/Math.sqrt(deltaX*deltaX+deltaY*deltaY)))));
-                disk.setY((float)(player1.getPosition().y+(playerHt*yScl)/2-diskHt/2 + (r*(deltaY/Math.sqrt(deltaX*deltaX+deltaY*deltaY)))));
+                int r = 50;
+                if(player1.hasDisk()) {
+                    disk.setX((float) (player1.getPosition().x + (playerWd * xScl) / 2 - diskWd / 2 + (r * (deltaX / Math.sqrt(deltaX * deltaX + deltaY * deltaY)))));
+                    disk.setY((float) (player1.getPosition().y + (playerHt * yScl) / 2 - diskHt / 2 + (r * (deltaY / Math.sqrt(deltaX * deltaX + deltaY * deltaY)))));
+                }
             }
 
 
-            if (xPos + playerWd <= 0) {
+
+            if (xPos + playerWd/2*xScl <= 0) {
                 player1.setX(xPos + 1);
             }
-            if (xPos + playerWd >= w) {
+            if (xPos + playerWd/2*xScl >= w) {
                 player1.setX(xPos - 1);
             }
-            if (yPos + playerHt <= 0) {
+            if (yPos + playerHt/2*yScl <= 0) {
                 player1.setY(yPos + 1);
             }
-            if (yPos + playerHt >= h) {
+            if (yPos + playerHt/2*yScl >= h) {
                 player1.setY(yPos - 1);
             }
 
-/*        cpuPlayer.update(dt);
+            /*float sideV = sketchyJohnThrowMethod(5,1.57,1).get(0); //I need to come up with a way to do this better so it only calls John's method when a throw happens
+            float straightV = sketchyJohnThrowMethod(5,1.57,1).get(1);
+            diskCurve = sketchyJohnThrowMethod(5,1.57,1).get(2);
+            sideV -= diskCurve;
+            double alpha = Math.toRadians(rotation - 90);
 
-        cpuPlayer.setVelocity(5);*/
-/*        if(cpuPlayer.getPosition().x + cpuPlayer.getTexture().getWidth()/2 >= w){
-            cpuPlayer.setX(w - cpuPlayer.getTexture().getWidth()/2 - 1);
-            cpuPlayer.setVelocity((int) cpuPlayer.getVelocity() * -1);
-        }
-        cpuPlayer.setX(cpuPlayer.getPosition().x + cpuPlayer.getVelocity());*/
+            diskVx = (float) (Math.cos(alpha)*sideV - Math.sin(alpha)*straightV);
+            diskVy = (float) (Math.sin(alpha)*sideV + Math.cos(alpha)*straightV);*/
+
+
+            disk.setX(disk.getX() + diskVx);
+            disk.setY(disk.getY() + diskVy);
+
+
+            double player1DistToDisk = Math.sqrt(Math.pow(player1.getPosition().x+playerWd/2-(disk.getX()+diskWd/2),2) + Math.pow(player1.getPosition().y+playerHt/2-(disk.getY()+diskHt/2),2));
+            //Gdx.app.log("LALALALA", player1DistToDisk + "");
+            if(player1DistToDisk <= catchableDistance && !player1.hasDisk() && !p1Threw){
+                player1.setHoldingDisk(true);
+                diskVx = 0;
+                diskVy = 0;
+            }
+            else if(player1DistToDisk > catchableDistance){
+                player1.setHoldingDisk(false);
+                p1Threw = false;
+            }
+
+
+            cpuPlayer.update(dt);
+            float cpuX = cpuPlayer.getPosition().x;
+            float cpuY = cpuPlayer.getPosition().y;
+            float cpuWd = cpuPlayer.getTexture().getWidth();
+            float cpuHt = cpuPlayer.getTexture().getHeight();
+            //Gdx.app.log("hello", cpuDis
+            // tToDisk + "");
+            double cpuDistToDisk = Math.sqrt(Math.pow(cpuX+cpuWd/2-(disk.getX()+diskWd/2),2) + Math.pow(cpuY+cpuHt/2-(disk.getY()+diskHt/2),2));
+
+            if(cpuDistToDisk <= 300 && diskVx != 0 && diskVy != 0){
+                cpuRotation = (float) Math.toDegrees(Math.atan(diskVy/diskVx));
+                if(diskVx < 0){
+                    cpuRotation+= 180;
+                }
+                if(cpuRotation < 0){
+                    cpuRotation+=360;
+                }
+                //cpuRotation+=180;
+            }
+            Gdx.app.log("CPUROTATION", cpuRotation + "");
+
+            if(cpuDistToDisk <= catchableDistance && !cpuPlayer.hasDisk() && !cpuThrew){
+                cpuPlayer.setHoldingDisk(true);
+                diskVx = 0;
+                diskVy = 0;
+            }
+            else if(cpuDistToDisk > catchableDistance ){
+                cpuPlayer.setHoldingDisk(false);
+                cpuThrew = false;
+            }
+
+            if (disk.getX()+diskWd/2*xScl <= w/6 && !inLeftEndZone && player1.hasDisk()){
+                team1Score++;
+                inLeftEndZone=true;
+            } else if (disk.getX()+diskWd/2*xScl > w/6){
+                inLeftEndZone=false;
+            }
+
+            if (disk.getX()+diskWd/2*xScl >= w-w/6 && !inRightEndZone && player1.hasDisk()){
+                team2Score++;
+                inRightEndZone=true;
+            } else if (disk.getX()+diskWd/2*xScl < w-w/6){
+                inRightEndZone=false;
+            }
+
+//            cpuPlayer.setVelocity(1);
+//            if(cpuPlayer.getPosition().x + cpuPlayer.getTexture().getWidth()/2 >= w){
+//                cpuPlayer.setX(w - cpuPlayer.getTexture().getWidth()/2 - 1);
+//                cpuPlayer.setVelocity((int) cpuPlayer.getVelocity() * -1);
+//            }
+//            cpuPlayer.setX(cpuPlayer.getPosition().x + cpuPlayer.getVelocity());
         }
     }
 
@@ -252,11 +344,11 @@ public class PlayState extends State implements GestureDetector.GestureListener,
         sb.draw(background, 0,0, w, h);
         sb.draw(player1.getTexture(),xPos,yPos,playerWd/2*xScl,playerHt/2*yScl,playerWd*xScl,playerHt*yScl,1,1,rotation,0,0,Math.round(playerWd),Math.round(playerHt),false,false);
         disk.draw(sb);
-        //sb.draw(cpuPlayer.getTexture(),cpuPlayer.getPosition().x,cpuPlayer.getPosition().y,cpuPlayer.getWidth()/2*xScl,cpuPlayer.getHeight()/2*yScl,cpuPlayer.getWidth()*xScl,cpuPlayer.getHeight()*yScl,1,1,rotation,0,0,Math.round(cpuPlayer.getWidth()),Math.round(cpuPlayer.getHeight()),false,false);
+        sb.draw(cpuPlayer.getTexture(),cpuPlayer.getPosition().x,cpuPlayer.getPosition().y,cpuPlayer.getTexture().getWidth()/2*xScl,cpuPlayer.getTexture().getHeight()/2*yScl,cpuPlayer.getTexture().getWidth()*xScl,cpuPlayer.getTexture().getHeight()*yScl,1,1,cpuRotation,0,0,Math.round(cpuPlayer.getTexture().getWidth()),Math.round(cpuPlayer.getTexture().getHeight()),false,false);
         scoreboard.draw(sb);
         clockText.draw(sb, clock(), scoreboardX + (79*scbdWd)/112, scoreboardY + (5*scbdHt)/8);
-        scoreText1.draw(sb, score1(), scoreboardX + (2*scbdWd)/16, scoreboardY + (5*scbdHt)/8);
-        scoreText2.draw(sb, score2(), scoreboardX + (35*scbdWd)/64, scoreboardY + (5*scbdHt)/8);
+        scoreText1.draw(sb, Integer.toString(team1Score), scoreboardX + (2*scbdWd)/16, scoreboardY + (5*scbdHt)/8);
+        scoreText2.draw(sb, Integer.toString(team2Score), scoreboardX + (35*scbdWd)/64, scoreboardY + (5*scbdHt)/8);
         pauseButton.draw(sb,1);
         touchpad.draw(sb,1);
         //cam.update();
@@ -319,24 +411,25 @@ public class PlayState extends State implements GestureDetector.GestureListener,
             }
             else {
                 time="0:00";
+                points=Math.abs(team1Score-team2Score);
+                gsm.set(new WinState(gsm));
             }
 
         return time;
     }
 
-    public String score1(){
-        String score1 = "0";
-        //score1 = "" + teamScore1;
+   /* public ArrayList<Float> sketchyJohnThrowMethod(float velocity, double theta, float acceleration){
+        ArrayList<Float> values = new ArrayList<Float>();
 
-        return score1;
-    }
+        float sideV = velocity*(float)Math.cos(theta);
+        float straightV = velocity*(float)Math.sin(theta);
 
-    public String score2(){
-        String score2 = "0";
-        //score2 = "" + teamScore2;
+        values.add(sideV);
+        values.add(straightV);
+        values.add(acceleration);
 
-        return score2;
-    }
+        return values;
+    }*/
 
 
     void drawDebug() {
