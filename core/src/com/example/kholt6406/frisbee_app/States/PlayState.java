@@ -3,12 +3,15 @@ package com.example.kholt6406.frisbee_app.States;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -16,7 +19,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.utils.Array;
 import com.example.kholt6406.frisbee_app.sprites.Player;
+import com.example.kholt6406.frisbee_app.swipe.SwipeHandler;
+import com.example.kholt6406.frisbee_app.swipe.mesh.SwipeTriStrip;
+import com.badlogic.gdx.graphics.GL20;
 
 import java.util.ArrayList;
 
@@ -77,6 +84,11 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     BitmapFont scoreText2;
     double playTime=60;
     boolean stopped=false;
+    boolean before;
+    ShapeRenderer shapes;
+    SwipeTriStrip tris;
+    SwipeHandler swipe;
+    Texture tex;
     int team1Score=0;
     int team2Score=0;
     static int points;
@@ -110,6 +122,17 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         scoreboardY=h-scbdHt;
         scoreboard.setX(scoreboardX);
         scoreboard.setY(scoreboardY);
+
+        //Swipes
+
+        tris = new SwipeTriStrip();
+        swipe = new SwipeHandler(250);
+        swipe.minDistance = 10;
+        swipe.initialDistance = 10;
+        tex = new Texture("gradient.png");
+        tex.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        shapes = new ShapeRenderer();
+
 
         freeTypeFontParameter.size=(int)(9*scbdHt)/18;
         clockText =freeTypeFontGenerator.generateFont(freeTypeFontParameter);
@@ -153,8 +176,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         stage = new Stage();
         stage.addActor(touchpad);
         stage.addActor(pauseButton);
-        //Gdx.input.setInputProcessor(stage);
-        Gdx.input.setInputProcessor(new InputMultiplexer(stage, new GestureDetector(this)));
+        Gdx.input.setInputProcessor(new InputMultiplexer(stage, new GestureDetector(this), swipe));
     }
 
     @Override
@@ -176,8 +198,15 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     protected void update(float dt) {
         handleInput();
         if (!stopped) {
+//        if(team1Scored == true){
+//            teamScore1++;
+//        }
+//        if(team2Scored == true){
+//            teamScore2++;
+//        }
             player1.update(dt);
 
+            //player1.setHoldingDisk(true);
             if (player1.hasDisk()) {
                 player1.setVelocity(0);
             }
@@ -198,6 +227,9 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 if (deltaX < 0) {
                     rotation += 180;
                 }
+                if(rotation<0){
+                    rotation += 360;
+                }
                 int r = 50;
                 if(player1.hasDisk()) {
                     disk.setX((float) (player1.getPosition().x + (playerWd * xScl) / 2 - diskWd / 2 + (r * (deltaX / Math.sqrt(deltaX * deltaX + deltaY * deltaY)))));
@@ -205,7 +237,6 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 }
             }
 
-            //Gdx.app.log("ROTATION", rotation + "");
 
 
             if (xPos + playerWd/2*xScl <= 0) {
@@ -304,9 +335,12 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
     @Override
     protected void render(SpriteBatch sb) {
+
         //sb.setProjectionMatrix(camera.combined);
         drawCounter++;
         sb.begin();
+
+
         sb.draw(background, 0,0, w, h);
         sb.draw(player1.getTexture(),xPos,yPos,playerWd/2*xScl,playerHt/2*yScl,playerWd*xScl,playerHt*yScl,1,1,rotation,0,0,Math.round(playerWd),Math.round(playerHt),false,false);
         disk.draw(sb);
@@ -317,20 +351,48 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         scoreText2.draw(sb, Integer.toString(team2Score), scoreboardX + (35*scbdWd)/64, scoreboardY + (5*scbdHt)/8);
         pauseButton.draw(sb,1);
         touchpad.draw(sb,1);
+        //cam.update();
+        //Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        //sb.setProjectionMatrix(cam.combined);
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        //tex.bind();
+
+        //the endcap scale
+		tris.endcap = 5f;
+
+        //the thickness of the line
+        tris.thickness = 30f;
+
+        //generate the triangle strip from our path
+        tris.update(swipe.path());
+
+        //the vertex color for tinting, i.e. for opacity
+        tris.color = Color.WHITE;
+
+        //render the triangles to the screen
+        tris.draw(cam);
+
+        //uncomment to see debug lines
+        drawDebug();
+
+
 
         if (drawCounter>=10){
             pauseButton.setDisabled(false);
         }
 
-        sb.end();
+
 
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
+        sb.end();
     }
 
     @Override
     public void dispose() {
-
+        shapes.dispose();
+        tex.dispose();
     }
 
     public String clock(){
@@ -369,6 +431,54 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         return values;
     }*/
 
+
+    void drawDebug() {
+        Array<Vector2> input = swipe.input();
+        int maxDrawPoints = 10;
+
+
+        //draw the raw input
+        shapes.begin(ShapeRenderer.ShapeType.Line);
+        shapes.setColor(Color.GRAY);
+        for (int i=0; i<input.size-1; i++) {
+            Vector2 p = input.get(i);
+            Vector2 p2 = input.get(i+1);
+            shapes.line(p.x, p.y, p2.x, p2.y);
+        }
+        shapes.end();
+
+        //draw the smoothed and simplified path
+        shapes.begin(ShapeRenderer.ShapeType.Line);
+        shapes.setColor(Color.RED);
+        Array<Vector2> out = swipe.path();
+        for (int i=0; i<out.size-1; i++) {
+            Vector2 p = out.get(i);
+            Vector2 p2 = out.get(i+1);
+            shapes.line(p.x, p.y, p2.x, p2.y);
+        }
+        shapes.end();
+
+
+        //render our perpendiculars
+        shapes.begin(ShapeRenderer.ShapeType.Line);
+        Vector2 perp = new Vector2();
+
+        for (int i=1; i<input.size-1; i++) {
+            Vector2 p = input.get(i);
+            Vector2 p2 = input.get(i+1);
+
+            shapes.setColor(Color.LIGHT_GRAY);
+            perp.set(p).sub(p2).nor();
+            perp.set(perp.y, -perp.x);
+            perp.scl(10f);
+            shapes.line(p.x, p.y, p.x+perp.x, p.y+perp.y);
+            perp.scl(-1f);
+            shapes.setColor(Color.BLUE);
+            shapes.line(p.x, p.y, p.x+perp.x, p.y+perp.y);
+        }
+        shapes.end();
+    }
+
     @Override
     public boolean touchDown(float x, float y, int pointer, int button) {
         return false;
@@ -386,25 +496,56 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
     @Override
     public boolean fling(float velocityX, float velocityY, int button) {
-        boolean validThrow = false;
+        Array<Vector2> input = swipe.input();
+        Vector2 lastPoint = input.first();
+        Vector2 firstPoint = input.get(input.size-1);
+        //Gdx.app.log("Smart Swipe", "First Point: "+firstPoint);
+        //Gdx.app.log("Smart Swipe", "Last Point: "+lastPoint);
+        if(firstPoint.x - (disk.getX()+diskWd/2)<=20 && firstPoint.y - (disk.getY()+diskHt/2)<=20){
+            double averageVelocity = 0;
+            double acceleration = 0;
+            double arcLength = 0;
+            for (int i = 0; i<input.size-2; i++){
+                double pointDistance = Math.sqrt(Math.pow((input.get(i+1).x-input.get(i).x),2)+Math.pow((input.get(i+1).y-input.get(i).y),2));
+                arcLength+=pointDistance;
+            }
+            averageVelocity = arcLength/input.size-2;
+            double crowDistance = Math.sqrt(Math.pow((input.first().x-input.get(input.size-1).x),2)+Math.pow((input.first().y-input.get(input.size-1).y),2));
+            acceleration = arcLength/crowDistance;
+            //Gdx.app.log("Smart Swipe", "Average Velocity: "+averageVelocity);
+            double dirX = (input.get(input.size-5).x-input.get(input.size-1).x);
+            double dirY = (input.get(input.size-5).y-input.get(input.size-1).y);
+            double absoluteTheta = Math.toDegrees(Math.atan(dirY/dirX));
+            if(dirX<0){
+                absoluteTheta += 180;
+            }
+            //Gdx.app.log("Smart Swipe", "DirX: "+dirX);
+            //Gdx.app.log("Smart Swipe", "DirY: "+dirY);
 
-        Gdx.app.log("Swipe", "Completed");
+            if(absoluteTheta<0){
+                absoluteTheta += 360;
+            }
+            double relativeTheta = rotation-absoluteTheta;
+            if(relativeTheta<0){
+                relativeTheta += 360;
+            }
+            relativeTheta = 360-relativeTheta;
+            //Gdx.app.log("Smart Swipe", "Rotation: "+rotation);
+            //Gdx.app.log("Smart Swipe", "Frisbee Direction: "+relativeTheta);
+        }
+        /*Gdx.app.log("Swipe", "Completed");
+        if(Math.abs(velocityX)>Math.abs(velocityY)){
+            if(velocityX>0){
+                Gdx.app.log("Swipe", "Right");
+            }else if(velocityX<0){
+                Gdx.app.log("Swipe", "Left");
+            }else{
+                Gdx.app.log("Swipe","No swipe");
+            }
+        }else{
+            Gdx.app.log("Swipe", "Up or Down");
 
-        if(player1.hasDisk()){
-            p1Threw = true;
-            player1.setHoldingDisk(false);
-            validThrow = true;
-        }
-        else if(cpuPlayer.hasDisk()){
-            cpuThrew = true;
-            cpuPlayer.setHoldingDisk(false);
-            validThrow = true;
-        }
-        if(validThrow) {
-            diskVx = 5 * (velocityX / ((float) Math.sqrt(velocityX * velocityX + velocityY * velocityY))); //makes total V=5 with x and y components matching the proportions of the swipe
-            diskVy = -5 * (velocityY / ((float) Math.sqrt(velocityX * velocityX + velocityY * velocityY)));
-        }
-
+        }*/
         return true;
     }
 
