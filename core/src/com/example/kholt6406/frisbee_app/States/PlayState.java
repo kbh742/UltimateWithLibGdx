@@ -58,8 +58,12 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     float diskVx;
     float diskVy;
     float diskCurve;
+    float sideV;
+    float straightV;
 
     int catchableDistance;
+
+    boolean hasPossesion;
 
     boolean p1Threw = false;
     boolean cpuThrew = false;
@@ -114,6 +118,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     int drawCounter = 0;
     boolean inLeftEndZone=false;
     boolean inRightEndZone=false;
+    float playerRotationAtTimeOfThrow;
+
     public PlayState(GameStateManager gsm) {
         super(gsm);
         player1=new Player(400,400);
@@ -180,12 +186,18 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         diskWd = diskTexture.getWidth()*xScl;
         diskHt = diskTexture.getHeight()*yScl;
         disk.setSize(diskWd, diskHt);
-        disk.setX(player1.getPosition().x + playerWd/2 - diskWd/2);
-        disk.setY(player1.getPosition().y + playerHt/2 - diskHt/2 + 40);
 
         catchableDistance = 100;
 
         player1.setHoldingDisk(true);
+        player1.setX(w/6 - playerWd/2);
+        player1.setY(h/2 - playerHt/2);
+
+        cpuPlayer.setX(w/6 - playerWd/2);
+        cpuPlayer.setY(h/3 - playerHt/2);
+
+        disk.setX(w/6 -diskWd/2);
+        disk.setY(h/2 - diskHt/2);
 
         touchpadSkin = new Skin();
         //Set background image
@@ -231,7 +243,6 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     protected void update(float dt) {
         handleInput();
         if (!stopped) {
-
 //        if(team1Scored == true){
 //            teamScore1++;
 //        }
@@ -288,21 +299,17 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 player1.setY(yPos - 1);
             }
 
-            /*float sideV = sketchyJohnThrowMethod(5,1.57,1).get(0); //I need to come up with a way to do this better so it only calls John's method when a throw happens
-            float straightV = sketchyJohnThrowMethod(5,1.57,1).get(1);
-            diskCurve = sketchyJohnThrowMethod(5,1.57,1).get(2);
-            sideV -= diskCurve;
-            double alpha = Math.toRadians(rotation - 90);
+            if(!player1.hasDisk() && !cpuPlayer.hasDisk()) {
+                sideV += diskCurve;
+                double alpha = Math.toRadians(playerRotationAtTimeOfThrow - 90); //THIS IS THE PLACE??
 
-            diskVx = (float) (Math.cos(alpha)*sideV - Math.sin(alpha)*straightV);
-            diskVy = (float) (Math.sin(alpha)*sideV + Math.cos(alpha)*straightV);*/
-
-
-            disk.setX(disk.getX() + diskVx);
-            disk.setY(disk.getY() + diskVy);
+                diskVx = (float) (Math.cos(alpha) * sideV - Math.sin(alpha) * straightV);
+                diskVy = (float) (Math.sin(alpha) * sideV + Math.cos(alpha) * straightV);
+            }
 
 
             double player1DistToDisk = Math.sqrt(Math.pow(player1.getPosition().x+playerWd/2-(disk.getX()+diskWd/2),2) + Math.pow(player1.getPosition().y+playerHt/2-(disk.getY()+diskHt/2),2));
+            //Gdx.app.log("LALALALA", player1DistToDisk + "");
             if(player1DistToDisk <= catchableDistance && !player1.hasDisk() && !p1Threw){
                 player1.setHoldingDisk(true);
                 diskVx = 0;
@@ -325,7 +332,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             // tToDisk + "");
             double cpuDistToDisk = Math.sqrt(Math.pow(cpuX+cpuWd/2-(disk.getX()+diskWd/2),2) + Math.pow(cpuY+cpuHt/2-(disk.getY()+diskHt/2),2));
 
-            if(cpuDistToDisk <= 300 && diskVx != 0 && diskVy != 0){
+            if(cpuDistToDisk <= 4*catchableDistance && diskVx != 0 && diskVy != 0){
                 cpuRotation = (float) Math.toDegrees(Math.atan(diskVy/diskVx));
                 if(diskVx < 0){
                     cpuRotation+= 180;
@@ -333,9 +340,9 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 if(cpuRotation < 0){
                     cpuRotation+=360;
                 }
-                //cpuRotation+=180;
+                cpuRotation+=180;
             }
-            Gdx.app.log("CPUROTATION", cpuRotation + "");
+            //Gdx.app.log("CPUROTATION", cpuRotation + "");
 
             if(cpuDistToDisk <= catchableDistance && !cpuPlayer.hasDisk() && !cpuThrew){
                 cpuPlayer.setHoldingDisk(true);
@@ -346,8 +353,33 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 cpuPlayer.setHoldingDisk(false);
                 cpuThrew = false;
             }
+            if(cpuPlayer.hasDisk()){
+                float currP1X = player1.getPosition().x;
+                float currP1Y = player1.getPosition().y;
+                float currP1R = rotation;
+                float currC1X = cpuPlayer.getPosition().x;
+                float currC1Y = cpuPlayer.getPosition().y;
+                float currC1R = cpuRotation;
 
-            if (disk.getX()+diskWd/2*xScl <= w/6 && !inLeftEndZone && player1.hasDisk()){
+                player1.setX(currC1X);
+                player1.setY(currC1Y);
+                rotation = currC1R;
+                cpuPlayer.setX(currP1X);
+                cpuPlayer.setY(currP1Y);
+                cpuRotation = currP1R;
+
+                cpuPlayer.setHoldingDisk(false);
+                player1.setHoldingDisk(true);
+            }
+
+            //Gdx.app.log("Player Holding Disk?", ""+ player1.hasDisk());
+            //Gdx.app.log("Cpu Holding Disk?", ""+cpuPlayer.hasDisk());
+            if(!player1.hasDisk()){
+                disk.setX(disk.getX() + diskVx);
+                disk.setY(disk.getY() + diskVy);
+            }
+
+            if (disk.getX()+diskWd/2*xScl <= w/6 && !inLeftEndZone && !player1.hasDisk()){
                 team1Score++;
                 inLeftEndZone=true;
             } else if (disk.getX()+diskWd/2*xScl > w/6){
@@ -357,6 +389,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             if (disk.getX()+diskWd/2*xScl >= w-w/6 && !inRightEndZone && player1.hasDisk()){
                 team2Score++;
                 inRightEndZone=true;
+                resetAfterScore();
             } else if (disk.getX()+diskWd/2*xScl < w-w/6){
                 inRightEndZone=false;
             }
@@ -460,6 +493,21 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         tex.dispose();
     }
 
+    public void resetAfterScore(){
+
+        player1.setX(w/6 - playerWd/2);
+        player1.setY(h/2 - playerHt/2);
+        rotation = 0;
+        cpuPlayer.setX(w/6 - playerWd/2);
+        cpuPlayer.setY(h/3 - playerHt/2);
+        cpuRotation = 0;
+        disk.setX(w/6 -diskWd/2);
+        disk.setY(h/2 - diskHt/2);
+        diskVx = 0;
+        diskVy = 0;
+        player1.setHoldingDisk(true);
+    }
+
     public String clock(){
         String time;
         if (!stopped) {
@@ -483,18 +531,33 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         return time;
     }
 
-   /* public ArrayList<Float> sketchyJohnThrowMethod(float velocity, double theta, float acceleration){
-        ArrayList<Float> values = new ArrayList<Float>();
+    public void smartThrow(double theta, double velocity, double acceleration){
+        if(player1.hasDisk() || cpuPlayer.hasDisk()) {
+            if (theta > 0 && theta <= 90) {
+                sideV = -(float) velocity * (float) Math.sin(Math.toRadians(theta));
+                straightV = (float) velocity * (float) Math.cos(Math.toRadians(theta));
+                diskCurve = (float) acceleration;
+            }
+            if (theta >= 270 && theta < 360) {
+                sideV = (float) velocity * (float) Math.sin(Math.toRadians(360 - theta));
+                straightV = (float) velocity * (float) Math.cos(Math.toRadians(360 - theta));
+                diskCurve = -(float) acceleration;
+            }
+            if (theta == 0 || theta == 360) {
+                sideV = 0;
+                straightV = (float) velocity;
+                diskCurve = 0;
+            }
 
-        float sideV = velocity*(float)Math.cos(theta);
-        float straightV = velocity*(float)Math.sin(theta);
-
-        values.add(sideV);
-        values.add(straightV);
-        values.add(acceleration);
-
-        return values;
-    }*/
+            if (player1.hasDisk()) {
+                p1Threw = true;
+                player1.setHoldingDisk(false);
+            } else if (cpuPlayer.hasDisk()) {
+                cpuThrew = true;
+                cpuPlayer.setHoldingDisk(false);
+            }
+        }
+    }
 
 
     void drawDebug() {
@@ -578,9 +641,28 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             averageVelocity = arcLength/input.size-2;
             double crowDistance = Math.sqrt(Math.pow((input.first().x-input.get(input.size-1).x),2)+Math.pow((input.first().y-input.get(input.size-1).y),2));
             acceleration = arcLength/crowDistance;
+            if(acceleration<1){
+                acceleration = 1;
+            }
+            acceleration-=1;
+            if(averageVelocity >= 48){
+                averageVelocity = 28;
+            }
+            else if (averageVelocity < 48){
+                averageVelocity = (averageVelocity*7)/12;
+            }
+            //Gdx.app.log("Smart Swipe", "Accleration: "+acceleration);
             //Gdx.app.log("Smart Swipe", "Average Velocity: "+averageVelocity);
-            double dirX = (input.get(input.size-5).x-input.get(input.size-1).x);
-            double dirY = (input.get(input.size-5).y-input.get(input.size-1).y);
+            int bestFit = 5;
+            if(acceleration<0.12){
+                bestFit = 12;
+                Gdx.app.log("Smart Swipe", "Best fit called");
+            }
+            if(input.size<bestFit){
+                bestFit = input.size;
+            }
+            double dirX = (input.get(input.size-bestFit).x-input.get(input.size-1).x);
+            double dirY = (input.get(input.size-bestFit).y-input.get(input.size-1).y);
             double absoluteTheta = Math.toDegrees(Math.atan(dirY/dirX));
             if(dirX<0){
                 absoluteTheta += 180;
@@ -592,12 +674,23 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 absoluteTheta += 360;
             }
             double relativeTheta = rotation-absoluteTheta;
+            playerRotationAtTimeOfThrow = rotation;
             if(relativeTheta<0){
                 relativeTheta += 360;
             }
             relativeTheta = 360-relativeTheta;
+
+
+
+            acceleration*=((3/(Math.sqrt(16.5)))*(Math.sqrt(averageVelocity)));
+            Gdx.app.log("ACC", "" + acceleration);
+            Gdx.app.log("Velocity", ""+ averageVelocity);
             //Gdx.app.log("Smart Swipe", "Rotation: "+rotation);
             //Gdx.app.log("Smart Swipe", "Frisbee Direction: "+relativeTheta);
+            if(!(relativeTheta>90&&relativeTheta<270)){
+                smartThrow(relativeTheta,averageVelocity,acceleration);
+            }
+
         }
         /*Gdx.app.log("Swipe", "Completed");
         if(Math.abs(velocityX)>Math.abs(velocityY)){
