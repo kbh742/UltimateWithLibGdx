@@ -20,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Timer;
 import com.example.kholt6406.frisbee_app.sprites.Player;
 import com.example.kholt6406.frisbee_app.swipe.SwipeHandler;
 import com.example.kholt6406.frisbee_app.swipe.mesh.SwipeTriStrip;
@@ -44,6 +45,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     public static final int WORLD_HEIGHT=1080;
     static float xScl =w/WORLD_WIDTH;
     static float yScl =h/WORLD_HEIGHT;
+
+    public static final int GAME_TIME=500;
 
     private Player player1;
     private Player cpuPlayer;
@@ -82,7 +85,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     BitmapFont clockText;
     BitmapFont scoreText1;
     BitmapFont scoreText2;
-    double playTime=500;
+    double playTime=GAME_TIME;
     boolean stopped=false;
     boolean before;
     ShapeRenderer shapes;
@@ -92,6 +95,21 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     int team1Score=0;
     int team2Score=0;
     static int points;
+    private int stallCounter = 0;
+    private Texture stallCount0;
+    private Texture stallCount1;
+    private Texture stallCount2;
+    private Texture stallCount3;
+    private Texture stallCount4;
+    private Texture stallCount5;
+    private Texture stallCount6;
+    private Texture stallCount7;
+    private Texture stallCount8;
+    private Texture stallCount9;
+    private Texture stallCount10;
+    private double caughtTime;
+    private double stallTime;
+    private boolean onOffense;
 
     int drawCounter = 0;
     boolean inLeftEndZone=false;
@@ -105,6 +123,21 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 //        camera.setToOrtho(false,WORLD_WIDTH*xMultiplier,WORLD_HEIGHT*yMultiplier);
 //        camera.position.set(0,0,0);
         background = new Texture("field_background.png");
+
+        stallCount0 = new Texture("stall_0.png");
+        stallCount1 = new Texture("stall_1.png");
+        stallCount2 = new Texture("stall_2.png");
+        stallCount3 = new Texture("stall_3.png");
+        stallCount4 = new Texture("stall_4.png");
+        stallCount5 = new Texture("stall_5.png");
+        stallCount6 = new Texture("stall_6.png");
+        stallCount7 = new Texture("stall_7.png");
+        stallCount8 = new Texture("stall_8.png");
+        stallCount9 = new Texture("stall_9.png");
+        stallCount10 = new Texture("stall_10.png");
+
+        caughtTime = 0;
+        stallTime = 0;
 
         pauseButtonSkin= new Skin();   //create button skin
         pauseButtonSkin.add("pauseButton", new Texture("button_pause.png"));    //add the image to the skin
@@ -198,6 +231,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     protected void update(float dt) {
         handleInput();
         if (!stopped) {
+
 //        if(team1Scored == true){
 //            teamScore1++;
 //        }
@@ -209,6 +243,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             //player1.setHoldingDisk(true);
             if (player1.hasDisk()) {
                 player1.setVelocity(0);
+                stallTime = GAME_TIME-(playTime - caughtTime);
+                onOffense = true;
             }
             else if (!player1.hasDisk()){
                 player1.setVelocity(10);
@@ -267,11 +303,12 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
 
             double player1DistToDisk = Math.sqrt(Math.pow(player1.getPosition().x+playerWd/2-(disk.getX()+diskWd/2),2) + Math.pow(player1.getPosition().y+playerHt/2-(disk.getY()+diskHt/2),2));
-            //Gdx.app.log("LALALALA", player1DistToDisk + "");
             if(player1DistToDisk <= catchableDistance && !player1.hasDisk() && !p1Threw){
                 player1.setHoldingDisk(true);
                 diskVx = 0;
                 diskVy = 0;
+                caughtTime = playTime;
+
             }
             else if(player1DistToDisk > catchableDistance){
                 player1.setHoldingDisk(false);
@@ -340,8 +377,36 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         drawCounter++;
         sb.begin();
 
-
         sb.draw(background, 0,0, w, h);
+        float stallWidth = Gdx.graphics.getWidth()/2;
+        float stallX = Gdx.graphics.getWidth()/4;
+        if(stallTime>0){
+            if(stallTime<1){
+                sb.draw(stallCount10, stallX, 0, stallWidth, h);
+            } else if (stallTime <2){
+                sb.draw(stallCount9, stallX, 0, stallWidth, h);
+            } else if (stallTime <3){
+                sb.draw(stallCount8, stallX, 0, stallWidth, h);
+            } else if (stallTime <4){
+                sb.draw(stallCount7, stallX, 0, stallWidth, h);
+            } else if (stallTime <5){
+                sb.draw(stallCount6, stallX, 0, stallWidth, h);
+            } else if (stallTime <6){
+                sb.draw(stallCount5, stallX, 0, stallWidth, h);
+            } else if (stallTime <7){
+                sb.draw(stallCount4, stallX, 0, stallWidth, h);
+            } else if (stallTime <8){
+                sb.draw(stallCount3, stallX, 0, stallWidth, h);
+            } else if (stallTime <9){
+                sb.draw(stallCount2, stallX, 0, stallWidth, h);
+            } else if (stallTime <10){
+                sb.draw(stallCount1, stallX, 0, stallWidth, h);
+            } else {
+                sb.draw(stallCount0, stallX, 0, stallWidth, h);
+            }
+        }
+
+
         sb.draw(player1.getTexture(),xPos,yPos,playerWd/2*xScl,playerHt/2*yScl,playerWd*xScl,playerHt*yScl,1,1,rotation,0,0,Math.round(playerWd),Math.round(playerHt),false,false);
         disk.draw(sb);
         sb.draw(cpuPlayer.getTexture(),cpuPlayer.getPosition().x,cpuPlayer.getPosition().y,cpuPlayer.getTexture().getWidth()/2*xScl,cpuPlayer.getTexture().getHeight()/2*yScl,cpuPlayer.getTexture().getWidth()*xScl,cpuPlayer.getTexture().getHeight()*yScl,1,1,cpuRotation,0,0,Math.round(cpuPlayer.getTexture().getWidth()),Math.round(cpuPlayer.getTexture().getHeight()),false,false);
@@ -496,6 +561,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
     @Override
     public boolean fling(float velocityX, float velocityY, int button) {
+        stallTime = 0;
         Array<Vector2> input = swipe.input();
         Vector2 lastPoint = input.first();
         Vector2 firstPoint = input.get(input.size-1);
@@ -544,6 +610,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             }
         }else{
             Gdx.app.log("Swipe", "Up or Down");
+            Gdx.app.log("Du hail du hail du hail du hail");
 
         }*/
         return true;
