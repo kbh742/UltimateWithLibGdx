@@ -573,7 +573,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
 
 
-        sb.draw(player1.getTexture(),xPos,yPos,playerWd/2*xScl,playerHt/2*yScl,playerWd*xScl,playerHt*yScl,1,1,rotation,0,0,Math.round(playerWd),Math.round(playerHt),false,false);
+        sb.draw(player1.getTexture(),player1.getPosition().x,player1.getPosition().y,playerWd/2,playerHt/2,playerWd,playerHt,1,1,rotation,0,0,Math.round(playerWd),Math.round(playerHt),false,false);
         float diskScale;
         float a = 0f;
         if(diskHeight==0){
