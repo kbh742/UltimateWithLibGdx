@@ -612,7 +612,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     public void smartThrow(double theta, double velocity, double acceleration){
         Gdx.app.log("Disk", acceleration + "acc");
         Gdx.app.log("Disk", velocity + "vec");
-        if(!(acceleration>3.8||acceleration>2.5&&velocity>50)){
+        if(!(acceleration>3.8||acceleration>2.5&&velocity>25)){
             if(player1.hasDisk() || cpuPlayer.hasDisk()) {
                 if (theta > 0 && theta <= 90) {
                     sideV = -(float) velocity * (float) Math.sin(Math.toRadians(theta));
