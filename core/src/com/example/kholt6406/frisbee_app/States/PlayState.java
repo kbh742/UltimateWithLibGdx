@@ -468,7 +468,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
         }
         else if (changingPoss){
-            if(!p1Threw){
+            if(!p1Threw){ //John thinks this should be changed at some point
                 float xDist = (disk.getX()+diskWd/2) - (player1.getPosition().x+playerWd/2);
                 float yDist = (disk.getY()+diskHt/2) - (player1.getPosition().y+playerHt/2);
                 float p1Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
