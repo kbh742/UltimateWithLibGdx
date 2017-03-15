@@ -382,7 +382,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             }
 
             double player1DistToDisk = getDistanceToDisk(player1);
-
+            //Gdx.app.log("playerhasdisk?", "" + player1.hasDisk());
+            //Gdx.app.log("p1threw", ""+p1Threw);
             if(player1DistToDisk <= catchableDistance && !player1.hasDisk() && !p1Threw){
                 player1.setHoldingDisk(true);
                 diskVx = 0;
