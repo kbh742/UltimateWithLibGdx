@@ -128,6 +128,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     double timeToVertex;
     double airTime;
     float playerHeight;
+    boolean diskInAir;
+    boolean isShortPass;
 
 
     int drawCounter = 0;
@@ -166,6 +168,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         changingPoss = false;
         playerHeight = -50;
         diskHeight = playerHeight;
+        diskInAir = false;
+        isShortPass = false;
 
 
         pauseButtonSkin= new Skin();   //create button skin
@@ -305,20 +309,31 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 stallTime = (GAME_TIME-playTime) - caughtTime;
 
                 onOffense = true;
+                diskHeight = 0;
             }
             else if (!player1.hasDisk()){
                 player1.setVelocity(10);
                 airTime = (GAME_TIME-playTime) - timeOfThrow;
-                onOffense = false;
+                //float c = 150;
                 float c = 150;
+                if(Math.abs(diskCurve)>0.1){
+                    diskHeight = (float) (((-1*Math.abs(diskCurve*c))/(timeToVertex*timeToVertex))*(airTime-timeToVertex)*(airTime-timeToVertex)+Math.abs(diskCurve)*c+playerHeight);
+                } else if (isShortPass == false){
+                    diskHeight = (float) (((-1*Math.abs(3*straightV)*(c/30))/(timeToVertex*timeToVertex))*(airTime-timeToVertex)*(airTime-timeToVertex)+Math.abs(straightV)*(c/30)-playerHeight);
+                } else if (isShortPass == true){
+                    diskHeight = (float) (((-1*Math.abs(3*straightV)*(c/30)))*(airTime)*(airTime)+Math.abs(straightV)*(c/30)-playerHeight);
+                }
 
-               if(Math.abs(diskCurve)>0.1){
-                   diskHeight = (float) (((-1*Math.abs(diskCurve*c))/(timeToVertex*timeToVertex))*(airTime-timeToVertex)*(airTime-timeToVertex)+Math.abs(diskCurve)*c+playerHeight);
-               } else {
-                   diskHeight = (float) (((-1*Math.abs(3*straightV)*(c/30))/(timeToVertex*timeToVertex))*(airTime-timeToVertex)*(airTime-timeToVertex)+Math.abs(straightV)*(c/30)-playerHeight);
-               }
+
+                //Gdx.app.log("Disk", "" + diskHeight);
                 if(diskHeight<-100){
                     diskHeight = -100;
+                    Gdx.app.log("Disk", "Time in Air: "+airTime);
+                    if(airTime>0.2&&(diskInAir)){
+                        Gdx.app.log("Disk", "Touched Ground");
+                        diskInAir = false;
+                        turnover();
+                    }
                 }
                 //Gdx.app.log("Disk", ""+diskHeight);
 
@@ -343,8 +358,10 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 }
                 int r = 50;
                 if(player1.hasDisk()) {
+
                     disk.setX((float) (player1.getPosition().x + (playerWd * xScl) / 2 - diskWd / 2 + (r * (deltaX / Math.sqrt(deltaX * deltaX + deltaY * deltaY)))));
                     disk.setY((float) (player1.getPosition().y + (playerHt * yScl) / 2 - diskHt / 2 + (r * (deltaY / Math.sqrt(deltaX * deltaX + deltaY * deltaY)))));
+
                 }
             }
 
@@ -370,6 +387,10 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
                 diskVx = (float) (Math.cos(alpha) * sideV - Math.sin(alpha) * straightV);
                 diskVy = (float) (Math.sin(alpha) * sideV + Math.cos(alpha) * straightV);
+                if(!diskInAir){
+                    diskVx = 0;
+                    diskVy = 0;
+                }
             }
             if (disk.getX() + diskWd/2 <= 0) {
                 changingPoss = true;
@@ -662,6 +683,10 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         player1.setHoldingDisk(true);
     }
 
+    public void turnover(){
+        onOffense = !(onOffense);
+    }
+
     public String clock(){
         String time;
         if (!stopped) {
@@ -686,7 +711,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     }
 
     public void smartThrow(double theta, double velocity, double acceleration){
-        Gdx.app.log("Disk", acceleration + "acc");
+        //Gdx.app.log("Disk", acceleration + "acc");
         Gdx.app.log("Disk", velocity + "vec");
         if(!(acceleration>3.8||acceleration>2.5&&velocity>25)){
             if(player1.hasDisk() || cpuPlayer.hasDisk()) {
@@ -709,7 +734,15 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 }
                 if(Math.abs(diskCurve)<0.1){
 
-                    timeToVertex = 750*(1/velocity)*Gdx.graphics.getDeltaTime();
+                    //timeToVertex = 750*(1/velocity)*Gdx.graphics.getDeltaTime();
+                    if(velocity>10){
+                        timeToVertex = 45*((1/(Math.pow((3*velocity), 0.1))))*Gdx.graphics.getDeltaTime();
+                        isShortPass = false;
+                    } else {
+                        timeToVertex = 0;
+                        isShortPass = true;
+                    }
+
                     Gdx.app.log("disk", "timetoVertex" + timeToVertex);
                 }
                 //Gdx.app.log("disk", ""+diskCurve);
@@ -721,6 +754,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                     cpuThrew = true;
                     cpuPlayer.setHoldingDisk(false);
                 }
+
             }
         }
 
@@ -866,6 +900,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             //Gdx.app.log("Smart Swipe", "Frisbee Direction: "+relativeTheta);
             if((!(relativeTheta>90&&relativeTheta<270))/*&&projectionScale>0*/){
                 smartThrow(relativeTheta,averageVelocity,acceleration);
+                diskInAir = true;
+                Gdx.app.log("Disk", "diskInAir true");
             }
 
         }
