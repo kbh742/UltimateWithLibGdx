@@ -212,7 +212,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         //Swipes
 
         tris = new SwipeTriStrip();
-        swipe = new SwipeHandler(250);
+        swipe = new SwipeHandler(249);
         swipe.minDistance = 10;
         swipe.initialDistance = 10;
         tex = new Texture("gradient.png");
@@ -238,10 +238,10 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
         player1.setHoldingDisk(true);
         player1.setX(w/6 - playerWd/2);
-        player1.setY(h/2 - playerHt/2);
+        player1.setY((h*2)/3 - playerHt/2);
 
         cpuPlayer.setX(w/6 - playerWd/2);
-        cpuPlayer.setY(h/3 - playerHt/2);
+        cpuPlayer.setY((h*2)/5 - playerHt/2);
 
         enemy1.setX(5*w/6 - playerWd/2);
         enemy1.setY(h/4 - playerHt/2);
@@ -250,7 +250,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         enemy2.setY(3*h/4 - playerHt/2);
 
         disk.setX(w/6 -diskWd/2);
-        disk.setY(h/2 - diskHt/2);
+        disk.setY((2*h)/5 - diskHt/2);
 
         touchpadSkin = new Skin();
         //Set background image
