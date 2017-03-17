@@ -212,7 +212,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         //Swipes
 
         tris = new SwipeTriStrip();
-        swipe = new SwipeHandler(248);
+        swipe = new SwipeHandler(250);
         swipe.minDistance = 10;
         swipe.initialDistance = 10;
         tex = new Texture("gradient.png");
@@ -238,10 +238,10 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
         player1.setHoldingDisk(true);
         player1.setX(w/6 - playerWd/2);
-        player1.setY(h/2 - playerHt/2);
+        player1.setY((h*2)/3 - playerHt/2);
 
         cpuPlayer.setX(w/6 - playerWd/2);
-        cpuPlayer.setY(h/3 - playerHt/2);
+        cpuPlayer.setY((h*2)/5 - playerHt/2);
 
         enemy1.setX(5*w/6 - playerWd/2);
         enemy1.setY(h/4 - playerHt/2);
@@ -250,7 +250,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         enemy2.setY(3*h/4 - playerHt/2);
 
         disk.setX(w/6 -diskWd/2);
-        disk.setY(h/2 - diskHt/2);
+        disk.setY((2*h)/5 - diskHt/2);
 
         touchpadSkin = new Skin();
         //Set background image
@@ -323,7 +323,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 } else if (isShortPass == true){
                     diskHeight = (float) (((-1*Math.abs(3*straightV)*(c/30)))*(airTime)*(airTime)+Math.abs(straightV)*(c/30)-playerHeight);
                 }
-                //Gdx.app.log("Disk", "Time in Air: "+airTime);
+
 
                 //Gdx.app.log("Disk", "" + diskHeight);
                 if(diskHeight<-100){
@@ -469,7 +469,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
         }
         else if (changingPoss){
-            if(onOffense){ //John thinks this should be changed at some point
+            if(!p1Threw){ //John thinks this should be changed at some point
                 float xDist = (disk.getX()+diskWd/2) - (player1.getPosition().x+playerWd/2);
                 float yDist = (disk.getY()+diskHt/2) - (player1.getPosition().y+playerHt/2);
                 float p1Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
