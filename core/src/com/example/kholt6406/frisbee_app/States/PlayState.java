@@ -212,7 +212,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         //Swipes
 
         tris = new SwipeTriStrip();
-        swipe = new SwipeHandler(250);
+        swipe = new SwipeHandler(248);
         swipe.minDistance = 10;
         swipe.initialDistance = 10;
         tex = new Texture("gradient.png");
@@ -469,7 +469,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
         }
         else if (changingPoss){
-            if(!p1Threw){ //John thinks this should be changed at some point
+            if(onOffense){ //John thinks this should be changed at some point
                 float xDist = (disk.getX()+diskWd/2) - (player1.getPosition().x+playerWd/2);
                 float yDist = (disk.getY()+diskHt/2) - (player1.getPosition().y+playerHt/2);
                 float p1Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
