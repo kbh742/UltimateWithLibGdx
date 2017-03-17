@@ -374,6 +374,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 if(!diskInAir){
                     diskVx = 0;
                     diskVy = 0;
+                    //changingPoss = true;
                 }
             }
 
@@ -473,16 +474,12 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 float yDist = (disk.getY()+diskHt/2) - (player1.getPosition().y+playerHt/2);
                 float p1Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
                 float p1Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-//                Gdx.app.log("changingPoss", "Vx= " + p1Vx);
-//                Gdx.app.log("changingPoss", "Vy= " + p1Vy);
-//                Gdx.app.log("changingPoss", "Xpos= " + player1.getPosition().x);
-//                Gdx.app.log("changingPoss", "Ypos= " + player1.getPosition().y);
                 player1.setX((player1.getPosition().x + p1Vx));
                 player1.setY((player1.getPosition().y + p1Vy));
-//                Gdx.app.log("changingPoss", "Xpos= " + player1.getPosition().x);
-//                Gdx.app.log("changingPoss", "Ypos= " + player1.getPosition().y);
+
                 if(getDistanceToDisk(player1) < catchableDistance){
                     changingPoss = false;
+                    //diskInAir =
                 }
             }
             else{
@@ -490,14 +487,9 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 float yDist = (disk.getY()+diskHt/2) - (enemy1.getPosition().y+playerHt/2);
                 float p1Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
                 float p1Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-                //Gdx.app.log("changingPoss", "Vx= " + p1Vx);
-                //Gdx.app.log("changingPoss", "Vy= " + p1Vy);
-                //Gdx.app.log("changingPoss", "Xpos= " + enemy1.getPosition().x);
-                //Gdx.app.log("changingPoss", "Ypos= " + enemy1.getPosition().y);
                 enemy1.setX((enemy1.getPosition().x + p1Vx));
                 enemy1.setY((enemy1.getPosition().y + p1Vy));
-                //Gdx.app.log("changingPoss", "Xpos= " + player1.getPosition().x);
-                //Gdx.app.log("changingPoss", "Ypos= " + player1.getPosition().y);
+
                 if(getDistanceToDisk(enemy1) < catchableDistance){
                     changingPoss = false;
                     p1Threw = false;
