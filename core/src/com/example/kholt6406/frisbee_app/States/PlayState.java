@@ -212,7 +212,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         //Swipes
 
         tris = new SwipeTriStrip();
-        swipe = new SwipeHandler(250);
+        swipe = new SwipeHandler(252);
         swipe.minDistance = 10;
         swipe.initialDistance = 10;
         tex = new Texture("gradient.png");
@@ -415,6 +415,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 cpuPlayer.setHoldingDisk(true);
                 diskVx = 0;
                 diskVy = 0;
+                caughtTime = GAME_TIME-playTime;
             }
             else if(cpuDistToDisk > catchableDistance ){
                 cpuPlayer.setHoldingDisk(false);
@@ -904,21 +905,22 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 relativeTheta += 360;
             }
             relativeTheta = 360-relativeTheta;
-            double playerDirX = (Math.cos(rotation));
-            double playerDirY = (Math.sin(rotation));
+            double playerDirX = (Math.cos((rotation*2*Math.PI)/360));
+            double playerDirY = (Math.sin((rotation*2*Math.PI)/360));
             double projectionScale = (playerDirX*(input.first().x-player1.getPosition().x)+playerDirY*(input.first().y-player1.getPosition().y))/(playerDirX*playerDirX+playerDirY*playerDirY);
 
 
             acceleration*=((3/(Math.sqrt(16.5)))*(Math.sqrt(averageVelocity)));
-            Gdx.app.log("Test", "playerDirX " + playerDirX);
-            Gdx.app.log("Test", "playerDirY " + playerDirY);
-            Gdx.app.log("Test", "vx " + (input.first().x-player1.getPosition().x));
-            Gdx.app.log("Test", "vy " + (input.first().y-player1.getPosition().y));
+            Gdx.app.log("Test,", "rotation" + rotation);
+            //Gdx.app.log("Test", "playerDirX " + playerDirX);
+            //Gdx.app.log("Test", "playerDirY " + playerDirY);
+            //Gdx.app.log("Test", "vx " + (input.first().x-player1.getPosition().x));
+            //Gdx.app.log("Test", "vy " + (input.first().y-player1.getPosition().y));
             Gdx.app.log("Test", "scale " + projectionScale);
 
             //Gdx.app.log("Smart Swipe", "Rotation: "+rotation);
             //Gdx.app.log("Smart Swipe", "Frisbee Direction: "+relativeTheta);
-            if((!(relativeTheta>90&&relativeTheta<270))/*&&projectionScale>0*/){
+            if((!(relativeTheta>90&&relativeTheta<270))&&projectionScale>0){
                 smartThrow(relativeTheta,averageVelocity,acceleration);
                 diskInAir = true;
                 Gdx.app.log("Disk", "diskInAir true");
