@@ -212,7 +212,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         //Swipes
 
         tris = new SwipeTriStrip();
-        swipe = new SwipeHandler(247);
+        swipe = new SwipeHandler(250);
         swipe.minDistance = 10;
         swipe.initialDistance = 10;
         tex = new Texture("gradient.png");
@@ -317,7 +317,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 //float c = 150;
                 float c = 150;
                 if(Math.abs(diskCurve)>0.1){
-                    diskHeight = (float) (((-1*Math.abs(diskCurve*c))/(timeToVertex*timeToVertex))*(airTime-timeToVertex)*(airTime-timeToVertex)+Math.abs(diskCurve)*c+playerHeight);
+                    diskHeight = (float) (1.5*(((-1*Math.abs(diskCurve*c))/(timeToVertex*timeToVertex))*(airTime-timeToVertex)*(airTime-timeToVertex)+Math.abs(diskCurve)*c+playerHeight));
                 } else if (isShortPass == false){
                     diskHeight = (float) (((-1*Math.abs(3*straightV)*(c/30))/(timeToVertex*timeToVertex))*(airTime-timeToVertex)*(airTime-timeToVertex)+Math.abs(straightV)*(c/30)-playerHeight);
                 } else if (isShortPass == true){
@@ -328,7 +328,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 //Gdx.app.log("Disk", "" + diskHeight);
                 if(diskHeight<-100){
                     diskHeight = -100;
-                    Gdx.app.log("Disk", "Time in Air: "+airTime);
+
                     if(airTime>0.2&&(diskInAir)){
                         Gdx.app.log("Disk", "Touched Ground");
                         diskInAir = false;
