@@ -212,7 +212,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         //Swipes
 
         tris = new SwipeTriStrip();
-        swipe = new SwipeHandler(250);
+        swipe = new SwipeHandler(254);
         swipe.minDistance = 10;
         swipe.initialDistance = 10;
         tex = new Texture("gradient.png");
