@@ -130,6 +130,12 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     float playerHeight;
     boolean diskInAir;
     boolean isShortPass;
+    double player1VelocityX;
+    double player1VelocityY;
+    double enemy1VelocityX;
+    double enemy1VelocityY;
+    double enemy2VelocityX;
+    double enemy2VelocityY;
 
 
     int drawCounter = 0;
@@ -212,7 +218,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         //Swipes
 
         tris = new SwipeTriStrip();
-        swipe = new SwipeHandler(254);
+        swipe = new SwipeHandler(256);
         swipe.minDistance = 10;
         swipe.initialDistance = 10;
         tex = new Texture("gradient.png");
@@ -251,6 +257,13 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
         disk.setX(w/6 -diskWd/2);
         disk.setY((2*h)/5 - diskHt/2);
+
+        player1VelocityX = 0;
+        enemy1VelocityX = 0;
+        enemy2VelocityX = 0;
+        player1VelocityY = 0;
+        enemy1VelocityY = 0;
+        enemy2VelocityY = 0;
 
         touchpadSkin = new Skin();
         //Set background image
@@ -299,7 +312,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         cpuPlayer.update(dt);
         enemy1.update(dt);
         enemy2.update(dt);
-        if (!stopped && !changingPoss) {
+        if (!stopped) {
 
 
 
@@ -339,12 +352,23 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             }
             xPos = player1.getPosition().x;
             yPos = player1.getPosition().y;
-            float deltaX = touchpad.getKnobPercentX();
-            float deltaY = touchpad.getKnobPercentY();
+            float deltaX = 0;
+            float deltaY = 0;
+            if(!changingPoss){
+                deltaX = touchpad.getKnobPercentX();
+                deltaY = touchpad.getKnobPercentY();
+            }
+
             deltaX *= xScl;
             deltaY *= yScl;
             player1.setX(xPos + deltaX * player1.getVelocity());
             player1.setY(yPos + deltaY * player1.getVelocity());
+            enemy1.setX((float) (enemy1.getPosition().x + enemy1VelocityX));
+            enemy1.setY((float) (enemy1.getPosition().y + enemy1VelocityY));
+            enemy2.setX((float) (enemy2.getPosition().x + enemy2VelocityX));
+            enemy2.setY((float) (enemy2.getPosition().y + enemy2VelocityY));
+
+
 
             if (deltaX != 0 && deltaY != 0) {
                 rotation = (float) Math.toDegrees(Math.atan(deltaY / deltaX));
@@ -488,14 +512,17 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             }
 
         }
-        else if (changingPoss && !stopped){
+        if (changingPoss && !stopped){
             if(!p1Threw){ //John thinks this should be changed at some point
                 float xDist = (disk.getX()+diskWd/2) - (player1.getPosition().x+playerWd/2);
                 float yDist = (disk.getY()+diskHt/2) - (player1.getPosition().y+playerHt/2);
                 float p1Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
                 float p1Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-                player1.setX((player1.getPosition().x + p1Vx));
-                player1.setY((player1.getPosition().y + p1Vy));
+                player1VelocityX = p1Vx;
+                player1VelocityY = p1Vy;
+                Gdx.app.log("Possession", "" + player1.getVelocity());
+                //player1.setX((player1.getPosition().x + p1Vx));
+                //player1.setY((player1.getPosition().y + p1Vy));
 
                 if(getDistanceToDisk(player1) < catchableDistance){
                     changingPoss = false;
@@ -505,10 +532,12 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             else{
                 float xDist = (disk.getX()+diskWd/2) - (enemy1.getPosition().x+playerWd/2);
                 float yDist = (disk.getY()+diskHt/2) - (enemy1.getPosition().y+playerHt/2);
-                float p1Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-                float p1Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-                enemy1.setX((enemy1.getPosition().x + p1Vx));
-                enemy1.setY((enemy1.getPosition().y + p1Vy));
+                float e1Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+                float e1Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+                enemy1VelocityX = e1Vx;
+                enemy1VelocityY = e1Vy;
+                Gdx.app.log("Possession", "" + enemy1.getVelocity());
+
                 enemy1Rotation = (float) Math.toDegrees(Math.atan(yDist/xDist));
                 if(xDist < 0){
                     enemy1Rotation+= 180;
@@ -523,6 +552,9 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 }
                 //Gdx.app.log("changingPoss1", ""+changingPoss);
             }
+        } else {
+            enemy1VelocityX = 0;
+            enemy1VelocityY = 0;
         }
         //Gdx.app.log("changingPoss2", ""+changingPoss);
     }
@@ -892,79 +924,82 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         Gdx.app.log("JOHN LOOK AT THIS","I am trash at coding");
         //Gdx.app.log("Smart Swipe", "First Point: "+firstPoint);
         //Gdx.app.log("Smart Swipe", "Last Point: "+lastPoint);
-        if(firstPoint.x - (disk.getX()+diskWd/2)<=20 && firstPoint.y - (disk.getY()+diskHt/2)<=20){
-            double averageVelocity = 0;
-            double acceleration = 0;
-            double arcLength = 0;
-            for (int i = 0; i<input.size-2; i++){
-                double pointDistance = Math.sqrt(Math.pow((input.get(i+1).x-input.get(i).x),2)+Math.pow((input.get(i+1).y-input.get(i).y),2));
-                arcLength+=pointDistance;
-            }
-            averageVelocity = arcLength/input.size-2;
-            double crowDistance = Math.sqrt(Math.pow((input.first().x-input.get(input.size-1).x),2)+Math.pow((input.first().y-input.get(input.size-1).y),2));
-            acceleration = arcLength/crowDistance;
-            if(acceleration<1){
-                acceleration = 1;
-            }
-            acceleration-=1;
-            if(averageVelocity >= 48){
-                averageVelocity = 28;
-            }
-            else if (averageVelocity < 48){
-                averageVelocity = (averageVelocity*7)/12;
-            }
-            //Gdx.app.log("Smart Swipe", "Accleration: "+acceleration);
-            //Gdx.app.log("Smart Swipe", "Average Velocity: "+averageVelocity);
-            int bestFit = 5;
-            if(acceleration<0.12){
-                bestFit = 12;
-                Gdx.app.log("Smart Swipe", "Best fit called");
-            }
-            if(input.size<bestFit){
-                bestFit = input.size;
-            }
-            double dirX = (input.get(input.size-bestFit).x-input.get(input.size-1).x);
-            double dirY = (input.get(input.size-bestFit).y-input.get(input.size-1).y);
-            double absoluteTheta = Math.toDegrees(Math.atan(dirY/dirX));
-            if(dirX<0){
-                absoluteTheta += 180;
-            }
-            //Gdx.app.log("Smart Swipe", "DirX: "+dirX);
-            //Gdx.app.log("Smart Swipe", "DirY: "+dirY);
-            Gdx.app.log("I identify as a professional ddoser", "DirX: "+dirX);
+        if(!changingPoss){
+            if(firstPoint.x - (disk.getX()+diskWd/2)<=20 && firstPoint.y - (disk.getY()+diskHt/2)<=20){
+                double averageVelocity = 0;
+                double acceleration = 0;
+                double arcLength = 0;
+                for (int i = 0; i<input.size-2; i++){
+                    double pointDistance = Math.sqrt(Math.pow((input.get(i+1).x-input.get(i).x),2)+Math.pow((input.get(i+1).y-input.get(i).y),2));
+                    arcLength+=pointDistance;
+                }
+                averageVelocity = arcLength/input.size-2;
+                double crowDistance = Math.sqrt(Math.pow((input.first().x-input.get(input.size-1).x),2)+Math.pow((input.first().y-input.get(input.size-1).y),2));
+                acceleration = arcLength/crowDistance;
+                if(acceleration<1){
+                    acceleration = 1;
+                }
+                acceleration-=1;
+                if(averageVelocity >= 48){
+                    averageVelocity = 28;
+                }
+                else if (averageVelocity < 48){
+                    averageVelocity = (averageVelocity*7)/12;
+                }
+                //Gdx.app.log("Smart Swipe", "Accleration: "+acceleration);
+                //Gdx.app.log("Smart Swipe", "Average Velocity: "+averageVelocity);
+                int bestFit = 5;
+                if(acceleration<0.12){
+                    bestFit = 12;
+                    Gdx.app.log("Smart Swipe", "Best fit called");
+                }
+                if(input.size<bestFit){
+                    bestFit = input.size;
+                }
+                double dirX = (input.get(input.size-bestFit).x-input.get(input.size-1).x);
+                double dirY = (input.get(input.size-bestFit).y-input.get(input.size-1).y);
+                double absoluteTheta = Math.toDegrees(Math.atan(dirY/dirX));
+                if(dirX<0){
+                    absoluteTheta += 180;
+                }
+                //Gdx.app.log("Smart Swipe", "DirX: "+dirX);
+                //Gdx.app.log("Smart Swipe", "DirY: "+dirY);
+                Gdx.app.log("I identify as a professional ddoser", "DirX: "+dirX);
 
 
-            if(absoluteTheta<0){
-                absoluteTheta += 360;
+                if(absoluteTheta<0){
+                    absoluteTheta += 360;
+                }
+                double relativeTheta = rotation-absoluteTheta;
+                playerRotationAtTimeOfThrow = rotation;
+                if(relativeTheta<0){
+                    relativeTheta += 360;
+                }
+                relativeTheta = 360-relativeTheta;
+                double playerDirX = (Math.cos((rotation*2*Math.PI)/360));
+                double playerDirY = (Math.sin((rotation*2*Math.PI)/360));
+                double projectionScale = (playerDirX*(input.first().x-player1.getPosition().x)+playerDirY*(input.first().y-player1.getPosition().y))/(playerDirX*playerDirX+playerDirY*playerDirY);
+
+
+                acceleration*=((3/(Math.sqrt(16.5)))*(Math.sqrt(averageVelocity)));
+                Gdx.app.log("Test,", "rotation" + rotation);
+                //Gdx.app.log("Test", "playerDirX " + playerDirX);
+                //Gdx.app.log("Test", "playerDirY " + playerDirY);
+                //Gdx.app.log("Test", "vx " + (input.first().x-player1.getPosition().x));
+                //Gdx.app.log("Test", "vy " + (input.first().y-player1.getPosition().y));
+                Gdx.app.log("Test", "scale " + projectionScale);
+
+                //Gdx.app.log("Smart Swipe", "Rotation: "+rotation);
+                //Gdx.app.log("Smart Swipe", "Frisbee Direction: "+relativeTheta);
+                if((!(relativeTheta>90&&relativeTheta<270))&&projectionScale>0){
+                    smartThrow(relativeTheta,averageVelocity,acceleration);
+                    diskInAir = true;
+                    Gdx.app.log("Disk", "diskInAir true");
+                }
+
             }
-            double relativeTheta = rotation-absoluteTheta;
-            playerRotationAtTimeOfThrow = rotation;
-            if(relativeTheta<0){
-                relativeTheta += 360;
-            }
-            relativeTheta = 360-relativeTheta;
-            double playerDirX = (Math.cos((rotation*2*Math.PI)/360));
-            double playerDirY = (Math.sin((rotation*2*Math.PI)/360));
-            double projectionScale = (playerDirX*(input.first().x-player1.getPosition().x)+playerDirY*(input.first().y-player1.getPosition().y))/(playerDirX*playerDirX+playerDirY*playerDirY);
-
-
-            acceleration*=((3/(Math.sqrt(16.5)))*(Math.sqrt(averageVelocity)));
-            Gdx.app.log("Test,", "rotation" + rotation);
-            //Gdx.app.log("Test", "playerDirX " + playerDirX);
-            //Gdx.app.log("Test", "playerDirY " + playerDirY);
-            //Gdx.app.log("Test", "vx " + (input.first().x-player1.getPosition().x));
-            //Gdx.app.log("Test", "vy " + (input.first().y-player1.getPosition().y));
-            Gdx.app.log("Test", "scale " + projectionScale);
-
-            //Gdx.app.log("Smart Swipe", "Rotation: "+rotation);
-            //Gdx.app.log("Smart Swipe", "Frisbee Direction: "+relativeTheta);
-            if((!(relativeTheta>90&&relativeTheta<270))&&projectionScale>0){
-                smartThrow(relativeTheta,averageVelocity,acceleration);
-                diskInAir = true;
-                Gdx.app.log("Disk", "diskInAir true");
-            }
-
         }
+
         /*Gdx.app.log("Swipe", "Completed");
         if(Math.abs(velocityX)>Math.abs(velocityY)){
             if(velocityX>0){
