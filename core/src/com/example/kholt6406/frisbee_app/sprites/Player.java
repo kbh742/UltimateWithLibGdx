@@ -16,7 +16,7 @@ public class Player extends Sprite{
 
     public Player(int x0, int y0){
         position=new Vector2(x0, y0);
-        velocity= 10;
+        velocity= 0;
         player=new Texture("idle.png");
         x=x0;
         y=y0;
