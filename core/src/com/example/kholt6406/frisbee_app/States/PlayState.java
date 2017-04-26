@@ -495,8 +495,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 float yPt = select2Waypoints.get(cpu2WayPoint).y;
                 float xDist = (xPt) - (cpu2Player.getPosition().x+playerWd/2);
                 float yDist = (yPt) - (cpu2Player.getPosition().y+playerHt/2);
-                float pVx = cpu2Speed * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-                float pVy = cpu2Speed * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+                float pVx = (cpu2Speed/5) * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+                float pVy = (cpu2Speed/5) * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
                 cpu2VelocityX = pVx;
                 cpu2VelocityY = pVy;
                 cpu2Rotation = (float) Math.toDegrees(Math.atan(yDist / xDist));
@@ -921,17 +921,27 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     }
 
     private void keepPlayerInBounds() {
-        if (xPos + playerWd/2 <= 0) {
-            player1.setX(xPos + 1);
-        }
-        if (xPos + playerWd/2 >= w) {
-            player1.setX(xPos - 1);
-        }
-        if (yPos + playerHt/2 <= 0) {
-            player1.setY(yPos + 1);
-        }
-        if (yPos + playerHt/2 >= h) {
-            player1.setY(yPos - 1);
+        ArrayList<Player> players = new ArrayList<Player>();
+        players.add(player1);
+        players.add(cpuPlayer);
+        players.add(cpu2Player);
+        players.add(enemy1);
+        players.add(enemy2);
+        players.add(enemy3);
+
+        for(Player p : players){
+            if (p.getPosition().x + playerWd/2 <= 0) {
+                p.setX(p.getPosition().x + 1);
+            }
+            if (p.getPosition().x + playerWd/2 >= w) {
+                p.setX(p.getPosition().x - 1);
+            }
+            if (p.getPosition().y + playerHt/2 <= 0) {
+                p.setY(p.getPosition().y + 1);
+            }
+            if (p.getPosition().y + playerHt/2 >= h) {
+                p.setY(p.getPosition().y - 1);
+            }
         }
     }
 
@@ -1361,7 +1371,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                     Gdx.app.log("Disk", "diskInAir true");
                 }
 
-            } else if(Math.abs(firstPoint.x - (cpuPlayer.getPosition().x+playerWd/2)) <= 20 && Math.abs(firstPoint.y - (cpuPlayer.getPosition().y+playerHt/2)) <= 20){
+            } else if(Math.abs(firstPoint.x - (cpuPlayer.getPosition().x+playerWd/2)) <= 30 && Math.abs(firstPoint.y - (cpuPlayer.getPosition().y+playerHt/2)) <= 30){
                 cpuAIReleased = false;
                 //cpuPlayer.setVelocity(10);
 
