@@ -58,7 +58,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     static float xScl =w/WORLD_WIDTH;
     static float yScl =h/WORLD_HEIGHT;
 
-    public static final int GAME_TIME=180;
+    public static final int GAME_TIME=30;
 
     public static final float CAMERA_HEIGHT=500;
 
@@ -197,9 +197,9 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         enemy3 = new Player(1000, 700);
         cpuRotation = 0;
         cpu2Rotation = 0;
-        enemy1Rotation=0;
-        enemy2Rotation=0;
-        enemy3Rotation = 0;
+        enemy1Rotation=180;
+        enemy2Rotation=180;
+        enemy3Rotation = 180;
 //        camera=new OrthographicCamera();
 //        camera.setToOrtho(false,WORLD_WIDTH*xMultiplier,WORLD_HEIGHT*yMultiplier);
 //        camera.position.set(0,0,0);
@@ -304,12 +304,12 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
         player1.setHoldingDisk(true);
         player1.setX(w/6 - playerWd/2);
-        player1.setY((h*2)/3 - playerHt/2);
+        player1.setY((h)/2 - playerHt/2);
 
         cpuPlayer.setX(w/6 - playerWd/2);
-        cpuPlayer.setY((h*2)/5 - playerHt/2);
+        cpuPlayer.setY((h)/4 - playerHt/2);
         cpu2Player.setX(w/6 - playerWd/2);
-        cpu2Player.setY((7*h)/8 - playerHt/2);
+        cpu2Player.setY((3*h)/4 - playerHt/2);
 
         enemy1.setX(5*w/6 - playerWd/2);
         enemy1.setY(h/4 - playerHt/2);
@@ -324,8 +324,11 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         enemy2.setTexture(enemyTexture);
         enemy3.setTexture(enemyTexture);
 
-        disk.setX(w/6 -diskWd/2);
-        disk.setY((2*h)/5 - diskHt/2);
+        Gdx.app.log("before", ""+disk.getY());
+        Gdx.app.log("playerWd", ""+playerWd);
+        disk.setX(w/6 - diskWd/2);
+        disk.setY((h)/2 - diskHt/2);
+        Gdx.app.log("after", ""+disk.getY());
 
         player1VelocityX = 0;
         enemy1VelocityX = 0;
@@ -368,7 +371,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         //Create new TouchPad with the created style
         touchpad = new Touchpad(10, touchpadStyle);
         //setBounds(x,y,width,height)
-        touchpad.setBounds(30*xScl, 30*yScl, 400*xScl, 400*yScl);
+        touchpad.setBounds(25,25,210,210);
 
 
         stage = new Stage();
@@ -737,14 +740,14 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
 
             if (disk.getX()+diskWd/2 <= w/6 && !inLeftEndZone && !player1.hasDisk() && !cpuPlayer.hasDisk() && !cpu2Player.hasDisk() && (enemy1.hasDisk() || enemy2.hasDisk() || enemy3.hasDisk())){
-                team1Score++;
+                team2Score++;
                 inLeftEndZone=true;
             } else if (disk.getX()+diskWd/2 > w/6){
                 inLeftEndZone=false;
             }
 
             if (disk.getX()+diskWd/2*xScl >= w-w/6 && !inRightEndZone && player1.hasDisk()){
-                team2Score++;
+                team1Score++;
                 inRightEndZone=true;
                 resetAfterScore();
             } else if (disk.getX()+diskWd/2*xScl < w-w/6){
