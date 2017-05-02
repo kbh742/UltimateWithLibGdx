@@ -58,7 +58,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     static float xScl =w/WORLD_WIDTH;
     static float yScl =h/WORLD_HEIGHT;
 
-    public static final int GAME_TIME=180;
+    public static final int GAME_TIME=30;
 
     public static final float CAMERA_HEIGHT=500;
 
@@ -197,9 +197,9 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         enemy3 = new Player(1000, 700);
         cpuRotation = 0;
         cpu2Rotation = 0;
-        enemy1Rotation=0;
-        enemy2Rotation=0;
-        enemy3Rotation = 0;
+        enemy1Rotation=180;
+        enemy2Rotation=180;
+        enemy3Rotation = 180;
 //        camera=new OrthographicCamera();
 //        camera.setToOrtho(false,WORLD_WIDTH*xMultiplier,WORLD_HEIGHT*yMultiplier);
 //        camera.position.set(0,0,0);
@@ -368,7 +368,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         //Create new TouchPad with the created style
         touchpad = new Touchpad(10, touchpadStyle);
         //setBounds(x,y,width,height)
-        touchpad.setBounds(30*xScl, 30*yScl, 400*xScl, 400*yScl);
+        touchpad.setBounds(25,25,210,210);
 
 
         stage = new Stage();
@@ -626,7 +626,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 }
                 cpuRotation+=180;
             }
-            if(cpuDistToDisk <= catchableDistance && !cpuPlayer.hasDisk() && !cpuThrew && diskHeight < 80){
+            if(cpuDistToDisk <= catchableDistance && !cpuPlayer.hasDisk() && !cpuThrew && diskHeight < 80 && onOffense){
                 cpuPlayer.setHoldingDisk(true);
                 diskVx = 0;
                 diskVy = 0;
@@ -640,6 +640,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             }
             if(cpuPlayer.hasDisk()){
                 selectWaypoints.clear();
+                cpuAIReleased = true;
                 switchToPlayerWithDisk();
             }
 
@@ -655,7 +656,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 }
                 cpu2Rotation+=180;
             }
-            if(cpu2DistToDisk <= catchableDistance && !cpu2Player.hasDisk() && !cpu2Threw && diskHeight < 80){
+            if(cpu2DistToDisk <= catchableDistance && !cpu2Player.hasDisk() && !cpu2Threw && diskHeight < 80 && onOffense){
                 cpu2Player.setHoldingDisk(true);
                 diskVx = 0;
                 diskVy = 0;
@@ -669,6 +670,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             }
             if(cpu2Player.hasDisk()){
                 select2Waypoints.clear();
+                cpu2AIReleased = true;
                 switchToPlayerWithDisk();
             }
 
@@ -743,7 +745,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
 
             if (disk.getX()+diskWd/2 <= w/6 && !inLeftEndZone && !player1.hasDisk() && !cpuPlayer.hasDisk() && !cpu2Player.hasDisk() && (enemy1.hasDisk() || enemy2.hasDisk() || enemy3.hasDisk())){
-                team1Score++;
+                team2Score++;
                 inLeftEndZone=true;
                 resetAfterScore(false);
             } else if (disk.getX()+diskWd/2 > w/6){
@@ -751,7 +753,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             }
 
             if (disk.getX()+diskWd/2*xScl >= w-w/6 && !inRightEndZone && player1.hasDisk()){
-                team2Score++;
+                team1Score++;
                 inRightEndZone=true;
                 resetAfterScore(true);
             } else if (disk.getX()+diskWd/2*xScl < w-w/6){
@@ -842,9 +844,9 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         }
     }
 
-    private void movePlayerToPoint(Player player, float x, float y){
+/*    private void movePlayerToPoint(Player player, float x, float y){
 
-    }
+    }*/
 
     private double getDistanceToDisk(Player player){
         double distToDisk;
@@ -1301,9 +1303,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         Gdx.app.log("Tap", "AllyY"+allyY);
 
         float allyRotation = cpuRotation;
-        if (
-(Math.abs(x - allyX)<=20 && Math.abs(y - allyY)<=20)&&
-(!onOffense)){
+        if (/*(Math.abs(x - allyX)<=20 && Math.abs(y - allyY)<=20)&& */(!onOffense)){
             Gdx.app.log("Tap", "Tapping");
             cpuPlayer.setX(player1.getPosition().x);
             cpuPlayer.setY(player1.getPosition().y);
@@ -1424,6 +1424,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 if(cpuSpeed>45){
                     cpuSpeed = 45;
                 }
+                selectWaypoints.clear();
+                cpuWayPoint = 0;
                 int x = 0;
                 for(int i = input.size -1; i > 0; i--){
                     x++;
@@ -1444,6 +1446,9 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 if(cpu2Speed>45){
                     cpu2Speed = 45;
                 }
+                select2Waypoints.clear();
+                cpu2WayPoint = 0;
+
                 int x = 0;
                 for(int i = input.size -1; i > 0; i--){
                     x++;

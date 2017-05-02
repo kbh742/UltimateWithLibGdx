@@ -25,9 +25,7 @@ public class Player extends Sprite{
 
     public void setX(float xPos) {x = xPos;}
 
-    public void setY(float yPos) {
-        y = yPos;
-    }
+    public void setY(float yPos) {y = yPos;}
 
     public void setVelocity(int v) {velocity = v;}
 
