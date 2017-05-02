@@ -632,6 +632,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 diskVy = 0;
                 caughtTime = GAME_TIME-playTime;
                 cpuVelocityX = 0;
+                cpuVelocityY = 0;
             }
             else if(cpuDistToDisk > catchableDistance ){
                 cpuPlayer.setHoldingDisk(false);
@@ -1224,7 +1225,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         timeOfThrow = GAME_TIME-playTime;
     }
 
-public void smartRoute(ArrayList<Vector2> waypoints, Player player){
+    public void smartRoute(ArrayList<Vector2> waypoints, Player player){
         float xPt = waypoints.get(0).x;
         float yPt = waypoints.get(0).y;
         float xDist = (xPt) - (player.getPosition().x+playerWd/2);
@@ -1235,7 +1236,7 @@ public void smartRoute(ArrayList<Vector2> waypoints, Player player){
         cpuVelocityY = pVy;
     }
 
-
+ 
 
     void drawDebug() {
         Array<Vector2> input = swipe.input();
