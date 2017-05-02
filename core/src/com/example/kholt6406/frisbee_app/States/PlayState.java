@@ -626,7 +626,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 }
                 cpuRotation+=180;
             }
-            if(cpuDistToDisk <= catchableDistance && !cpuPlayer.hasDisk() && !cpuThrew && diskHeight < 80){
+            if(cpuDistToDisk <= catchableDistance && !cpuPlayer.hasDisk() && !cpuThrew && diskHeight < 80 && onOffense){
                 cpuPlayer.setHoldingDisk(true);
                 diskVx = 0;
                 diskVy = 0;
@@ -640,6 +640,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             }
             if(cpuPlayer.hasDisk()){
                 selectWaypoints.clear();
+                cpuAIReleased = true;
                 switchToPlayerWithDisk();
             }
 
@@ -655,7 +656,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 }
                 cpu2Rotation+=180;
             }
-            if(cpu2DistToDisk <= catchableDistance && !cpu2Player.hasDisk() && !cpu2Threw && diskHeight < 80){
+            if(cpu2DistToDisk <= catchableDistance && !cpu2Player.hasDisk() && !cpu2Threw && diskHeight < 80 && onOffense){
                 cpu2Player.setHoldingDisk(true);
                 diskVx = 0;
                 diskVy = 0;
@@ -669,6 +670,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             }
             if(cpu2Player.hasDisk()){
                 select2Waypoints.clear();
+                cpu2AIReleased = true;
                 switchToPlayerWithDisk();
             }
 
@@ -842,9 +844,9 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         }
     }
 
-    private void movePlayerToPoint(Player player, float x, float y){
+/*    private void movePlayerToPoint(Player player, float x, float y){
 
-    }
+    }*/
 
     private double getDistanceToDisk(Player player){
         double distToDisk;
@@ -1301,7 +1303,7 @@ public void smartRoute(ArrayList<Vector2> waypoints, Player player){
         Gdx.app.log("Tap", "AllyY"+allyY);
 
         float allyRotation = cpuRotation;
-        if ((Math.abs(x - allyX)<=20 && Math.abs(y - allyY)<=20)&& (!onOffense)){
+        if (/*(Math.abs(x - allyX)<=20 && Math.abs(y - allyY)<=20)&& */(!onOffense)){
             Gdx.app.log("Tap", "Tapping");
             cpuPlayer.setX(player1.getPosition().x);
             cpuPlayer.setY(player1.getPosition().y);
@@ -1422,6 +1424,8 @@ public void smartRoute(ArrayList<Vector2> waypoints, Player player){
                 if(cpuSpeed>45){
                     cpuSpeed = 45;
                 }
+                selectWaypoints.clear();
+                cpuWayPoint = 0;
                 int x = 0;
                 for(int i = input.size -1; i > 0; i--){
                     x++;
@@ -1442,6 +1446,9 @@ public void smartRoute(ArrayList<Vector2> waypoints, Player player){
                 if(cpu2Speed>45){
                     cpu2Speed = 45;
                 }
+                select2Waypoints.clear();
+                cpu2WayPoint = 0;
+
                 int x = 0;
                 for(int i = input.size -1; i > 0; i--){
                     x++;
