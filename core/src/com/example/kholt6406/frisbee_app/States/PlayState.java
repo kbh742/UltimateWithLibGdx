@@ -37,7 +37,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class PlayState extends State implements GestureDetector.GestureListener{
+class PlayState extends State implements GestureDetector.GestureListener{
     World world;
     Body body;
 
@@ -58,7 +58,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     static float xScl =w/WORLD_WIDTH;
     static float yScl =h/WORLD_HEIGHT;
 
-    public static final int GAME_TIME=30;
+    public static final int GAME_TIME=500;
 
     public static final float CAMERA_HEIGHT=500;
 
@@ -187,7 +187,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     boolean inRightEndZone=false;
     float playerRotationAtTimeOfThrow;
 
-    public PlayState(GameStateManager gsm) {
+    PlayState(GameStateManager gsm) {
         super(gsm);
         player1=new Player(400,400);
         cpuPlayer = new Player(800, 600);
@@ -1246,29 +1246,29 @@ public void smartRoute(ArrayList<Vector2> waypoints, Player player){
 
 
         //draw the raw input
-        shapes.begin(ShapeRenderer.ShapeType.Line);
+/*        shapes.begin(ShapeRenderer.ShapeType.Line);
         shapes.setColor(Color.GRAY);
         for (int i=0; i<input.size-1; i++) {
             Vector2 p = input.get(i);
             Vector2 p2 = input.get(i+1);
             shapes.line(p.x, p.y, p2.x, p2.y);
         }
-        shapes.end();
+        shapes.end();*/
 
         //draw the smoothed and simplified path
-        shapes.begin(ShapeRenderer.ShapeType.Line);
-        shapes.setColor(Color.RED);
+        shapes.begin(ShapeRenderer.ShapeType.Filled);
+        shapes.setColor(Color.WHITE);
         Array<Vector2> out = swipe.path();
         for (int i=0; i<out.size-1; i++) {
             Vector2 p = out.get(i);
             Vector2 p2 = out.get(i+1);
-            shapes.line(p.x, p.y, p2.x, p2.y);
+            shapes.rectLine(p.x, p.y, p2.x, p2.y,10);
         }
         shapes.end();
 
 
         //render our perpendiculars
-        shapes.begin(ShapeRenderer.ShapeType.Line);
+/*        shapes.begin(ShapeRenderer.ShapeType.Line);
         Vector2 perp = new Vector2();
 
         for (int i=1; i<input.size-1; i++) {
@@ -1284,7 +1284,7 @@ public void smartRoute(ArrayList<Vector2> waypoints, Player player){
             shapes.setColor(Color.BLUE);
             shapes.line(p.x, p.y, p.x+perp.x, p.y+perp.y);
         }
-        shapes.end();
+        shapes.end();*/
     }
 
     @Override
