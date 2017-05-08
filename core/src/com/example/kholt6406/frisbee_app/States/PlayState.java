@@ -240,12 +240,12 @@ class PlayState extends State implements GestureDetector.GestureListener{
         pauseButtonStyle= new ImageButton.ImageButtonStyle();  //create button style
         pauseButtonStyle.imageUp = pauseButtonSkin.getDrawable("pauseButton");  //sets the button appearance when it is not pressed
         pauseButton = new ImageButton(pauseButtonStyle);    //initializes the ImageButton with the created style as a parameter
-        pauseButton.setBounds(0,(WORLD_HEIGHT-pauseButton.getHeight())*yScl,pauseButton.getWidth()*xScl,pauseButton.getHeight()*yScl);
+        pauseButton.setBounds(0,(WORLD_HEIGHT-pauseButton.getHeight()),pauseButton.getWidth(),pauseButton.getHeight());
 
         scbdTexture = new Texture("scoreboard.png");
         scoreboard=new Sprite(scbdTexture);
-        scbdWd = scbdTexture.getWidth()*2*xScl;
-        scbdHt = scbdTexture.getHeight()*2*yScl;
+        scbdWd = scbdTexture.getWidth()*2;
+        scbdHt = scbdTexture.getHeight()*2;
         scoreboard.setSize(scbdWd, scbdHt);
         //scoreboardX=(w/2)-(scbdWd)/2;
         scoreboardX=w-scbdWd;
@@ -255,8 +255,8 @@ class PlayState extends State implements GestureDetector.GestureListener{
 
         scbdTexture = new Texture("scoreboard_left_offense.png");
         scoreboardLeft=new Sprite(scbdTexture);
-        scbdWd = scbdTexture.getWidth()*2*xScl;
-        scbdHt = scbdTexture.getHeight()*2*yScl;
+        scbdWd = scbdTexture.getWidth()*2;
+        scbdHt = scbdTexture.getHeight()*2;
         scoreboardLeft.setSize(scbdWd, scbdHt);
         //scoreboardX=(w/2)-(scbdWd)/2;
         scoreboardX=w-scbdWd;
@@ -266,8 +266,8 @@ class PlayState extends State implements GestureDetector.GestureListener{
 
         scbdTexture = new Texture("scoreboard_right_offense.png");
         scoreboardRight=new Sprite(scbdTexture);
-        scbdWd = scbdTexture.getWidth()*2*xScl;
-        scbdHt = scbdTexture.getHeight()*2*yScl;
+        scbdWd = scbdTexture.getWidth()*2;
+        scbdHt = scbdTexture.getHeight()*2;
         scoreboardRight.setSize(scbdWd, scbdHt);
         //scoreboardX=(w/2)-(scbdWd)/2;
         scoreboardX=w-scbdWd;
@@ -296,8 +296,8 @@ class PlayState extends State implements GestureDetector.GestureListener{
 
         diskTexture = new Texture("frisbee_snake.png");
         disk = new Sprite(diskTexture);
-        diskWd = diskTexture.getWidth()*xScl;
-        diskHt = diskTexture.getHeight()*yScl;
+        diskWd = diskTexture.getWidth();
+        diskHt = diskTexture.getHeight();
         disk.setSize(diskWd, diskHt);
 
         catchableDistance = 100;
@@ -541,8 +541,8 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 deltaY = 0;
             }
 
-            deltaX *= xScl;
-            deltaY *= yScl;
+            //deltaX *= xScl;
+            //deltaY *= yScl;
             player1.setX(xPos + deltaX * player1.getVelocity());
             player1.setY(yPos + deltaY * player1.getVelocity());
             enemy1.setX (enemy1.getPosition().x + enemy1VelocityX);
@@ -569,8 +569,8 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 int r = 50;
                 if(player1.hasDisk()) {
 
-                    disk.setX((float) (player1.getPosition().x + (playerWd * xScl) / 2 - diskWd / 2 + (r * (deltaX / Math.sqrt(deltaX * deltaX + deltaY * deltaY)))));
-                    disk.setY((float) (player1.getPosition().y + (playerHt * yScl) / 2 - diskHt / 2 + (r * (deltaY / Math.sqrt(deltaX * deltaX + deltaY * deltaY)))));
+                    disk.setX((float) (player1.getPosition().x + (playerWd) / 2 - diskWd / 2 + (r * (deltaX / Math.sqrt(deltaX * deltaX + deltaY * deltaY)))));
+                    disk.setY((float) (player1.getPosition().y + (playerHt) / 2 - diskHt / 2 + (r * (deltaY / Math.sqrt(deltaX * deltaX + deltaY * deltaY)))));
 
                 }
             }
@@ -694,6 +694,9 @@ class PlayState extends State implements GestureDetector.GestureListener{
             else if(enemy1distToDisk > catchableDistance ){
                 enemy1.setHoldingDisk(false);
             }
+            if(onOffense){
+                playDefense(enemy1, player1);
+            }
 
 
             enemy2distToDisk = getDistanceToDisk(enemy2);
@@ -714,6 +717,9 @@ class PlayState extends State implements GestureDetector.GestureListener{
             }
             else if(enemy2distToDisk > catchableDistance ){
                 enemy2.setHoldingDisk(false);
+            }
+            if(onOffense){
+                playDefense(enemy2, cpuPlayer);
             }
 
 
@@ -736,6 +742,9 @@ class PlayState extends State implements GestureDetector.GestureListener{
             else if(enemy3distToDisk > catchableDistance ){
                 enemy3.setHoldingDisk(false);
             }
+            if(onOffense){
+                playDefense(enemy3, cpu2Player);
+            }
 
 
             if(!player1.hasDisk()){
@@ -752,11 +761,11 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 inLeftEndZone=false;
             }
 
-            if (disk.getX()+diskWd/2*xScl >= w-w/6 && !inRightEndZone && player1.hasDisk()){
+            if (disk.getX()+diskWd/2 >= w-w/6 && !inRightEndZone && player1.hasDisk()){
                 team1Score++;
                 inRightEndZone=true;
                 resetAfterScore(true);
-            } else if (disk.getX()+diskWd/2*xScl < w-w/6){
+            } else if (disk.getX()+diskWd/2 < w-w/6){
                 inRightEndZone=false;
 
             }
@@ -847,6 +856,15 @@ class PlayState extends State implements GestureDetector.GestureListener{
 /*    private void movePlayerToPoint(Player player, float x, float y){
 
     }*/
+
+    private void playDefense(Player player, Player mark){
+        float xDist = (mark.getPosition().x) - (player.getPosition().x);
+        float yDist = (mark.getPosition().y) - (player.getPosition().y);
+        float Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+        float Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+        player.setX(player.getPosition().x + Vx);
+        player.setY(player.getPosition().y + Vy);
+    }
 
     private double getDistanceToDisk(Player player){
         double distToDisk;
