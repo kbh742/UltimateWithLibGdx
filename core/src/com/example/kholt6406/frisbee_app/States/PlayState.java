@@ -860,10 +860,12 @@ class PlayState extends State implements GestureDetector.GestureListener{
     private void playDefense(Player player, Player mark){
         float xDist = (mark.getPosition().x) - (player.getPosition().x);
         float yDist = (mark.getPosition().y) - (player.getPosition().y);
-        float Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-        float Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-        player.setX(player.getPosition().x + Vx);
-        player.setY(player.getPosition().y + Vy);
+        if(Math.sqrt(xDist*xDist + yDist*yDist) > catchableDistance || player.getPosition().x < mark.getPosition().x){
+            float Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+            float Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+            player.setX(player.getPosition().x + Vx);
+            player.setY(player.getPosition().y + Vy);
+        }
     }
 
     private double getDistanceToDisk(Player player){
@@ -1245,7 +1247,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
         timeOfThrow = GAME_TIME-playTime;
     }
 
-public void smartRoute(ArrayList<Vector2> waypoints, Player player){
+/*public void smartRoute(ArrayList<Vector2> waypoints, Player player){
         float xPt = waypoints.get(0).x;
         float yPt = waypoints.get(0).y;
         float xDist = (xPt) - (player.getPosition().x+playerWd/2);
@@ -1254,7 +1256,7 @@ public void smartRoute(ArrayList<Vector2> waypoints, Player player){
         float pVy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
         cpuVelocityX = pVx;
         cpuVelocityY = pVy;
-    }
+    }*/
 
 
 
@@ -1354,7 +1356,7 @@ public void smartRoute(ArrayList<Vector2> waypoints, Player player){
         //Gdx.app.log("Smart Swipe", "First Point: "+firstPoint);
         //Gdx.app.log("Smart Swipe", "Last Point: "+lastPoint);
         if(!changingPoss){
-            if((Math.abs(firstPoint.x - (disk.getX()+diskWd/2))<=20 && Math.abs(firstPoint.y - (disk.getY()+diskHt/2))<=20)&&(player1.hasDisk())&&onOffense){
+            if((Math.abs(firstPoint.x - (disk.getX()+diskWd/2))<=100 && Math.abs(firstPoint.y - (disk.getY()+diskHt/2))<=100)&&(player1.hasDisk())&&onOffense){
                 double averageVelocity = 0;
                 double acceleration = 0;
                 double arcLength = 0;
@@ -1429,7 +1431,7 @@ public void smartRoute(ArrayList<Vector2> waypoints, Player player){
                     Gdx.app.log("Disk", "diskInAir true");
                 }
 
-            } else if(Math.abs(firstPoint.x - (cpuPlayer.getPosition().x+playerWd/2)) <= 30 && Math.abs(firstPoint.y - (cpuPlayer.getPosition().y+playerHt/2)) <= 30){
+            } else if(Math.abs(firstPoint.x - (cpuPlayer.getPosition().x+playerWd/2)) <= 100 && Math.abs(firstPoint.y - (cpuPlayer.getPosition().y+playerHt/2)) <= 100){
                 cpuAIReleased = false;
                 //cpuPlayer.setVelocity(10);
 
@@ -1452,7 +1454,7 @@ public void smartRoute(ArrayList<Vector2> waypoints, Player player){
                     }
                 }
                 //smartRoute(selectWaypoints, cpuPlayer);
-            } else if(Math.abs(firstPoint.x - (cpu2Player.getPosition().x+playerWd/2)) <= 20 && Math.abs(firstPoint.y - (cpu2Player.getPosition().y+playerHt/2)) <= 20){
+            } else if(Math.abs(firstPoint.x - (cpu2Player.getPosition().x+playerWd/2)) <= 50 && Math.abs(firstPoint.y - (cpu2Player.getPosition().y+playerHt/2)) <= 50){
                 cpu2AIReleased = false;
                 //cpuPlayer.setVelocity(10);
                 double arcLength = 0;
