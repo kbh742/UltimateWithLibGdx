@@ -37,7 +37,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class PlayState extends State implements GestureDetector.GestureListener{
+class PlayState extends State implements GestureDetector.GestureListener{
     World world;
     Body body;
 
@@ -58,7 +58,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     static float xScl =w/WORLD_WIDTH;
     static float yScl =h/WORLD_HEIGHT;
 
-    public static final int GAME_TIME=30;
+    public static final int GAME_TIME=500;
 
     public static final float CAMERA_HEIGHT=500;
 
@@ -187,7 +187,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
     boolean inRightEndZone=false;
     float playerRotationAtTimeOfThrow;
 
-    public PlayState(GameStateManager gsm) {
+    PlayState(GameStateManager gsm) {
         super(gsm);
         player1=new Player(400,400);
         cpuPlayer = new Player(800, 600);
@@ -240,12 +240,12 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         pauseButtonStyle= new ImageButton.ImageButtonStyle();  //create button style
         pauseButtonStyle.imageUp = pauseButtonSkin.getDrawable("pauseButton");  //sets the button appearance when it is not pressed
         pauseButton = new ImageButton(pauseButtonStyle);    //initializes the ImageButton with the created style as a parameter
-        pauseButton.setBounds(0,(WORLD_HEIGHT-pauseButton.getHeight())*yScl,pauseButton.getWidth()*xScl,pauseButton.getHeight()*yScl);
+        pauseButton.setBounds(0,(WORLD_HEIGHT-pauseButton.getHeight()),pauseButton.getWidth(),pauseButton.getHeight());
 
         scbdTexture = new Texture("scoreboard.png");
         scoreboard=new Sprite(scbdTexture);
-        scbdWd = scbdTexture.getWidth()*2*xScl;
-        scbdHt = scbdTexture.getHeight()*2*yScl;
+        scbdWd = scbdTexture.getWidth()*2;
+        scbdHt = scbdTexture.getHeight()*2;
         scoreboard.setSize(scbdWd, scbdHt);
         //scoreboardX=(w/2)-(scbdWd)/2;
         scoreboardX=w-scbdWd;
@@ -255,8 +255,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
         scbdTexture = new Texture("scoreboard_left_offense.png");
         scoreboardLeft=new Sprite(scbdTexture);
-        scbdWd = scbdTexture.getWidth()*2*xScl;
-        scbdHt = scbdTexture.getHeight()*2*yScl;
+        scbdWd = scbdTexture.getWidth()*2;
+        scbdHt = scbdTexture.getHeight()*2;
         scoreboardLeft.setSize(scbdWd, scbdHt);
         //scoreboardX=(w/2)-(scbdWd)/2;
         scoreboardX=w-scbdWd;
@@ -266,8 +266,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
         scbdTexture = new Texture("scoreboard_right_offense.png");
         scoreboardRight=new Sprite(scbdTexture);
-        scbdWd = scbdTexture.getWidth()*2*xScl;
-        scbdHt = scbdTexture.getHeight()*2*yScl;
+        scbdWd = scbdTexture.getWidth()*2;
+        scbdHt = scbdTexture.getHeight()*2;
         scoreboardRight.setSize(scbdWd, scbdHt);
         //scoreboardX=(w/2)-(scbdWd)/2;
         scoreboardX=w-scbdWd;
@@ -296,8 +296,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
         diskTexture = new Texture("frisbee_snake.png");
         disk = new Sprite(diskTexture);
-        diskWd = diskTexture.getWidth()*xScl;
-        diskHt = diskTexture.getHeight()*yScl;
+        diskWd = diskTexture.getWidth();
+        diskHt = diskTexture.getHeight();
         disk.setSize(diskWd, diskHt);
 
         catchableDistance = 100;
@@ -541,8 +541,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 deltaY = 0;
             }
 
-            deltaX *= xScl;
-            deltaY *= yScl;
+            //deltaX *= xScl;
+            //deltaY *= yScl;
             player1.setX(xPos + deltaX * player1.getVelocity());
             player1.setY(yPos + deltaY * player1.getVelocity());
             enemy1.setX (enemy1.getPosition().x + enemy1VelocityX);
@@ -569,8 +569,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 int r = 50;
                 if(player1.hasDisk()) {
 
-                    disk.setX((float) (player1.getPosition().x + (playerWd * xScl) / 2 - diskWd / 2 + (r * (deltaX / Math.sqrt(deltaX * deltaX + deltaY * deltaY)))));
-                    disk.setY((float) (player1.getPosition().y + (playerHt * yScl) / 2 - diskHt / 2 + (r * (deltaY / Math.sqrt(deltaX * deltaX + deltaY * deltaY)))));
+                    disk.setX((float) (player1.getPosition().x + (playerWd) / 2 - diskWd / 2 + (r * (deltaX / Math.sqrt(deltaX * deltaX + deltaY * deltaY)))));
+                    disk.setY((float) (player1.getPosition().y + (playerHt) / 2 - diskHt / 2 + (r * (deltaY / Math.sqrt(deltaX * deltaX + deltaY * deltaY)))));
 
                 }
             }
@@ -694,6 +694,9 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             else if(enemy1distToDisk > catchableDistance ){
                 enemy1.setHoldingDisk(false);
             }
+            if(onOffense){
+                playDefense(enemy1, player1);
+            }
 
 
             enemy2distToDisk = getDistanceToDisk(enemy2);
@@ -714,6 +717,9 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             }
             else if(enemy2distToDisk > catchableDistance ){
                 enemy2.setHoldingDisk(false);
+            }
+            if(onOffense){
+                playDefense(enemy2, cpuPlayer);
             }
 
 
@@ -736,6 +742,9 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             else if(enemy3distToDisk > catchableDistance ){
                 enemy3.setHoldingDisk(false);
             }
+            if(onOffense){
+                playDefense(enemy3, cpu2Player);
+            }
 
 
             if(!player1.hasDisk()){
@@ -752,11 +761,11 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                 inLeftEndZone=false;
             }
 
-            if (disk.getX()+diskWd/2*xScl >= w-w/6 && !inRightEndZone && player1.hasDisk()){
+            if (disk.getX()+diskWd/2 >= w-w/6 && !inRightEndZone && player1.hasDisk()){
                 team1Score++;
                 inRightEndZone=true;
                 resetAfterScore(true);
-            } else if (disk.getX()+diskWd/2*xScl < w-w/6){
+            } else if (disk.getX()+diskWd/2 < w-w/6){
                 inRightEndZone=false;
 
             }
@@ -847,6 +856,17 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 /*    private void movePlayerToPoint(Player player, float x, float y){
 
     }*/
+
+    private void playDefense(Player player, Player mark){
+        float xDist = (mark.getPosition().x) - (player.getPosition().x);
+        float yDist = (mark.getPosition().y) - (player.getPosition().y);
+        if(Math.sqrt(xDist*xDist + yDist*yDist) > catchableDistance || player.getPosition().x < mark.getPosition().x){
+            float Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+            float Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+            player.setX(player.getPosition().x + Vx);
+            player.setY(player.getPosition().y + Vy);
+        }
+    }
 
     private double getDistanceToDisk(Player player){
         double distToDisk;
@@ -1248,7 +1268,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         timeOfThrow = GAME_TIME-playTime;
     }
 
-    public void smartRoute(ArrayList<Vector2> waypoints, Player player){
+/*public void smartRoute(ArrayList<Vector2> waypoints, Player player){
         float xPt = waypoints.get(0).x;
         float yPt = waypoints.get(0).y;
         float xDist = (xPt) - (player.getPosition().x+playerWd/2);
@@ -1257,9 +1277,9 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         float pVy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
         cpuVelocityX = pVx;
         cpuVelocityY = pVy;
-    }
+    }*/
 
- 
+
 
     void drawDebug() {
         Array<Vector2> input = swipe.input();
@@ -1267,29 +1287,29 @@ public class PlayState extends State implements GestureDetector.GestureListener{
 
 
         //draw the raw input
-        shapes.begin(ShapeRenderer.ShapeType.Line);
+/*        shapes.begin(ShapeRenderer.ShapeType.Line);
         shapes.setColor(Color.GRAY);
         for (int i=0; i<input.size-1; i++) {
             Vector2 p = input.get(i);
             Vector2 p2 = input.get(i+1);
             shapes.line(p.x, p.y, p2.x, p2.y);
         }
-        shapes.end();
+        shapes.end();*/
 
         //draw the smoothed and simplified path
-        shapes.begin(ShapeRenderer.ShapeType.Line);
-        shapes.setColor(Color.RED);
+        shapes.begin(ShapeRenderer.ShapeType.Filled);
+        shapes.setColor(Color.WHITE);
         Array<Vector2> out = swipe.path();
         for (int i=0; i<out.size-1; i++) {
             Vector2 p = out.get(i);
             Vector2 p2 = out.get(i+1);
-            shapes.line(p.x, p.y, p2.x, p2.y);
+            shapes.rectLine(p.x, p.y, p2.x, p2.y,10);
         }
         shapes.end();
 
 
         //render our perpendiculars
-        shapes.begin(ShapeRenderer.ShapeType.Line);
+/*        shapes.begin(ShapeRenderer.ShapeType.Line);
         Vector2 perp = new Vector2();
 
         for (int i=1; i<input.size-1; i++) {
@@ -1305,7 +1325,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             shapes.setColor(Color.BLUE);
             shapes.line(p.x, p.y, p.x+perp.x, p.y+perp.y);
         }
-        shapes.end();
+        shapes.end();*/
     }
 
     @Override
@@ -1357,7 +1377,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         //Gdx.app.log("Smart Swipe", "First Point: "+firstPoint);
         //Gdx.app.log("Smart Swipe", "Last Point: "+lastPoint);
         if(!changingPoss){
-            if((Math.abs(firstPoint.x - (disk.getX()+diskWd/2))<=20 && Math.abs(firstPoint.y - (disk.getY()+diskHt/2))<=20)&&(player1.hasDisk())&&onOffense){
+            if((Math.abs(firstPoint.x - (disk.getX()+diskWd/2))<=100 && Math.abs(firstPoint.y - (disk.getY()+diskHt/2))<=100)&&(player1.hasDisk())&&onOffense){
                 double averageVelocity = 0;
                 double acceleration = 0;
                 double arcLength = 0;
@@ -1432,7 +1452,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                     Gdx.app.log("Disk", "diskInAir true");
                 }
 
-            } else if(Math.abs(firstPoint.x - (cpuPlayer.getPosition().x+playerWd/2)) <= 70 && Math.abs(firstPoint.y - (cpuPlayer.getPosition().y+playerHt/2)) <= 70){
+            } else if(Math.abs(firstPoint.x - (cpuPlayer.getPosition().x+playerWd/2)) <= 100 && Math.abs(firstPoint.y - (cpuPlayer.getPosition().y+playerHt/2)) <= 100){
                 cpuAIReleased = false;
                 //cpuPlayer.setVelocity(10);
 
@@ -1455,7 +1475,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                     }
                 }
                 //smartRoute(selectWaypoints, cpuPlayer);
-            } else if(Math.abs(firstPoint.x - (cpu2Player.getPosition().x+playerWd/2)) <= 20 && Math.abs(firstPoint.y - (cpu2Player.getPosition().y+playerHt/2)) <= 20){
+            } else if(Math.abs(firstPoint.x - (cpu2Player.getPosition().x+playerWd/2)) <= 50 && Math.abs(firstPoint.y - (cpu2Player.getPosition().y+playerHt/2)) <= 50){
                 cpu2AIReleased = false;
                 //cpuPlayer.setVelocity(10);
                 double arcLength = 0;
