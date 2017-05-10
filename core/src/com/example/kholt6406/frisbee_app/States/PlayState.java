@@ -860,7 +860,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
     private void playDefense(Player player, Player mark){
         float xDist = (mark.getPosition().x) - (player.getPosition().x);
         float yDist = (mark.getPosition().y) - (player.getPosition().y);
-        if(Math.sqrt(xDist*xDist + yDist*yDist) > catchableDistance || player.getPosition().x < mark.getPosition().x){
+        if(Math.sqrt(xDist*xDist + yDist*yDist) > catchableDistance || player.getPosition().x < (mark.getPosition().x + catchableDistance)){
             float Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
             float Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
             player.setX(player.getPosition().x + Vx);
