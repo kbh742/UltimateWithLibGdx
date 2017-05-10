@@ -959,6 +959,8 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         //world.step(Gdx.graphics.getDeltaTime(), 6, 2);
         //player1.setPosition(body.getPosition().x, body.getPosition().y);
         //sb.setProjectionMatrix(camera.combined);
+        Gdx.app.log("Cpu1", ""+cpuAIReleased);
+        Gdx.app.log("Cpu2", ""+cpu2AIReleased);
         drawCounter++;
         sb.begin();
 
@@ -1101,6 +1103,10 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         changingPoss = false;
         selectWaypoints.clear();
         select2Waypoints.clear();
+        cpuWayPoint = 0;
+        cpu2WayPoint = 0;
+        cpuAIReleased = true;
+        cpu2AIReleased = true;
         player1.setX(w/6 - playerWd/2);
         player1.setY(h/2 - playerHt/2);
         rotation = 0;
@@ -1119,18 +1125,33 @@ public class PlayState extends State implements GestureDetector.GestureListener{
         enemy3.setX(5*w/6 - playerWd/2);
         enemy3.setY(h/2 - playerHt/2);
         enemy3Rotation = 180;
+        cpuVelocityX = 0;
+        cpuVelocityY = 0;
+        cpu2VelocityX = 0;
+        cpu2VelocityY = 0;
+        player1VelocityX = 0;
+        player1VelocityY = 0;
+        enemy1VelocityX = 0;
+        enemy1VelocityY = 0;
+        enemy2VelocityX = 0;
+        enemy2VelocityY = 0;
+        enemy3VelocityX = 0;
+        enemy3VelocityY = 0;
+        boolean isJohnGay = true;
         if(playerScored){
             disk.setX(5*w/6 - diskWd/2);
             disk.setY(h/2-diskHt/2);
             diskVx = 0;
             diskVy = 0;
+            onOffense = false;
             enemy3.setHoldingDisk(true);
-            changingPoss = true;
+            //changingPoss = true;
             } else {
             disk.setX(w/6 -diskWd/2);
             disk.setY(h/2 - diskHt/2);
             diskVx = 0;
             diskVy = 0;
+            onOffense = true;
             player1.setHoldingDisk(true);
         }
         cpuAIReleased = true;
@@ -1411,7 +1432,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
                     Gdx.app.log("Disk", "diskInAir true");
                 }
 
-            } else if(Math.abs(firstPoint.x - (cpuPlayer.getPosition().x+playerWd/2)) <= 30 && Math.abs(firstPoint.y - (cpuPlayer.getPosition().y+playerHt/2)) <= 30){
+            } else if(Math.abs(firstPoint.x - (cpuPlayer.getPosition().x+playerWd/2)) <= 70 && Math.abs(firstPoint.y - (cpuPlayer.getPosition().y+playerHt/2)) <= 70){
                 cpuAIReleased = false;
                 //cpuPlayer.setVelocity(10);
 
@@ -1460,7 +1481,7 @@ public class PlayState extends State implements GestureDetector.GestureListener{
             }
         }
 
-Gdx.app.log("Swipe", "Completed");
+        Gdx.app.log("Swipe", "Completed");
         if(Math.abs(velocityX)>Math.abs(velocityY)){
             if(velocityX>0){
                 Gdx.app.log("Swipe", "Right");
