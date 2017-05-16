@@ -3,7 +3,6 @@ package com.example.kholt6406.frisbee_app.States;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -20,22 +19,15 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Timer;
 import com.example.kholt6406.frisbee_app.sprites.Player;
 import com.example.kholt6406.frisbee_app.swipe.SwipeHandler;
 import com.example.kholt6406.frisbee_app.swipe.mesh.SwipeTriStrip;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 class PlayState extends State implements GestureDetector.GestureListener{
     World world;
@@ -50,7 +42,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
     float yPos;
     float playerWd;
     float playerHt;
-
+    LinkedHashMap<Player,Boolean> playerPossData = new LinkedHashMap<Player, Boolean>();
     OrthographicCamera camera;
 
     public static final int WORLD_WIDTH=1920;
@@ -371,6 +363,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
         touchpad.setBounds(25,25,210,210);
 
 
+
         stage = new Stage();
         stage.addActor(touchpad);
         stage.addActor(pauseButton);
@@ -577,7 +570,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
 
             keepPlayerInBounds();
 
-            if(!player1.hasDisk() && !cpuPlayer.hasDisk() && !cpu2Player.hasDisk() && !enemy1.hasDisk() && !enemy2.hasDisk() && !enemy3.hasDisk()) {
+            if(!player1.hasDisk() && !cpuPlayer.hasDisk() && !cpu2Player.hasDisk() && !playerPossData.containsValue(true)) {
                 sideV += diskCurve;
                 double alpha = Math.toRadians(playerRotationAtTimeOfThrow - 90);
 
@@ -590,7 +583,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 }
             }
 
-            if(!player1.hasDisk() && !cpuPlayer.hasDisk() && !cpu2Player.hasDisk() && !enemy1.hasDisk() && !enemy2.hasDisk() && !enemy3.hasDisk()){
+            if(!player1.hasDisk() && !cpuPlayer.hasDisk() && !cpu2Player.hasDisk() && !playerPossData.containsValue(true)){
                 keepDiskInBounds();
             }
 
@@ -686,7 +679,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 }
                 enemy1Rotation+=180;
             }
-            if(enemy1distToDisk <= catchableDistance && !enemy1.hasDisk() && diskHeight < 80){
+            if(enemy1distToDisk <= catchableDistance && !playerPossData.get(player1) && diskHeight < 80){
                 enemy1.setHoldingDisk(true);
                 diskVx = 0;
                 diskVy = 0;
@@ -710,7 +703,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 }
                 enemy2Rotation+=180;
             }
-            if(enemy2distToDisk <= catchableDistance && !enemy2.hasDisk() && diskHeight < 80){
+            if(enemy2distToDisk <= catchableDistance && !playerPossData.get(cpuPlayer) && diskHeight < 80){
                 enemy2.setHoldingDisk(true);
                 diskVx = 0;
                 diskVy = 0;
@@ -734,7 +727,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 }
                 enemy3Rotation+=180;
             }
-            if(enemy3distToDisk <= catchableDistance && !enemy3.hasDisk() && diskHeight < 80){
+            if(enemy3distToDisk <= catchableDistance && !playerPossData.get(cpu2Player) && diskHeight < 80){
                 enemy3.setHoldingDisk(true);
                 diskVx = 0;
                 diskVy = 0;
@@ -745,6 +738,9 @@ class PlayState extends State implements GestureDetector.GestureListener{
             if(onOffense){
                 playDefense(enemy3, cpu2Player);
             }
+            if (!onOffense){
+                playOffense();
+            }
 
 
             if(!player1.hasDisk()){
@@ -753,7 +749,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
             }
 
 
-            if (disk.getX()+diskWd/2 <= w/6 && !inLeftEndZone && !player1.hasDisk() && !cpuPlayer.hasDisk() && !cpu2Player.hasDisk() && (enemy1.hasDisk() || enemy2.hasDisk() || enemy3.hasDisk())){
+            if (disk.getX()+diskWd/2 <= w/6 && !inLeftEndZone && !player1.hasDisk() && !cpuPlayer.hasDisk() && !cpu2Player.hasDisk() && playerPossData.containsValue(true)){
                 team2Score++;
                 inLeftEndZone=true;
                 resetAfterScore(false);
@@ -806,6 +802,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 Gdx.app.log("enemy1distToDisk", ""+ enemy1distToDisk);
                 if(getDistanceToDisk(enemy1) < catchableDistance){
                     changingPoss = false;
+                    enemy1.setHoldingDisk(true);
                     p1Threw = false;
                 }
             } else if((enemy2distToDisk < enemy1distToDisk)&&(enemy2distToDisk < enemy3distToDisk)){
@@ -825,6 +822,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
 
                 if(getDistanceToDisk(enemy2) < catchableDistance){
                     changingPoss = false;
+                    enemy2.setHoldingDisk(true);
                     p1Threw = false;
                 }
             } else if((enemy3distToDisk < enemy1distToDisk)&&(enemy3distToDisk < enemy2distToDisk)){
@@ -844,6 +842,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
 
                 if(getDistanceToDisk(enemy3) < catchableDistance){
                     changingPoss = false;
+                    enemy3.setHoldingDisk(true);
                     p1Threw = false;
                 }
             }
@@ -865,6 +864,19 @@ class PlayState extends State implements GestureDetector.GestureListener{
         player.setX(player.getPosition().x + Vx);
         player.setY(player.getPosition().y + Vy);
     }
+
+    private void playOffense(){
+        Vector2 enemyPosition=new Vector2(getEnemyWithPossession().getX(),getEnemyWithPossession().getY());
+        Gdx.app.error("Enemy With Possession",enemyPosition.toString());
+    }
+
+    private Player getEnemyWithPossession (){
+        ArrayList<Boolean> valueArray=new ArrayList<Boolean>(playerPossData.values());
+        ArrayList<Player> keyArray=new ArrayList<Player>(playerPossData.keySet());
+        int indexOfTrue=valueArray.indexOf(true);
+        return keyArray.get(indexOfTrue);
+    }
+
 
     private double getDistanceToDisk(Player player){
         double distToDisk;
@@ -955,6 +967,14 @@ class PlayState extends State implements GestureDetector.GestureListener{
         players.add(enemy1);
         players.add(enemy2);
         players.add(enemy3);
+
+        playerPossData.put(player1,false);
+        playerPossData.put(cpuPlayer,false);
+        playerPossData.put(cpu2Player,false);
+        playerPossData.put(enemy1,false);
+        playerPossData.put(enemy2,false);
+        playerPossData.put(enemy3,false);
+
 
         for(Player p : players){
             if (p.getPosition().x + playerWd/2 <= 0) {
@@ -1161,7 +1181,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
         onOffense = !(onOffense);
         if(player1.hasDisk()){
             player1.setHoldingDisk(false);
-        } else if (enemy1.hasDisk()){
+        } else if (playerPossData.get(player1)){
             enemy1.setHoldingDisk(false);
         }
         diskHeight = -100;
