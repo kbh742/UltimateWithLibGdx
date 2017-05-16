@@ -94,6 +94,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
     boolean p1Threw = false;
     boolean cpuThrew = false;
     boolean cpu2Threw = false;
+    boolean enemyThrew = false;
 
     boolean cpuAIReleased;
     boolean cpu2AIReleased;
@@ -478,6 +479,13 @@ class PlayState extends State implements GestureDetector.GestureListener{
 
             }
 
+            if(enemy1.hasDisk()||enemy2.hasDisk()||enemy3.hasDisk()){
+                stallTime = (GAME_TIME-playTime) - caughtTime;
+
+                onOffense = false;
+                diskHeight = -50;
+            }
+
             //Duncan is stupid
             Gdx.app.log("Waypoints", "cpuAIReleased: " + cpuAIReleased);
             if(cpuAIReleased == false){
@@ -598,6 +606,15 @@ class PlayState extends State implements GestureDetector.GestureListener{
                     disk.setX((float) (player1.getPosition().x + (playerWd) / 2 - diskWd / 2 + (r * (deltaX / Math.sqrt(deltaX * deltaX + deltaY * deltaY)))));
                     disk.setY((float) (player1.getPosition().y + (playerHt) / 2 - diskHt / 2 + (r * (deltaY / Math.sqrt(deltaX * deltaX + deltaY * deltaY)))));
 
+                } else if (enemy1.hasDisk()){
+                    //disk.setX((float) (enemy1.getPosition().x + (playerWd) / 2 - diskWd / 2 + (r * (Math.toDegrees(Math.cos(180-enemy1Rotation))))));
+                    //disk.setY((float) (enemy1.getPosition().y + (playerHt) / 2 - diskHt / 2 + (r * (Math.toDegrees(Math.sin(180-enemy1Rotation))))));
+                } else if (enemy2.hasDisk()){
+                    //disk.setX((float) (enemy2.getPosition().x + (playerWd) / 2 - diskWd / 2 + (r * (Math.toDegrees(Math.cos(180-enemy1Rotation))))));
+                    //disk.setY((float) (enemy2.getPosition().y + (playerHt) / 2 - diskHt / 2 + (r * (Math.toDegrees(Math.sin(180-enemy1Rotation))))));
+                } else if (enemy3.hasDisk()){
+                    //disk.setX((float) (enemy2.getPosition().x + (playerWd) / 2 - diskWd / 2 + (r * (Math.toDegrees(Math.cos(180-enemy1Rotation))))));
+                    //disk.setY((float) (enemy2.getPosition().y + (playerHt) / 2 - diskHt / 2 + (r * (Math.toDegrees(Math.sin(180-enemy1Rotation))))));
                 }
             }
 
@@ -631,12 +648,12 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 Gdx.app.log("Catching", "Caught" + caughtTime);
                 //cpuVelocityX = 0;
                 //cpuVelocityY = 0;
-
+                enemyThrew = false;
 
             }
             else if(player1DistToDisk > catchableDistance){
                 player1.setHoldingDisk(false);
-                //p1Threw = false;
+                p1Threw = false;
             }
 
 
@@ -659,6 +676,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 caughtTime = GAME_TIME-playTime;
                 cpuVelocityX = 0;
                 cpuVelocityY = 0;
+                enemyThrew = false;
             }
             else if(cpuDistToDisk > catchableDistance ){
                 cpuPlayer.setHoldingDisk(false);
@@ -689,6 +707,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 caughtTime = GAME_TIME-playTime;
                 cpu2VelocityX = 0;
                 cpu2VelocityY = 0;
+                enemyThrew = false;
             }
             else if(cpu2DistToDisk > catchableDistance ){
                 cpu2Player.setHoldingDisk(false);
@@ -712,10 +731,11 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 }
                 enemy1Rotation+=180;
             }
-            if(enemy1distToDisk <= catchableDistance && !enemy1.hasDisk() && diskHeight < 80){
+            if(enemy1distToDisk <= catchableDistance && !enemy1.hasDisk() && diskHeight < 80 && !enemyThrew && !player1.hasDisk()){
                 enemy1.setHoldingDisk(true);
                 diskVx = 0;
                 diskVy = 0;
+                caughtTime = GAME_TIME-playTime;
             }
             else if(enemy1distToDisk > catchableDistance ){
                 enemy1.setHoldingDisk(false);
@@ -734,10 +754,11 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 }
                 enemy2Rotation+=180;
             }
-            if(enemy2distToDisk <= catchableDistance && !enemy2.hasDisk() && diskHeight < 80){
+            if(enemy2distToDisk <= catchableDistance && !enemy2.hasDisk() && diskHeight < 80 && !enemyThrew && !player1.hasDisk()){
                 enemy2.setHoldingDisk(true);
                 diskVx = 0;
                 diskVy = 0;
+                caughtTime = GAME_TIME-playTime;
             }
             else if(enemy2distToDisk > catchableDistance ){
                 enemy2.setHoldingDisk(false);
@@ -756,10 +777,11 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 }
                 enemy3Rotation+=180;
             }
-            if(enemy3distToDisk <= catchableDistance && !enemy3.hasDisk() && diskHeight < 80){
+            if(enemy3distToDisk <= catchableDistance && !enemy3.hasDisk() && diskHeight < 80 && !enemyThrew && !player1.hasDisk()){
                 enemy3.setHoldingDisk(true);
                 diskVx = 0;
                 diskVy = 0;
+                caughtTime = GAME_TIME-playTime;
             }
             else if(enemy3distToDisk > catchableDistance ){
                 enemy3.setHoldingDisk(false);
@@ -1061,7 +1083,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
         sb.draw(background, 0,0, w, h);
         float stallWidth = Gdx.graphics.getWidth()/2;
         float stallX = Gdx.graphics.getWidth()/4;
-        if(stallTime>0 && onOffense){
+        if(stallTime>0/* && onOffense*/){
             if(stallTime<1){
                 sb.draw(stallCount10, stallX, 0, stallWidth, h);
             } else if (stallTime <2){
@@ -1086,10 +1108,17 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 timeOfStall = GAME_TIME-playTime;
                 stallTime = 0;
                 airTime = 0;
+                if(onOffense){
+                    changingPoss = true;
+                    p1Threw = true;
+                } else {
+                    enemyThrew = true;
+                }
                 turnover();
                 diskInAir = false;
-                changingPoss = true;
-                p1Threw = true;
+
+
+
                 airTime = 0;
 
             } else {
