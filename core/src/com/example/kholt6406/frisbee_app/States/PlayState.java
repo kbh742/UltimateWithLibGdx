@@ -907,35 +907,35 @@ class PlayState extends State implements GestureDetector.GestureListener{
 
     }*/
 
-    private void playDefense(Player player, Player mark){
-        boolean run = false;
+    private void playDefense(Player defender, Player mark){
         player1.setRot(rotation);
         cpuPlayer.setRot(cpuRotation);
         cpu2Player.setRot(cpu2Rotation);
         defender.setRot(mark.getRot() + 180);
-        float xDist = (mark.getPosition().x) - (player.getPosition().x);
-        float yDist = (mark.getPosition().y) - (player.getPosition().y);
-        if(Math.sqrt(xDist*xDist + yDist*yDist) > catchableDistance || player.getPosition().x < (mark.getPosition().x + catchableDistance)){
-            run = true;
-            float Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-            float Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-            player.setX(player.getPosition().x + Vx);
-            player.setY(player.getPosition().y + Vy);
-        }
-        /*else if(Math.sqrt(xDist*xDist + yDist*yDist) == catchableDistance){
-            run = true;
-            float x = catchableDistance*(float)Math.sin(mark.getRot());
-            float y = catchableDistance*(float)Math.cos(mark.getRot());
-            xDist = x-defender.getPosition().x;
-            yDist = y-defender.getPosition().y;
+        float xDist = (mark.getPosition().x) - (defender.getPosition().x);
+        float yDist = (mark.getPosition().y) - (defender.getPosition().y);
+        float Vx=0;
+        float Vy=0;
+        if(Math.sqrt(xDist*xDist + yDist*yDist) > catchableDistance && !mark.hasDisk()){
+            //Gdx.app.log("running", "1");
+            Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+            Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+
 
         }
-        if(run){
-            float Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-            float Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-            defender.setX(defender.getPosition().x + Vx);
-            defender.setY(defender.getPosition().y + Vy);
-        }*/
+        if(mark.hasDisk()){
+            Gdx.app.log("running", "2");
+            Gdx.app.log("running",""+mark.getRot());
+
+            float dx = (disk.getX())-defender.getPosition().x;
+            float dy = (disk.getY())-defender.getPosition().y;
+            Vx = 5f * (dx / ((float) Math.sqrt(dx * dx + dy * dy)));
+            Vy = 5f * (dy / ((float) Math.sqrt(dx * dx + dy * dy)));
+        }
+
+        defender.setX(defender.getPosition().x + Vx);
+        defender.setY(defender.getPosition().y + Vy);
+        //Gdx.app.log("running", ""+Math.sqrt(xDist*xDist + yDist*yDist));
 
     }
 
@@ -1107,14 +1107,14 @@ class PlayState extends State implements GestureDetector.GestureListener{
             } else if (stallTime <10){
                 sb.draw(stallCount1, stallX, 0, stallWidth, h);
             } else if (stallTime < 11){
-                timeOfStall = GAME_TIME-playTime;
-                stallTime = 0;
-                airTime = 0;
-                turnover();
-                diskInAir = false;
-                changingPoss = true;
-                p1Threw = true;
-                airTime = 0;
+//                timeOfStall = GAME_TIME-playTime;
+//                stallTime = 0;
+//                airTime = 0;
+//                turnover();
+//                diskInAir = false;
+//                changingPoss = true;
+//                p1Threw = true;
+//                airTime = 0;
 
             } else {
 
