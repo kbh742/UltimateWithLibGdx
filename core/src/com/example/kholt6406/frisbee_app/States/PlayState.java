@@ -303,7 +303,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
         //Swipes
 
         tris = new SwipeTriStrip();
-        swipe = new SwipeHandler(250);
+        swipe = new SwipeHandler(256);
         swipe.minDistance = 1;
         swipe.initialDistance = 1;
         tex = new Texture("gradient.png");
@@ -751,8 +751,8 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 }
                 enemy1Rotation+=180;
             }
-            enemy1.setRot(enemy1Rotation);
-            if(enemy1distToDisk <= catchableDistance && !enemy1.hasDisk() && diskHeight < 80 && !enemyThrew && !player1.hasDisk()){
+            enemy1.setRot(enemy1Rotation); //Line below is John's cancerous work in progress
+            if((enemy1distToDisk <= catchableDistance && !enemy1.hasDisk() && diskHeight < 80 && !enemyThrew && !player1.hasDisk())||(distanceBetweenPlayers(enemy1, player1) <= 151 && enemy1distToDisk <= catchableDistance/2 && !enemy1.hasDisk() && diskHeight < 80 && !enemyThrew && !player1.hasDisk())){
                 enemy1.setHoldingDisk(true);
                 diskVx = 0;
                 diskVy = 0;
@@ -850,7 +850,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 inLeftEndZone=false;
             }
 
-            if (disk.getX()+diskWd/2 >= w-w/6 && !inRightEndZone && player1.hasDisk()){
+            if (disk.getX()+diskWd/2 >= w-w/6 && !inRightEndZone && (player1.hasDisk() || cpuPlayer.hasDisk() || cpu2Player.hasDisk())){
                 team1Score++;
                 inRightEndZone=true;
                 resetAfterScore(true);
@@ -967,14 +967,18 @@ class PlayState extends State implements GestureDetector.GestureListener{
 
 
             }
-            if (mark.hasDisk()) {
+            else if (mark.hasDisk()) {
+                float totalV = 5f;
+                if(Math.sqrt(xDist * xDist + yDist * yDist) < catchableDistance){
+                    totalV=2f;
+                }
                 Gdx.app.log("running", "2");
                 Gdx.app.log("running", "" + mark.getRot());
 
-                float dx = (disk.getX()) - defender.getPosition().x;
-                float dy = (disk.getY()) - defender.getPosition().y;
-                Vx = 5f * (dx / ((float) Math.sqrt(dx * dx + dy * dy)));
-                Vy = 5f * (dy / ((float) Math.sqrt(dx * dx + dy * dy)));
+                float dx = (mark.getPosition().x +playerWd/2 + 3*((disk.getX() + diskWd/2)-(mark.getPosition().x + playerWd/2))) - (defender.getPosition().x + playerWd/2);
+                float dy = (mark.getPosition().y +playerHt/2 + 3*((disk.getY() + diskHt/2)-(mark.getPosition().y + playerHt/2))) - (defender.getPosition().y + playerHt/2);
+                Vx = totalV * (dx / ((float) Math.sqrt(dx * dx + dy * dy)));
+                Vy = totalV * (dy / ((float) Math.sqrt(dx * dx + dy * dy)));
             }
 
             defender.setX(defender.getPosition().x + Vx);
