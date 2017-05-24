@@ -587,7 +587,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
             yPos = player1.getPosition().y;
             float deltaX = touchpad.getKnobPercentX();
             float deltaY = touchpad.getKnobPercentY();
-            if(changingPoss && !p1Threw){
+            if(changingPoss && p1Threw){
                 deltaX = 0;
                 deltaY = 0;
             }
@@ -642,7 +642,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
 
             keepPlayerInBounds();
 
-            if(!player1.hasDisk() && !cpuPlayer.hasDisk() && !cpu2Player.hasDisk() && !playerPossData.containsValue(true)) {
+            if(!player1.hasDisk() && !cpuPlayer.hasDisk() && !cpu2Player.hasDisk() && !enemy1.hasDisk() && !enemy2.hasDisk() && !enemy3.hasDisk()) {
                 sideV += diskCurve;
                 double alpha = Math.toRadians(playerRotationAtTimeOfThrow - 90);
 
@@ -657,7 +657,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 }
             }
 
-            if(!player1.hasDisk() && !cpuPlayer.hasDisk() && !cpu2Player.hasDisk() && !playerPossData.containsValue(true)){
+            if(!player1.hasDisk() && !cpuPlayer.hasDisk() && !cpu2Player.hasDisk() && !enemy1.hasDisk() && !enemy2.hasDisk() && !enemy3.hasDisk()){
                 keepDiskInBounds();
             }
 
@@ -862,21 +862,30 @@ class PlayState extends State implements GestureDetector.GestureListener{
             }
 
 
-            if (disk.getX()+diskWd/2 <= w/6 && !inLeftEndZone && !player1.hasDisk() && !cpuPlayer.hasDisk() && !cpu2Player.hasDisk() && playerPossData.containsValue(true)){
-                team2Score++;
+            if (disk.getX()+diskWd/2 <= w/6 && !inLeftEndZone){
                 inLeftEndZone=true;
-                resetAfterScore(false);
+                if(enemy1.hasDisk() || enemy2.hasDisk() || enemy3.hasDisk()){
+                    team2Score++;
+                    resetAfterScore(false);
+                }
             } else if (disk.getX()+diskWd/2 > w/6){
                 inLeftEndZone=false;
             }
 
-            if (disk.getX()+diskWd/2 >= w-w/6 && !inRightEndZone && player1.hasDisk()){
-                team1Score++;
+            if (disk.getX()+diskWd/2 >= w-w/6 && !inRightEndZone){
                 inRightEndZone=true;
-                resetAfterScore(true);
+                if(player1.hasDisk() || cpuPlayer.hasDisk() || cpu2Player.hasDisk()){
+                    team1Score++;
+                    resetAfterScore(true);
+                }
             } else if (disk.getX()+diskWd/2 < w-w/6){
                 inRightEndZone=false;
-
+            }
+            if(inRightEndZone && diskHeight == -100){
+                disk.setX(w-w/6-diskWd/2);
+            }
+            if(inLeftEndZone && diskHeight == -100){
+                disk.setX(w/6+diskWd/2);
             }
 
         }
@@ -1191,14 +1200,6 @@ class PlayState extends State implements GestureDetector.GestureListener{
         players.add(enemy1);
         players.add(enemy2);
         players.add(enemy3);
-
-        playerPossData.put(player1,false);
-        playerPossData.put(cpuPlayer,false);
-        playerPossData.put(cpu2Player,false);
-        playerPossData.put(enemy1,false);
-        playerPossData.put(enemy2,false);
-        playerPossData.put(enemy3,false);
-
 
         for(Player p : players){
             if (p.getPosition().x + playerWd/2 <= 0) {
