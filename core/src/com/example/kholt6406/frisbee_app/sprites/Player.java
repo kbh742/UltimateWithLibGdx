@@ -11,12 +11,14 @@ public class Player extends Sprite{
     private float velocity;
     private Texture player;
     private boolean hasDisk;
+    private float rotation;
     float x = 0;
     float y = 0;
 
     public Player(int x0, int y0){
         position=new Vector2(x0, y0);
         velocity= 0;
+        rotation = 0;
         player=new Texture("idle.png");
         x=x0;
         y=y0;
@@ -28,6 +30,8 @@ public class Player extends Sprite{
     public void setY(float yPos) {y = yPos;}
 
     public void setVelocity(int v) {velocity = v;}
+
+    public void setRot(float r) { rotation = r;}
 
     public void update(float dt){
         //velocity.scl(dt);
@@ -46,4 +50,6 @@ public class Player extends Sprite{
     }
 
     public boolean hasDisk() {return hasDisk; }
+
+    public float getRot() { return rotation;}
 }
