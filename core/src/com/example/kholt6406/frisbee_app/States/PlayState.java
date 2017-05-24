@@ -581,7 +581,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
             yPos = player1.getPosition().y;
             float deltaX = touchpad.getKnobPercentX();
             float deltaY = touchpad.getKnobPercentY();
-            if(changingPoss && !p1Threw){
+            if(changingPoss && p1Threw){
                 deltaX = 0;
                 deltaY = 0;
             }
@@ -837,21 +837,30 @@ class PlayState extends State implements GestureDetector.GestureListener{
             }
 
 
-            if (disk.getX()+diskWd/2 <= w/6 && !inLeftEndZone && !player1.hasDisk() && !cpuPlayer.hasDisk() && !cpu2Player.hasDisk() && (enemy1.hasDisk() || enemy2.hasDisk() || enemy3.hasDisk())){
-                team2Score++;
+            if (disk.getX()+diskWd/2 <= w/6 && !inLeftEndZone){
                 inLeftEndZone=true;
-                resetAfterScore(false);
+                if(enemy1.hasDisk() || enemy2.hasDisk() || enemy3.hasDisk()){
+                    team2Score++;
+                    resetAfterScore(false);
+                }
             } else if (disk.getX()+diskWd/2 > w/6){
                 inLeftEndZone=false;
             }
 
-            if (disk.getX()+diskWd/2 >= w-w/6 && !inRightEndZone && player1.hasDisk()){
-                team1Score++;
+            if (disk.getX()+diskWd/2 >= w-w/6 && !inRightEndZone){
                 inRightEndZone=true;
-                resetAfterScore(true);
+                if(player1.hasDisk() || cpuPlayer.hasDisk() || cpu2Player.hasDisk()){
+                    team1Score++;
+                    resetAfterScore(true);
+                }
             } else if (disk.getX()+diskWd/2 < w-w/6){
                 inRightEndZone=false;
-
+            }
+            if(inRightEndZone && diskHeight == -100){
+                disk.setX(w-w/6-diskWd);
+            }
+            if(inLeftEndZone && diskHeight == -100){
+                disk.setX(w/6+diskWd);
             }
 
         }
