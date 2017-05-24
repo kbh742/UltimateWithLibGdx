@@ -317,6 +317,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
         catchableDistance = 100;
 
         player1.setHoldingDisk(true);
+        playerPossData.replace(player1,true);
         player1.setX(w/6 - playerWd/2);
         player1.setY((h)/2 - playerHt/2);
 
@@ -618,6 +619,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
             //Gdx.app.log("p1threw", ""+p1Threw);
             if(player1DistToDisk <= catchableDistance && !player1.hasDisk() && !p1Threw && onOffense && diskHeight < 80){
                 player1.setHoldingDisk(true);
+                playerPossData.replace(player1,true);
                 diskVx = 0;
                 diskVy = 0;
                 caughtTime = GAME_TIME-playTime;
@@ -629,6 +631,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
             }
             else if(player1DistToDisk > catchableDistance){
                 player1.setHoldingDisk(false);
+                playerPossData.replace(player1,false);
                 //p1Threw = false;
             }
 
@@ -647,6 +650,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
             }
             if(cpuDistToDisk <= catchableDistance && !cpuPlayer.hasDisk() && !cpuThrew && diskHeight < 80 && onOffense){
                 cpuPlayer.setHoldingDisk(true);
+                playerPossData.replace(cpuPlayer,true);
                 diskVx = 0;
                 diskVy = 0;
                 caughtTime = GAME_TIME-playTime;
@@ -655,6 +659,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
             }
             else if(cpuDistToDisk > catchableDistance ){
                 cpuPlayer.setHoldingDisk(false);
+                playerPossData.replace(cpuPlayer,false);
                 cpuThrew = false;
             }
             if(cpuPlayer.hasDisk()){
@@ -677,6 +682,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
             }
             if(cpu2DistToDisk <= catchableDistance && !cpu2Player.hasDisk() && !cpu2Threw && diskHeight < 80 && onOffense){
                 cpu2Player.setHoldingDisk(true);
+                playerPossData.replace(cpu2Player,true);
                 diskVx = 0;
                 diskVy = 0;
                 caughtTime = GAME_TIME-playTime;
@@ -685,6 +691,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
             }
             else if(cpu2DistToDisk > catchableDistance ){
                 cpu2Player.setHoldingDisk(false);
+                playerPossData.replace(cpu2Player,false);
                 cpu2Threw = false;
             }
             if(cpu2Player.hasDisk()){
@@ -707,11 +714,13 @@ class PlayState extends State implements GestureDetector.GestureListener{
             }
             if(enemy1distToDisk <= catchableDistance && !playerPossData.get(player1) && diskHeight < 80){
                 enemy1.setHoldingDisk(true);
+                playerPossData.replace(enemy1,true);
                 diskVx = 0;
                 diskVy = 0;
             }
             else if(enemy1distToDisk > catchableDistance ){
                 enemy1.setHoldingDisk(false);
+                playerPossData.replace(enemy1,false);
             }
 
 
@@ -729,11 +738,13 @@ class PlayState extends State implements GestureDetector.GestureListener{
             }
             if(enemy2distToDisk <= catchableDistance && !playerPossData.get(cpuPlayer) && diskHeight < 80){
                 enemy2.setHoldingDisk(true);
+                playerPossData.replace(enemy2,true);
                 diskVx = 0;
                 diskVy = 0;
             }
             else if(enemy2distToDisk > catchableDistance ){
                 enemy2.setHoldingDisk(false);
+                playerPossData.replace(enemy2,false);
             }
 
 
@@ -751,11 +762,13 @@ class PlayState extends State implements GestureDetector.GestureListener{
             }
             if(enemy3distToDisk <= catchableDistance && !playerPossData.get(cpu2Player) && diskHeight < 80){
                 enemy3.setHoldingDisk(true);
+                playerPossData.replace(enemy3,true);
                 diskVx = 0;
                 diskVy = 0;
             }
             else if(enemy3distToDisk > catchableDistance ){
                 enemy3.setHoldingDisk(false);
+                playerPossData.replace(enemy3,false);
             }
 
             if(onOffense){
@@ -847,6 +860,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 if(getDistanceToDisk(enemy1) < catchableDistance){
                     changingPoss = false;
                     enemy1.setHoldingDisk(true);
+                    playerPossData.replace(enemy1,true);
                     p1Threw = false;
                 }
             } else if((enemy2distToDisk < enemy1distToDisk)&&(enemy2distToDisk < enemy3distToDisk)){
@@ -867,6 +881,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 if(getDistanceToDisk(enemy2) < catchableDistance){
                     changingPoss = false;
                     enemy2.setHoldingDisk(true);
+                    playerPossData.replace(enemy2,true);
                     p1Threw = false;
                 }
             } else if((enemy3distToDisk < enemy1distToDisk)&&(enemy3distToDisk < enemy2distToDisk)){
@@ -887,6 +902,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 if(getDistanceToDisk(enemy3) < catchableDistance){
                     changingPoss = false;
                     enemy3.setHoldingDisk(true);
+                    playerPossData.replace(enemy3,true);
                     p1Threw = false;
                 }
             }
@@ -908,8 +924,6 @@ class PlayState extends State implements GestureDetector.GestureListener{
             float Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
             player.setX(player.getPosition().x + Vx);
             player.setY(player.getPosition().y + Vy);
-        } else{
-
         }
 
     }
@@ -942,15 +956,60 @@ class PlayState extends State implements GestureDetector.GestureListener{
     }
 
     private void playOffense(){
-        Vector2 enemyPosition=new Vector2(getEnemyWithPossession().getX(),getEnemyWithPossession().getY());
-        Gdx.app.error("Enemy With Possession",enemyPosition.toString());
+        Vector2 enemyPosition;
+        if (getEnemyWithPossession() != null){
+            enemyPosition=new Vector2(getEnemyWithPossession().getPosition().x,getEnemyWithPossession().getPosition().y);
+            Vector2 newPosition=new Vector2(enemyPosition.x-100,enemyPosition.y+100);
+            Player closestEnemy=getClosestEnemy(newPosition);
+            float xDist = (newPosition.x) - (closestEnemy.getPosition().x);
+            float yDist = (newPosition.y) - (closestEnemy.getPosition().y);
+            if (Math.sqrt(xDist*xDist + yDist*yDist)<catchableDistance) {
+                float Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+                float Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+                closestEnemy.setX(closestEnemy.getPosition().x + Vx);
+                closestEnemy.setY(closestEnemy.getPosition().y + Vy);
+                enemy2.setRotation((float) Math.toDegrees(Math.atan(yDist/xDist)));
+                if(xDist < 0){
+                    enemy2.setRotation(enemy2.getRotation()+180);
+                }
+                if(enemy2.getRotation() < 0){
+                    enemy2.setRotation(enemy2.getRotation()+360);
+                }
+            }
+        }
+        //Gdx.app.error("Enemy With Possession",enemyPosition.toString());
     }
 
     private Player getEnemyWithPossession (){
-        ArrayList<Boolean> valueArray=new ArrayList<Boolean>(playerPossData.values());
-        ArrayList<Player> keyArray=new ArrayList<Player>(playerPossData.keySet());
+        ArrayList<Boolean> valueArray=new ArrayList<>(playerPossData.values());
+        ArrayList<Player> keyArray=new ArrayList<>(playerPossData.keySet());
         int indexOfTrue=valueArray.indexOf(true);
-        return keyArray.get(indexOfTrue);
+        if (indexOfTrue != -1) {
+            return keyArray.get(indexOfTrue);
+        }
+        else {
+            return null;
+        }
+    }
+
+    private Player getClosestEnemy(Vector2 newPosition) {
+        Player closestEnemy=null;
+        float closestDistance=999999999999f;
+        for (Player player:players){
+            float xDist = (newPosition.x) - (player.getPosition().x);
+            float yDist = (newPosition.y) - (player.getPosition().y);
+            float distance=(float)Math.sqrt(xDist*xDist + yDist*yDist);
+            if (distance<closestDistance && player != getEnemyWithPossession()){
+                closestDistance=distance;
+                closestEnemy=player;
+            }
+        }
+        if (closestEnemy != null) {
+            return closestEnemy;
+        }
+        else {
+            return null;
+        }
     }
 
 
@@ -979,6 +1038,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
             cpuPlayer.setY(currP1Y);
             cpuRotation = currP1R;
             cpuPlayer.setHoldingDisk(false);
+            playerPossData.replace(cpuPlayer,false);
         } else if (cpu2Player.hasDisk()){
             currC1X = cpu2Player.getPosition().x;
             currC1Y = cpu2Player.getPosition().y;
@@ -987,11 +1047,13 @@ class PlayState extends State implements GestureDetector.GestureListener{
             cpu2Player.setY(currP1Y);
             cpu2Rotation = currP1R;
             cpu2Player.setHoldingDisk(false);
+            playerPossData.replace(cpu2Player,false);
         }
         player1.setX(currC1X);
         player1.setY(currC1Y);
         rotation = currC1R;
         player1.setHoldingDisk(true);
+        playerPossData.replace(player1,true);
     }
 
     private void keepDiskInBounds() {
@@ -1036,7 +1098,6 @@ class PlayState extends State implements GestureDetector.GestureListener{
     }
 
     private void keepPlayerInBounds() {
-        ArrayList<Player> players = new ArrayList<Player>();
         players.add(player1);
         players.add(cpuPlayer);
         players.add(cpu2Player);
@@ -1209,11 +1270,17 @@ class PlayState extends State implements GestureDetector.GestureListener{
 
     public void resetAfterScore(boolean playerScored){
         player1.setHoldingDisk(false);
+        playerPossData.replace(player1,false);
         cpuPlayer.setHoldingDisk(false);
+        playerPossData.replace(cpuPlayer,false);
         cpu2Player.setHoldingDisk(false);
+        playerPossData.replace(cpu2Player,false);
         enemy1.setHoldingDisk(false);
+        playerPossData.replace(enemy1,false);
         enemy2.setHoldingDisk(false);
+        playerPossData.replace(enemy2,false);
         enemy3.setHoldingDisk(false);
+        playerPossData.replace(enemy3,false);
         changingPoss = false;
         selectWaypoints.clear();
         select2Waypoints.clear();
@@ -1259,6 +1326,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
             diskVy = 0;
             onOffense = false;
             enemy3.setHoldingDisk(true);
+            playerPossData.replace(enemy3,true);
             //changingPoss = true;
             } else {
             disk.setX(w/6 -diskWd/2);
@@ -1267,6 +1335,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
             diskVy = 0;
             onOffense = true;
             player1.setHoldingDisk(true);
+            playerPossData.replace(player1,true);
         }
         cpuAIReleased = true;
         cpu2AIReleased = true;
@@ -1278,8 +1347,10 @@ class PlayState extends State implements GestureDetector.GestureListener{
         onOffense = !(onOffense);
         if(player1.hasDisk()){
             player1.setHoldingDisk(false);
+            playerPossData.replace(player1,false);
         } else if (playerPossData.get(player1)){
             enemy1.setHoldingDisk(false);
+            playerPossData.replace(enemy1,false);
         }
         diskHeight = -100;
     }
@@ -1348,12 +1419,15 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 if (player1.hasDisk()) {
                     p1Threw = true;
                     player1.setHoldingDisk(false);
+                    playerPossData.replace(player1,false);
                 } else if (cpuPlayer.hasDisk()) {
                     cpuThrew = true;
                     cpuPlayer.setHoldingDisk(false);
+                    playerPossData.replace(cpuPlayer,false);
                 }  else if (cpu2Player.hasDisk()) {
                     cpu2Threw = true;
                     cpu2Player.setHoldingDisk(false);
+                    playerPossData.replace(cpu2Player,false);
                 }
 
             }
