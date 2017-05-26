@@ -75,6 +75,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
     private Player enemy1;
     private Player enemy2;
     private Player enemy3;
+    ArrayList<Player> players = new ArrayList<Player>();
     private double enemy1distToDisk;
     private double enemy2distToDisk;
     private double enemy3distToDisk;
@@ -670,7 +671,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 playerPossData.replace(player1,true);
                 diskVx = 0;
                 diskVy = 0;
-                //caughtTime = GAME_TIME-playTime;
+                caughtTime = GAME_TIME-playTime;
                 Gdx.app.log("Catching", "Caught" + caughtTime);
                 //cpuVelocityX = 0;
                 //cpuVelocityY = 0;
@@ -702,7 +703,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 playerPossData.replace(cpuPlayer,true);
                 diskVx = 0;
                 diskVy = 0;
-                //caughtTime = GAME_TIME-playTime;
+                caughtTime = GAME_TIME-playTime;
                 cpuVelocityX = 0;
                 cpuVelocityY = 0;
                 enemyThrew = false;
@@ -735,7 +736,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 playerPossData.replace(cpu2Player,true);
                 diskVx = 0;
                 diskVy = 0;
-                //caughtTime = GAME_TIME-playTime;
+                caughtTime = GAME_TIME-playTime;
                 cpu2VelocityX = 0;
                 cpu2VelocityY = 0;
                 enemyThrew = false;
@@ -769,7 +770,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 playerPossData.replace(enemy1,true);
                 diskVx = 0;
                 diskVy = 0;
-                //caughtTime = GAME_TIME-playTime;
+                caughtTime = GAME_TIME-playTime;
             }
             else if(enemy1distToDisk > catchableDistance ){
                 enemy1.setHoldingDisk(false);
@@ -795,7 +796,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 playerPossData.replace(enemy2,true);
                 diskVx = 0;
                 diskVy = 0;
-                //caughtTime = GAME_TIME-playTime;
+                caughtTime = GAME_TIME-playTime;
             }
             else if(enemy2distToDisk > catchableDistance ){
                 enemy2.setHoldingDisk(false);
@@ -821,7 +822,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 playerPossData.replace(enemy3,true);
                 diskVx = 0;
                 diskVy = 0;
-                //caughtTime = GAME_TIME-playTime;
+                caughtTime = GAME_TIME-playTime;
             }
             else if(enemy3distToDisk > catchableDistance ){
                 enemy3.setHoldingDisk(false);
@@ -1199,7 +1200,6 @@ class PlayState extends State implements GestureDetector.GestureListener{
     }
 
     private void keepPlayerInBounds() {
-        ArrayList<Player> players = new ArrayList<Player>();
         players.add(player1);
         players.add(cpuPlayer);
         players.add(cpu2Player);
