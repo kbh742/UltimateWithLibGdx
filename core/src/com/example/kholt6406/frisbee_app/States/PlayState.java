@@ -70,11 +70,14 @@ class PlayState extends State implements GestureDetector.GestureListener{
     private double player1DistToDisk;
     private double cpuDistToDisk;
     private Player cpu2Player;
+    ArrayList<Player> players = new ArrayList<Player>();
     private double cpu2DistToDisk;
 
     private Player enemy1;
     private Player enemy2;
     private Player enemy3;
+    private Player closestEnemy=null;
+    private Player enemyWithPossession=null;
     private double enemy1distToDisk;
     private double enemy2distToDisk;
     private double enemy3distToDisk;
@@ -97,6 +100,8 @@ class PlayState extends State implements GestureDetector.GestureListener{
     boolean cpuThrew = false;
     boolean cpu2Threw = false;
     boolean enemyThrew = false;
+    boolean enemyThrowing=false;
+    boolean playingOffense=false;
 
     boolean cpuAIReleased;
     boolean cpu2AIReleased;
@@ -225,6 +230,13 @@ class PlayState extends State implements GestureDetector.GestureListener{
         stallCount9 = new Texture("stall_9.png");
         stallCount10 = new Texture("stall_10.png");
         selectRing = new Texture("select_ring.png");
+
+        playerPossData.put(player1,false);
+        playerPossData.put(cpuPlayer,false);
+        playerPossData.put(cpu2Player,false);
+        playerPossData.put(enemy1,false);
+        playerPossData.put(enemy2,false);
+        playerPossData.put(enemy3,false);
 
         timeOfStall = 0;
         caughtTime = 0;
@@ -425,7 +437,6 @@ class PlayState extends State implements GestureDetector.GestureListener{
     @Override
     protected void update(float dt) {
         world.step(Gdx.graphics.getDeltaTime(), 6, 2);
-
         handleInput();
         player1.update(dt);
         cpuPlayer.update(dt);
@@ -433,551 +444,540 @@ class PlayState extends State implements GestureDetector.GestureListener{
         enemy1.update(dt);
         enemy2.update(dt);
         enemy3.update(dt);
-        if (!stopped) {
 
-            Gdx.app.log("Enemy threw: ", "" + enemyThrew);
+        if (!playingOffense) {
 
-            if (player1.hasDisk()) {
-                player1.setVelocity(0);
-                stallTime = (GAME_TIME-playTime) - caughtTime;
+            if (!stopped) {
 
-                onOffense = true;
-                diskHeight = -50;
+                Gdx.app.log("Enemy threw: ", "" + enemyThrew);
+
+                if (player1.hasDisk()) {
+                    player1.setVelocity(0);
+                    stallTime = (GAME_TIME - playTime) - caughtTime;
+
+                    onOffense = true;
+                    diskHeight = -50;
 
 
+                } else if (!player1.hasDisk()) {
+                    player1.setVelocity(10);
+                    if (onOffense) {
+                        airTime = (GAME_TIME - playTime) - timeOfThrow;
+                    }
 
-            }
-            else if (!player1.hasDisk()){
-                player1.setVelocity(10);
-                if(onOffense){
-                    airTime = (GAME_TIME-playTime) - timeOfThrow;
+                    //float c = 150;
+                    float c = 150;
+                    if (airTime > 0) {
+                        Gdx.app.log("disk", "thrown");
+                        Gdx.app.log("Trash at code", "Wow! Savage.");
+                        if (Math.abs(diskCurve) > 0.1) {
+                            diskHeight = (float) (1.5 * (((-1 * Math.abs(diskCurve * c)) / (timeToVertex * timeToVertex)) * (airTime - timeToVertex) * (airTime - timeToVertex) + Math.abs(diskCurve) * c + playerHeight));
+                        } else if (!isShortPass) {
+                            diskHeight = (float) (((-1 * Math.abs(3 * straightV) * (c / 30)) / (timeToVertex * timeToVertex)) * (airTime - timeToVertex) * (airTime - timeToVertex) + Math.abs(straightV) * (c / 30) - playerHeight);
+                        } else {
+                            c = 100;
+                            diskHeight = (float) (((-1 * Math.abs(3 * straightV) * (c / 30)) / (timeToVertex * timeToVertex)) * (airTime - timeToVertex) * (airTime - timeToVertex) + Math.abs(straightV) * (c / 30) - playerHeight);
+                            //diskHeight = (float) (((-1*Math.abs(2*straightV)*(c/30)))*(airTime)*(airTime)+Math.abs(straightV)*(c/30)-playerHeight);
+                        }
+                    }
+
+
+                    //Gdx.app.log("Disk", "" + diskHeight);
+                    if (diskHeight < -100) {
+                        diskHeight = -100;
+
+                        if (airTime > 0.2 && (diskInAir)) {
+                            Gdx.app.log("Disk", "Touched Ground");
+                            diskInAir = false;
+                            turnover();
+                            changingPoss = true;
+                        }
+                    }
+
                 }
 
-                //float c = 150;
-                float c = 150;
-                if (airTime > 0){
-                    Gdx.app.log("disk", "thrown");
-                    Gdx.app.log("Trash at code", "Wow! Savage.");
-                    if(Math.abs(diskCurve)>0.1){
-                        diskHeight = (float) (1.5*(((-1*Math.abs(diskCurve*c))/(timeToVertex*timeToVertex))*(airTime-timeToVertex)*(airTime-timeToVertex)+Math.abs(diskCurve)*c+playerHeight));
-                    } else if (!isShortPass){
-                        diskHeight = (float) (((-1*Math.abs(3*straightV)*(c/30))/(timeToVertex*timeToVertex))*(airTime-timeToVertex)*(airTime-timeToVertex)+Math.abs(straightV)*(c/30)-playerHeight);
+                if (enemy1.hasDisk() || enemy2.hasDisk() || enemy3.hasDisk()) {
+                    stallTime = (GAME_TIME - playTime) - caughtTime;
+
+                    onOffense = false;
+                    diskHeight = -50;
+                    if (enemy1.hasDisk()) {
+                        enemy1VelocityX = 0;
+                        enemy1VelocityY = 0;
+                    } else if (enemy2.hasDisk()) {
+                        enemy2VelocityX = 0;
+                        enemy2VelocityY = 0;
+                    } else if (enemy3.hasDisk()) {
+                        enemy3VelocityX = 0;
+                        enemy3VelocityY = 0;
+                    }
+                }
+
+
+                //Duncan is stupid
+                Gdx.app.log("Waypoints", "cpuAIReleased: " + cpuAIReleased);
+                if (cpuAIReleased == false) {
+                    Gdx.app.log("Waypoints", "cpuWayPoint: " + cpuWayPoint);
+                    float xPt = selectWaypoints.get(cpuWayPoint).x;
+                    float yPt = selectWaypoints.get(cpuWayPoint).y;
+                    float xDist = (xPt) - (cpuPlayer.getPosition().x + playerWd / 2);
+                    float yDist = (yPt) - (cpuPlayer.getPosition().y + playerHt / 2);
+                    float pVx = (cpuSpeed / 5) * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+                    float pVy = (cpuSpeed / 5) * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+                    cpuVelocityX = pVx;
+                    cpuVelocityY = pVy;
+                    cpuRotation = (float) Math.toDegrees(Math.atan(yDist / xDist));
+                    if (xDist < 0) {
+                        cpuRotation += 180;
+                    }
+                    if (cpuRotation < 0) {
+                        cpuRotation += 360;
+                    }
+                    if (cpuWayPoint >= selectWaypoints.size() - 1) {
+                        cpuAIReleased = true;
+                        cpuWayPoint = 0;
+                        selectWaypoints.clear();
                     } else {
-                        c = 100;
-                        diskHeight = (float) (((-1*Math.abs(3*straightV)*(c/30))/(timeToVertex*timeToVertex))*(airTime-timeToVertex)*(airTime-timeToVertex)+Math.abs(straightV)*(c/30)-playerHeight);
-                        //diskHeight = (float) (((-1*Math.abs(2*straightV)*(c/30)))*(airTime)*(airTime)+Math.abs(straightV)*(c/30)-playerHeight);
+                        //float xPtNext = selectWaypoints.get(cpuWayPoint).x;
+                        //float yPtNext = selectWaypoints.get(cpuWayPoint).y;
+                        //float xDistNext = (xPtNext) - (cpuPlayer.getPosition().x+playerWd/2);
+                        //float yDistNext = (yPtNext) - (cpuPlayer.getPosition().y+playerHt/2);
+                        double distToNextWaypoint = Math.sqrt(xDist * xDist + yDist * yDist);
+                        cpuSpeed = (float) (Math.sqrt(Math.pow((selectWaypoints.get(cpuWayPoint + 1).x - selectWaypoints.get(cpuWayPoint).x), 2) + Math.pow((selectWaypoints.get(cpuWayPoint + 1).y - selectWaypoints.get(cpuWayPoint).y), 2)));
+                        if (cpuSpeed > 45) {
+                            cpuSpeed = 45;
+                        }
+                        Gdx.app.log("Waypoints", "distToNextWayPoint: " + distToNextWaypoint);
+                        if (distToNextWaypoint < 10) {
+                            cpuWayPoint++;
+                        }
+                    }
+                }
+                if (cpu2AIReleased == false) {
+                    //Gdx.app.log("Waypoints", "cpuWayPoint: " + cpuWayPoint);
+                    float xPt = select2Waypoints.get(cpu2WayPoint).x;
+                    float yPt = select2Waypoints.get(cpu2WayPoint).y;
+                    float xDist = (xPt) - (cpu2Player.getPosition().x + playerWd / 2);
+                    float yDist = (yPt) - (cpu2Player.getPosition().y + playerHt / 2);
+                    float pVx = (cpu2Speed / 5) * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+                    float pVy = (cpu2Speed / 5) * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+                    cpu2VelocityX = pVx;
+                    cpu2VelocityY = pVy;
+                    cpu2Rotation = (float) Math.toDegrees(Math.atan(yDist / xDist));
+                    if (xDist < 0) {
+                        cpu2Rotation += 180;
+                    }
+                    if (cpu2Rotation < 0) {
+                        cpu2Rotation += 360;
+                    }
+                    if (cpu2WayPoint >= select2Waypoints.size() - 1) {
+                        cpu2AIReleased = true;
+                        cpu2WayPoint = 0;
+                        select2Waypoints.clear();
+                    } else {
+                        //float xPtNext = selectWaypoints.get(cpuWayPoint).x;
+                        //float yPtNext = selectWaypoints.get(cpuWayPoint).y;
+                        //float xDistNext = (xPtNext) - (cpuPlayer.getPosition().x+playerWd/2);
+                        //float yDistNext = (yPtNext) - (cpuPlayer.getPosition().y+playerHt/2);
+                        double distToNextWaypoint = Math.sqrt(xDist * xDist + yDist * yDist);
+                        cpu2Speed = (float) (Math.sqrt(Math.pow((select2Waypoints.get(cpu2WayPoint + 1).x - select2Waypoints.get(cpu2WayPoint).x), 2) + Math.pow((select2Waypoints.get(cpu2WayPoint + 1).y - select2Waypoints.get(cpu2WayPoint).y), 2)));
+                        if (cpu2Speed > 45) {
+                            cpu2Speed = 45;
+                        }
+                        //Gdx.app.log("Waypoints", "distToNextWayPoint: " + distToNextWaypoint);
+                        if (distToNextWaypoint < 10) {
+                            cpu2WayPoint++;
+                        }
                     }
                 }
 
 
+                xPos = player1.getPosition().x;
+                yPos = player1.getPosition().y;
+                float deltaX = touchpad.getKnobPercentX();
+                float deltaY = touchpad.getKnobPercentY();
+                if (changingPoss && p1Threw) {
+                    deltaX = 0;
+                    deltaY = 0;
+                }
 
-                //Gdx.app.log("Disk", "" + diskHeight);
-                if(diskHeight<-100){
-                    diskHeight = -100;
+                //deltaX *= xScl;
+                //deltaY *= yScl;
+                player1.setX(xPos + deltaX * player1.getVelocity());
+                player1.setY(yPos + deltaY * player1.getVelocity());
+                enemy1.setX(enemy1.getPosition().x + enemy1VelocityX);
+                enemy1.setY(enemy1.getPosition().y + enemy1VelocityY);
+                enemy2.setX(enemy2.getPosition().x + enemy2VelocityX);
+                enemy2.setY(enemy2.getPosition().y + enemy2VelocityY);
+                enemy3.setX(enemy3.getPosition().x + enemy3VelocityX);
+                enemy3.setY(enemy3.getPosition().y + enemy3VelocityY);
+                cpuPlayer.setX(cpuPlayer.getPosition().x + cpuVelocityX);
+                cpuPlayer.setY(cpuPlayer.getPosition().y + cpuVelocityY);
+                cpu2Player.setX(cpu2Player.getPosition().x + cpu2VelocityX);
+                cpu2Player.setY(cpu2Player.getPosition().y + cpu2VelocityY);
+                Gdx.app.log("Enemy v", enemy1VelocityX + "");
 
-                    if(airTime>0.2&&(diskInAir)){
-                        Gdx.app.log("Disk", "Touched Ground");
-                        diskInAir = false;
-                        turnover();
-                        changingPoss = true;
+
+                if (deltaX != 0 && deltaY != 0) {
+                    rotation = (float) Math.toDegrees(Math.atan(deltaY / deltaX));
+                    if (deltaX < 0) {
+                        rotation += 180;
                     }
-                }
-
-            }
-
-            if(enemy1.hasDisk()||enemy2.hasDisk()||enemy3.hasDisk()){
-                stallTime = (GAME_TIME-playTime) - caughtTime;
-
-                onOffense = false;
-                diskHeight = -50;
-                if(enemy1.hasDisk()){
-                    enemy1VelocityX = 0;
-                    enemy1VelocityY = 0;
-                } else if (enemy2.hasDisk()){
-                    enemy2VelocityX = 0;
-                    enemy2VelocityY = 0;
-                } else if (enemy3.hasDisk()){
-                    enemy3VelocityX = 0;
-                    enemy3VelocityY = 0;
-                }
-            }
-
-
-            //Duncan is stupid
-            Gdx.app.log("Waypoints", "cpuAIReleased: " + cpuAIReleased);
-            if(cpuAIReleased == false){
-                Gdx.app.log("Waypoints", "cpuWayPoint: " + cpuWayPoint);
-                float xPt = selectWaypoints.get(cpuWayPoint).x;
-                float yPt = selectWaypoints.get(cpuWayPoint).y;
-                float xDist = (xPt) - (cpuPlayer.getPosition().x+playerWd/2);
-                float yDist = (yPt) - (cpuPlayer.getPosition().y+playerHt/2);
-                float pVx = (cpuSpeed/5) * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-                float pVy = (cpuSpeed/5) * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-                cpuVelocityX = pVx;
-                cpuVelocityY = pVy;
-                cpuRotation = (float) Math.toDegrees(Math.atan(yDist / xDist));
-                if (xDist < 0) {
-                    cpuRotation += 180;
-                }
-                if(cpuRotation<0){
-                    cpuRotation += 360;
-                }
-                if (cpuWayPoint >= selectWaypoints.size()-1){
-                    cpuAIReleased = true;
-                    cpuWayPoint = 0;
-                    selectWaypoints.clear();
-                } else {
-                    //float xPtNext = selectWaypoints.get(cpuWayPoint).x;
-                    //float yPtNext = selectWaypoints.get(cpuWayPoint).y;
-                    //float xDistNext = (xPtNext) - (cpuPlayer.getPosition().x+playerWd/2);
-                    //float yDistNext = (yPtNext) - (cpuPlayer.getPosition().y+playerHt/2);
-                    double distToNextWaypoint = Math.sqrt(xDist*xDist + yDist*yDist);
-                    cpuSpeed = (float) (Math.sqrt(Math.pow((selectWaypoints.get(cpuWayPoint+1).x-selectWaypoints.get(cpuWayPoint).x),2)+Math.pow((selectWaypoints.get(cpuWayPoint+1).y-selectWaypoints.get(cpuWayPoint).y),2)));
-                    if(cpuSpeed>45){
-                        cpuSpeed = 45;
+                    if (rotation < 0) {
+                        rotation += 360;
                     }
-                    Gdx.app.log("Waypoints", "distToNextWayPoint: " + distToNextWaypoint);
-                    if(distToNextWaypoint<10){
-                        cpuWayPoint++;
+                    int r = 50;
+                    if (player1.hasDisk()) {
+
+                        disk.setX((float) (player1.getPosition().x + (playerWd) / 2 - diskWd / 2 + (r * (deltaX / Math.sqrt(deltaX * deltaX + deltaY * deltaY)))));
+                        disk.setY((float) (player1.getPosition().y + (playerHt) / 2 - diskHt / 2 + (r * (deltaY / Math.sqrt(deltaX * deltaX + deltaY * deltaY)))));
+
                     }
-                }
-            }
-            if(cpu2AIReleased == false){
-                //Gdx.app.log("Waypoints", "cpuWayPoint: " + cpuWayPoint);
-                float xPt = select2Waypoints.get(cpu2WayPoint).x;
-                float yPt = select2Waypoints.get(cpu2WayPoint).y;
-                float xDist = (xPt) - (cpu2Player.getPosition().x+playerWd/2);
-                float yDist = (yPt) - (cpu2Player.getPosition().y+playerHt/2);
-                float pVx = (cpu2Speed/5) * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-                float pVy = (cpu2Speed/5) * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-                cpu2VelocityX = pVx;
-                cpu2VelocityY = pVy;
-                cpu2Rotation = (float) Math.toDegrees(Math.atan(yDist / xDist));
-                if (xDist < 0) {
-                    cpu2Rotation += 180;
-                }
-                if(cpu2Rotation<0){
-                    cpu2Rotation += 360;
-                }
-                if (cpu2WayPoint >= select2Waypoints.size()-1){
-                    cpu2AIReleased = true;
-                    cpu2WayPoint = 0;
-                    select2Waypoints.clear();
-                } else {
-                    //float xPtNext = selectWaypoints.get(cpuWayPoint).x;
-                    //float yPtNext = selectWaypoints.get(cpuWayPoint).y;
-                    //float xDistNext = (xPtNext) - (cpuPlayer.getPosition().x+playerWd/2);
-                    //float yDistNext = (yPtNext) - (cpuPlayer.getPosition().y+playerHt/2);
-                    double distToNextWaypoint = Math.sqrt(xDist*xDist + yDist*yDist);
-                    cpu2Speed = (float) (Math.sqrt(Math.pow((select2Waypoints.get(cpu2WayPoint+1).x-select2Waypoints.get(cpu2WayPoint).x),2)+Math.pow((select2Waypoints.get(cpu2WayPoint+1).y-select2Waypoints.get(cpu2WayPoint).y),2)));
-                    if(cpu2Speed>45){
-                        cpu2Speed = 45;
-                    }
-                    //Gdx.app.log("Waypoints", "distToNextWayPoint: " + distToNextWaypoint);
-                    if(distToNextWaypoint<10){
-                        cpu2WayPoint++;
-                    }
-                }
-            }
-
-
-
-
-            xPos = player1.getPosition().x;
-            yPos = player1.getPosition().y;
-            float deltaX = touchpad.getKnobPercentX();
-            float deltaY = touchpad.getKnobPercentY();
-            if(changingPoss && p1Threw){
-                deltaX = 0;
-                deltaY = 0;
-            }
-
-            //deltaX *= xScl;
-            //deltaY *= yScl;
-            player1.setX(xPos + deltaX * player1.getVelocity());
-            player1.setY(yPos + deltaY * player1.getVelocity());
-            enemy1.setX (enemy1.getPosition().x + enemy1VelocityX);
-            enemy1.setY(enemy1.getPosition().y + enemy1VelocityY);
-            enemy2.setX(enemy2.getPosition().x + enemy2VelocityX);
-            enemy2.setY(enemy2.getPosition().y + enemy2VelocityY);
-            enemy3.setX(enemy3.getPosition().x + enemy3VelocityX);
-            enemy3.setY(enemy3.getPosition().y + enemy3VelocityY);
-            cpuPlayer.setX(cpuPlayer.getPosition().x + cpuVelocityX);
-            cpuPlayer.setY(cpuPlayer.getPosition().y + cpuVelocityY);
-            cpu2Player.setX(cpu2Player.getPosition().x + cpu2VelocityX);
-            cpu2Player.setY(cpu2Player.getPosition().y + cpu2VelocityY);
-            Gdx.app.log("Enemy v", enemy1VelocityX + "");
-
-
-
-            if (deltaX != 0 && deltaY != 0) {
-                rotation = (float) Math.toDegrees(Math.atan(deltaY / deltaX));
-                if (deltaX < 0) {
-                    rotation += 180;
-                }
-                if(rotation<0){
-                    rotation += 360;
                 }
                 int r = 50;
-                if(player1.hasDisk()) {
-
-                    disk.setX((float) (player1.getPosition().x + (playerWd) / 2 - diskWd / 2 + (r * (deltaX / Math.sqrt(deltaX * deltaX + deltaY * deltaY)))));
-                    disk.setY((float) (player1.getPosition().y + (playerHt) / 2 - diskHt / 2 + (r * (deltaY / Math.sqrt(deltaX * deltaX + deltaY * deltaY)))));
-
+                if (enemy1.hasDisk()) {
+                    disk.setX((float) (enemy1.getPosition().x + (playerWd) / 2 - diskWd / 2 + (r * (Math.cos(Math.toRadians(180 - enemy1Rotation))))));
+                    disk.setY((float) (enemy1.getPosition().y + (playerHt) / 2 - diskHt / 2 + (r * (Math.sin(Math.toRadians(180 - enemy1Rotation))))));
+                } else if (enemy2.hasDisk()) {
+                    disk.setX((float) (enemy2.getPosition().x + (playerWd) / 2 - diskWd / 2 + (r * (Math.cos(Math.toRadians(180 - enemy1Rotation))))));
+                    disk.setY((float) (enemy2.getPosition().y + (playerHt) / 2 - diskHt / 2 + (r * (Math.sin(Math.toRadians(180 - enemy1Rotation))))));
+                } else if (enemy3.hasDisk()) {
+                    disk.setX((float) (enemy3.getPosition().x + (playerWd) / 2 - diskWd / 2 + (r * (Math.cos(Math.toRadians(180 - enemy1Rotation))))));
+                    disk.setY((float) (enemy3.getPosition().y + (playerHt) / 2 - diskHt / 2 + (r * (Math.sin(Math.toRadians(180 - enemy1Rotation))))));
                 }
-            }
-            int r = 50;
-            if (enemy1.hasDisk()){
-                disk.setX((float) (enemy1.getPosition().x + (playerWd) / 2 - diskWd / 2 + (r * (Math.cos(Math.toRadians(180-enemy1Rotation))))));
-                disk.setY((float) (enemy1.getPosition().y + (playerHt) / 2 - diskHt / 2 + (r * (Math.sin(Math.toRadians(180-enemy1Rotation))))));
-            } else if (enemy2.hasDisk()){
-                disk.setX((float) (enemy2.getPosition().x + (playerWd) / 2 - diskWd / 2 + (r * (Math.cos(Math.toRadians(180-enemy1Rotation))))));
-                disk.setY((float) (enemy2.getPosition().y + (playerHt) / 2 - diskHt / 2 + (r * (Math.sin(Math.toRadians(180-enemy1Rotation))))));
-            } else if (enemy3.hasDisk()){
-                disk.setX((float) (enemy3.getPosition().x + (playerWd) / 2 - diskWd / 2 + (r * (Math.cos(Math.toRadians(180-enemy1Rotation))))));
-                disk.setY((float) (enemy3.getPosition().y + (playerHt) / 2 - diskHt / 2 + (r * (Math.sin(Math.toRadians(180-enemy1Rotation))))));
-            }
-            Gdx.app.log("Disk", "Enemy1 position " + enemy1.getPosition().x);
-            Gdx.app.log("Disk", "Sin hting" + r * (Math.toDegrees(Math.cos(180-enemy1Rotation))));
+                Gdx.app.log("Disk", "Enemy1 position " + enemy1.getPosition().x);
+                Gdx.app.log("Disk", "Sin hting" + r * (Math.toDegrees(Math.cos(180 - enemy1Rotation))));
 
-            keepPlayerInBounds();
+                keepPlayerInBounds();
 
-            if(!player1.hasDisk() && !cpuPlayer.hasDisk() && !cpu2Player.hasDisk() && !enemy1.hasDisk() && !enemy2.hasDisk() && !enemy3.hasDisk()) {
-                sideV += diskCurve;
-                double alpha = Math.toRadians(playerRotationAtTimeOfThrow - 90);
+                if (!player1.hasDisk() && !cpuPlayer.hasDisk() && !cpu2Player.hasDisk() && !enemy1.hasDisk() && !enemy2.hasDisk() && !enemy3.hasDisk() && !playingOffense) {
+                    sideV += diskCurve;
+                    double alpha = Math.toRadians(playerRotationAtTimeOfThrow - 90);
 
-                diskVx = (float) (Math.cos(alpha) * sideV - Math.sin(alpha) * straightV);
-                diskVy = (float) (Math.sin(alpha) * sideV + Math.cos(alpha) * straightV);
-                if(!diskInAir){
+                    diskVx = (float) (Math.cos(alpha) * sideV - Math.sin(alpha) * straightV);
+                    diskVy = (float) (Math.sin(alpha) * sideV + Math.cos(alpha) * straightV);
+                    if (!diskInAir) {
+                        diskVx = 0;
+                        diskVy = 0;
+                        if (!onOffense) {
+                            changingPoss = true;
+                        }
+                    }
+                }
+
+                if (!player1.hasDisk() && !cpuPlayer.hasDisk() && !cpu2Player.hasDisk() && !enemy1.hasDisk() && !enemy2.hasDisk() && !enemy3.hasDisk()) {
+                    keepDiskInBounds();
+                }
+
+                player1DistToDisk = getDistanceToDisk(player1);
+                //Gdx.app.log("playerhasdisk?", "" + player1.hasDisk());
+                //Gdx.app.log("p1threw", ""+p1Threw);
+                if (player1DistToDisk <= catchableDistance && !player1.hasDisk() && !p1Threw && onOffense && diskHeight < 80) {
+                    player1.setHoldingDisk(true);
+                    playerPossData.replace(player1, true);
                     diskVx = 0;
                     diskVy = 0;
-                    if(!onOffense){
-                        changingPoss = true;
-                    }
-                }
-            }
+                    caughtTime = GAME_TIME - playTime;
+                    Gdx.app.log("Catching", "Caught" + caughtTime);
+                    //cpuVelocityX = 0;
+                    //cpuVelocityY = 0;
+                    enemyThrew = false;
 
-            if(!player1.hasDisk() && !cpuPlayer.hasDisk() && !cpu2Player.hasDisk() && !enemy1.hasDisk() && !enemy2.hasDisk() && !enemy3.hasDisk()){
-                keepDiskInBounds();
-            }
-
-            player1DistToDisk = getDistanceToDisk(player1);
-            //Gdx.app.log("playerhasdisk?", "" + player1.hasDisk());
-            //Gdx.app.log("p1threw", ""+p1Threw);
-            if(player1DistToDisk <= catchableDistance && !player1.hasDisk() && !p1Threw && onOffense && diskHeight < 80){
-                player1.setHoldingDisk(true);
-                playerPossData.replace(player1,true);
-                diskVx = 0;
-                diskVy = 0;
-                caughtTime = GAME_TIME-playTime;
-                Gdx.app.log("Catching", "Caught" + caughtTime);
-                //cpuVelocityX = 0;
-                //cpuVelocityY = 0;
-                enemyThrew = false;
-
-            }
-            else if(player1DistToDisk > catchableDistance){
-                player1.setHoldingDisk(false);
-                p1Threw = false;
-                playerPossData.replace(player1,false);
-                //p1Threw = false;
-            }
-
-
-            cpuDistToDisk = getDistanceToDisk(cpuPlayer);
-            cpu2DistToDisk = getDistanceToDisk(cpu2Player);
-            if(cpuDistToDisk <= 2*catchableDistance && diskVx != 0 && diskVy != 0){
-                cpuRotation = (float) Math.toDegrees(Math.atan(diskVy/diskVx));
-                if(diskVx < 0){
-                    cpuRotation+= 180;
-                }
-                if(cpuRotation < 0){
-                    cpuRotation+=360;
-                }
-                cpuRotation+=180;
-            }
-            if(cpuDistToDisk <= catchableDistance && !cpuPlayer.hasDisk() && !cpuThrew && diskHeight < 80 && onOffense){
-                cpuPlayer.setHoldingDisk(true);
-                playerPossData.replace(cpuPlayer,true);
-                diskVx = 0;
-                diskVy = 0;
-                caughtTime = GAME_TIME-playTime;
-                cpuVelocityX = 0;
-                cpuVelocityY = 0;
-                enemyThrew = false;
-            }
-            else if(cpuDistToDisk > catchableDistance ){
-                cpuPlayer.setHoldingDisk(false);
-                playerPossData.replace(cpuPlayer,false);
-                cpuThrew = false;
-            }
-            if(cpuPlayer.hasDisk()){
-                selectWaypoints.clear();
-                cpuAIReleased = true;
-                switchToPlayerWithDisk();
-            }
-
-
-
-            if(cpu2DistToDisk <= 2*catchableDistance && diskVx != 0 && diskVy != 0){
-                cpu2Rotation = (float) Math.toDegrees(Math.atan(diskVy/diskVx));
-                if(diskVx < 0){
-                    cpu2Rotation+= 180;
-                }
-                if(cpu2Rotation < 0){
-                    cpu2Rotation+=360;
-                }
-                cpu2Rotation+=180;
-            }
-            if(cpu2DistToDisk <= catchableDistance && !cpu2Player.hasDisk() && !cpu2Threw && diskHeight < 80 && onOffense){
-                cpu2Player.setHoldingDisk(true);
-                playerPossData.replace(cpu2Player,true);
-                diskVx = 0;
-                diskVy = 0;
-                caughtTime = GAME_TIME-playTime;
-                cpu2VelocityX = 0;
-                cpu2VelocityY = 0;
-                enemyThrew = false;
-            }
-            else if(cpu2DistToDisk > catchableDistance ){
-                cpu2Player.setHoldingDisk(false);
-                playerPossData.replace(cpu2Player,false);
-                cpu2Threw = false;
-            }
-            if(cpu2Player.hasDisk()){
-                select2Waypoints.clear();
-                cpu2AIReleased = true;
-                switchToPlayerWithDisk();
-            }
-
-
-            enemy1distToDisk = getDistanceToDisk(enemy1);
-            if(enemy1distToDisk <= 4*catchableDistance && diskVx != 0 && diskVy != 0){
-                enemy1Rotation = (float) Math.toDegrees(Math.atan(diskVy/diskVx));
-                if(diskVx < 0){
-                    enemy1Rotation+= 180;
-                }
-                if(enemy1Rotation < 0){
-                    enemy1Rotation+=360;
-                }
-                enemy1Rotation+=180;
-            }
-            enemy1.setRot(enemy1Rotation); //Line below is John's cancerous work in progress
-            if((enemy1distToDisk <= catchableDistance && !enemy1.hasDisk() && diskHeight < 80 && !enemyThrew && !player1.hasDisk())||(distanceBetweenPlayers(enemy1, player1) <= 151 && enemy1distToDisk <= catchableDistance/2 && !enemy1.hasDisk() && diskHeight < 80 && !enemyThrew && !player1.hasDisk())){
-                enemy1.setHoldingDisk(true);
-                playerPossData.replace(enemy1,true);
-                diskVx = 0;
-                diskVy = 0;
-                caughtTime = GAME_TIME-playTime;
-            }
-            else if(enemy1distToDisk > catchableDistance ){
-                enemy1.setHoldingDisk(false);
-                playerPossData.replace(enemy1,false);
-            }
-
-
-
-            enemy2distToDisk = getDistanceToDisk(enemy2);
-            if(enemy2distToDisk <= 4*catchableDistance && diskVx != 0 && diskVy != 0){
-                enemy2Rotation = (float) Math.toDegrees(Math.atan(diskVy/diskVx));
-                if(diskVx < 0){
-                    enemy2Rotation+= 180;
-                }
-                if(enemy2Rotation < 0){
-                    enemy2Rotation+=360;
-                }
-                enemy2Rotation+=180;
-            }
-            enemy2.setRot(enemy2Rotation);
-            if(enemy2distToDisk <= catchableDistance && !enemy2.hasDisk() && diskHeight < 80 && !enemyThrew && !player1.hasDisk()){
-                enemy2.setHoldingDisk(true);
-                playerPossData.replace(enemy2,true);
-                diskVx = 0;
-                diskVy = 0;
-                caughtTime = GAME_TIME-playTime;
-            }
-            else if(enemy2distToDisk > catchableDistance ){
-                enemy2.setHoldingDisk(false);
-                playerPossData.replace(enemy2,false);
-            }
-
-
-
-            enemy3distToDisk = getDistanceToDisk(enemy3);
-            if(enemy3distToDisk <= 4*catchableDistance && diskVx != 0 && diskVy != 0){
-                enemy3Rotation = (float) Math.toDegrees(Math.atan(diskVy/diskVx));
-                if(diskVx < 0){
-                    enemy3Rotation+= 180;
-                }
-                if(enemy3Rotation < 0){
-                    enemy3Rotation+=360;
-                }
-                enemy3Rotation+=180;
-            }
-            enemy3.setRot(enemy3Rotation);
-            if(enemy3distToDisk <= catchableDistance && !enemy3.hasDisk() && diskHeight < 80 && !enemyThrew && !player1.hasDisk()){
-                enemy3.setHoldingDisk(true);
-                playerPossData.replace(enemy3,true);
-                diskVx = 0;
-                diskVy = 0;
-                caughtTime = GAME_TIME-playTime;
-            }
-            else if(enemy3distToDisk > catchableDistance ){
-                enemy3.setHoldingDisk(false);
-                playerPossData.replace(enemy3,false);
-            }
-
-            if(onOffense){
-                double[][] distanceArray = new double[3][3];
-                for (int i=0; i<3; i++){
-                    for (int j=0; j<3; j++){
-                        distanceArray[i][j] = distanceBetweenPlayers(intToPlayer(i, true), intToPlayer(j, false));
-                    }
-                }
-                double[] distanceSum = new double[6];
-                for (int i=0; i<6; i++){
-                    distanceSum[i] = distanceArray[0][permutations[0][i]] + distanceArray[1][permutations[1][i]] + distanceArray[2][permutations[2][i]];
-                }
-                double minDistance = distanceSum[0];
-                int minElement = 0;
-                for(int i=0; i<6; i++){
-                    if(distanceSum[i]<minDistance){
-                        minDistance = distanceSum[i];
-                        minElement = i;
-                    }
-                }
-                playDefense(enemy1, intToPlayer(permutations[0][minElement], true));
-                playDefense(enemy2, intToPlayer(permutations[1][minElement], true));
-                playDefense(enemy3, intToPlayer(permutations[2][minElement], true));
-            }
-            if (!onOffense){
-                playOffense();
-            }
-
-
-
-            if(!player1.hasDisk()){
-                disk.setX(disk.getX() + diskVx);
-                disk.setY(disk.getY() + diskVy);
-            }
-
-
-            if (disk.getX()+diskWd/2 <= w/6 && !inLeftEndZone){
-                inLeftEndZone=true;
-                if(enemy1.hasDisk() || enemy2.hasDisk() || enemy3.hasDisk()){
-                    team2Score++;
-                    resetAfterScore(false);
-                }
-            } else if (disk.getX()+diskWd/2 > w/6){
-                inLeftEndZone=false;
-            }
-
-            if (disk.getX()+diskWd/2 >= w-w/6 && !inRightEndZone){
-                inRightEndZone=true;
-                if(player1.hasDisk() || cpuPlayer.hasDisk() || cpu2Player.hasDisk()){
-                    team1Score++;
-                    resetAfterScore(true);
-                }
-            } else if (disk.getX()+diskWd/2 < w-w/6){
-                inRightEndZone=false;
-            }
-            if(inRightEndZone && diskHeight == -100){
-                disk.setX(w-w/6-diskWd/2);
-            }
-            if(inLeftEndZone && diskHeight == -100){
-                disk.setX(w/6+diskWd/2);
-            }
-
-        }
-        if (changingPoss && !stopped){
-            if(!p1Threw && onOffense){
-                float xDist = (disk.getX()+diskWd/2) - (player1.getPosition().x+playerWd/2);
-                float yDist = (disk.getY()+diskHt/2) - (player1.getPosition().y+playerHt/2);
-                float p1Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-                float p1Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-                player1VelocityX = p1Vx;
-                player1VelocityY = p1Vy;
-                Gdx.app.log("Possession", "" + player1.getVelocity());
-                //player1.setX((player1.getPosition().x + p1Vx));
-                //player1.setY((player1.getPosition().y + p1Vy));
-
-                if(getDistanceToDisk(player1) < catchableDistance){
-                    changingPoss = false;
-                    //diskInAir =
-                }
-            } else if((enemy1distToDisk < enemy2distToDisk)&&(enemy1distToDisk < enemy3distToDisk)){
-                float xDist = (disk.getX()+diskWd/2) - (enemy1.getPosition().x+playerWd/2);
-                float yDist = (disk.getY()+diskHt/2) - (enemy1.getPosition().y+playerHt/2);
-                float e1Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-                float e1Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-                enemy1VelocityX = e1Vx;
-                enemy1VelocityY = e1Vy;
-                Gdx.app.log("Possession", "" + enemy1.getVelocity());
-
-                enemy1Rotation = (float) Math.toDegrees(Math.atan(yDist/xDist));
-                if(xDist < 0){
-                    enemy1Rotation+= 180;
-                }
-                if(enemy1Rotation < 0){
-                    enemy1Rotation+=360;
-                }
-                enemy1.setRot(enemy1Rotation);
-                Gdx.app.log("enemy1distToDisk", ""+ enemy1distToDisk);
-                if(getDistanceToDisk(enemy1) < catchableDistance){
-                    changingPoss = false;
-                    enemy1.setHoldingDisk(true);
-                    playerPossData.replace(enemy1,true);
+                } else if (player1DistToDisk > catchableDistance) {
+                    player1.setHoldingDisk(false);
                     p1Threw = false;
+                    playerPossData.replace(player1, false);
+                    //p1Threw = false;
+                }
+
+
+                cpuDistToDisk = getDistanceToDisk(cpuPlayer);
+                cpu2DistToDisk = getDistanceToDisk(cpu2Player);
+                if (cpuDistToDisk <= 2 * catchableDistance && diskVx != 0 && diskVy != 0) {
+                    cpuRotation = (float) Math.toDegrees(Math.atan(diskVy / diskVx));
+                    if (diskVx < 0) {
+                        cpuRotation += 180;
+                    }
+                    if (cpuRotation < 0) {
+                        cpuRotation += 360;
+                    }
+                    cpuRotation += 180;
+                }
+                if (cpuDistToDisk <= catchableDistance && !cpuPlayer.hasDisk() && !cpuThrew && diskHeight < 80 && onOffense) {
+                    cpuPlayer.setHoldingDisk(true);
+                    playerPossData.replace(cpuPlayer, true);
+                    diskVx = 0;
+                    diskVy = 0;
+                    caughtTime = GAME_TIME - playTime;
+                    cpuVelocityX = 0;
+                    cpuVelocityY = 0;
+                    enemyThrew = false;
+                } else if (cpuDistToDisk > catchableDistance) {
+                    cpuPlayer.setHoldingDisk(false);
+                    playerPossData.replace(cpuPlayer, false);
+                    cpuThrew = false;
+                }
+                if (cpuPlayer.hasDisk()) {
+                    selectWaypoints.clear();
+                    cpuAIReleased = true;
+                    switchToPlayerWithDisk();
+                }
+
+
+                if (cpu2DistToDisk <= 2 * catchableDistance && diskVx != 0 && diskVy != 0) {
+                    cpu2Rotation = (float) Math.toDegrees(Math.atan(diskVy / diskVx));
+                    if (diskVx < 0) {
+                        cpu2Rotation += 180;
+                    }
+                    if (cpu2Rotation < 0) {
+                        cpu2Rotation += 360;
+                    }
+                    cpu2Rotation += 180;
+                }
+                if (cpu2DistToDisk <= catchableDistance && !cpu2Player.hasDisk() && !cpu2Threw && diskHeight < 80 && onOffense) {
+                    cpu2Player.setHoldingDisk(true);
+                    playerPossData.replace(cpu2Player, true);
+                    diskVx = 0;
+                    diskVy = 0;
+                    caughtTime = GAME_TIME - playTime;
+                    cpu2VelocityX = 0;
+                    cpu2VelocityY = 0;
+                    enemyThrew = false;
+                } else if (cpu2DistToDisk > catchableDistance) {
+                    cpu2Player.setHoldingDisk(false);
+                    playerPossData.replace(cpu2Player, false);
+                    cpu2Threw = false;
+                }
+                if (cpu2Player.hasDisk()) {
+                    select2Waypoints.clear();
+                    cpu2AIReleased = true;
+                    switchToPlayerWithDisk();
+                }
+
+
+                enemy1distToDisk = getDistanceToDisk(enemy1);
+                if (enemy1distToDisk <= 4 * catchableDistance && diskVx != 0 && diskVy != 0) {
+                    enemy1Rotation = (float) Math.toDegrees(Math.atan(diskVy / diskVx));
+                    if (diskVx < 0) {
+                        enemy1Rotation += 180;
+                    }
+                    if (enemy1Rotation < 0) {
+                        enemy1Rotation += 360;
+                    }
+                    enemy1Rotation += 180;
+                }
+                enemy1.setRot(enemy1Rotation); //Line below is John's cancerous work in progress
+                if ((enemy1distToDisk <= catchableDistance && !enemy1.hasDisk() && diskHeight < 80 && !enemyThrew && !player1.hasDisk()) || (distanceBetweenPlayers(enemy1, player1) <= 151 && enemy1distToDisk <= catchableDistance / 2 && !enemy1.hasDisk() && diskHeight < 80 && !enemyThrew && !player1.hasDisk())) {
                     enemy1.setHoldingDisk(true);
+                    playerPossData.replace(enemy1, true);
+                    diskVx = 0;
+                    diskVy = 0;
+                    caughtTime = GAME_TIME - playTime;
+                } else if (enemy1distToDisk > catchableDistance) {
+                    enemy1.setHoldingDisk(false);
+                    playerPossData.replace(enemy1, false);
                 }
-            } else if((enemy2distToDisk < enemy1distToDisk)&&(enemy2distToDisk < enemy3distToDisk)){
-                float xDist = (disk.getX()+diskWd/2) - (enemy2.getPosition().x+playerWd/2);
-                float yDist = (disk.getY()+diskHt/2) - (enemy2.getPosition().y+playerHt/2);
-                float p1Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-                float p1Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-                enemy2.setX((enemy2.getPosition().x + p1Vx));
-                enemy2.setY((enemy2.getPosition().y + p1Vy));
-                enemy2Rotation = (float) Math.toDegrees(Math.atan(yDist/xDist));
-                if(xDist < 0){
-                    enemy2Rotation+= 180;
-                }
-                if(enemy2Rotation < 0){
-                    enemy2Rotation+=360;
+
+
+                enemy2distToDisk = getDistanceToDisk(enemy2);
+                if (enemy2distToDisk <= 4 * catchableDistance && diskVx != 0 && diskVy != 0) {
+                    enemy2Rotation = (float) Math.toDegrees(Math.atan(diskVy / diskVx));
+                    if (diskVx < 0) {
+                        enemy2Rotation += 180;
+                    }
+                    if (enemy2Rotation < 0) {
+                        enemy2Rotation += 360;
+                    }
+                    enemy2Rotation += 180;
                 }
                 enemy2.setRot(enemy2Rotation);
-                if(getDistanceToDisk(enemy2) < catchableDistance){
-                    changingPoss = false;
+                if (enemy2distToDisk <= catchableDistance && !enemy2.hasDisk() && diskHeight < 80 && !enemyThrew && !player1.hasDisk()) {
                     enemy2.setHoldingDisk(true);
-                    playerPossData.replace(enemy2,true);
-                    p1Threw = false;
-                    enemy2.setHoldingDisk(true);
+                    playerPossData.replace(enemy2, true);
+                    diskVx = 0;
+                    diskVy = 0;
+                    caughtTime = GAME_TIME - playTime;
+                } else if (enemy2distToDisk > catchableDistance) {
+                    enemy2.setHoldingDisk(false);
+                    playerPossData.replace(enemy2, false);
                 }
-            } else if((enemy3distToDisk < enemy1distToDisk)&&(enemy3distToDisk < enemy2distToDisk)){
-                float xDist = (disk.getX()+diskWd/2) - (enemy3.getPosition().x+playerWd/2);
-                float yDist = (disk.getY()+diskHt/2) - (enemy3.getPosition().y+playerHt/2);
-                float p1Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-                float p1Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-                enemy3.setX((enemy3.getPosition().x + p1Vx));
-                enemy3.setY((enemy3.getPosition().y + p1Vy));
-                enemy3Rotation = (float) Math.toDegrees(Math.atan(yDist/xDist));
-                if(xDist < 0){
-                    enemy3Rotation+= 180;
-                }
-                if(enemy3Rotation < 0){
-                    enemy3Rotation+=360;
+
+
+                enemy3distToDisk = getDistanceToDisk(enemy3);
+                if (enemy3distToDisk <= 4 * catchableDistance && diskVx != 0 && diskVy != 0) {
+                    enemy3Rotation = (float) Math.toDegrees(Math.atan(diskVy / diskVx));
+                    if (diskVx < 0) {
+                        enemy3Rotation += 180;
+                    }
+                    if (enemy3Rotation < 0) {
+                        enemy3Rotation += 360;
+                    }
+                    enemy3Rotation += 180;
                 }
                 enemy3.setRot(enemy3Rotation);
-                if(getDistanceToDisk(enemy3) < catchableDistance){
-                    changingPoss = false;
+                if (enemy3distToDisk <= catchableDistance && !enemy3.hasDisk() && diskHeight < 80 && !enemyThrew && !player1.hasDisk()) {
                     enemy3.setHoldingDisk(true);
-                    playerPossData.replace(enemy3,true);
-                    p1Threw = false;
-                    enemy3.setHoldingDisk(true);
+                    playerPossData.replace(enemy3, true);
+                    diskVx = 0;
+                    diskVy = 0;
+                    caughtTime = GAME_TIME - playTime;
+                } else if (enemy3distToDisk > catchableDistance) {
+                    enemy3.setHoldingDisk(false);
+                    playerPossData.replace(enemy3, false);
                 }
+
+                if (onOffense) {
+                    double[][] distanceArray = new double[3][3];
+                    for (int i = 0; i < 3; i++) {
+                        for (int j = 0; j < 3; j++) {
+                            distanceArray[i][j] = distanceBetweenPlayers(intToPlayer(i, true), intToPlayer(j, false));
+                        }
+                    }
+                    double[] distanceSum = new double[6];
+                    for (int i = 0; i < 6; i++) {
+                        distanceSum[i] = distanceArray[0][permutations[0][i]] + distanceArray[1][permutations[1][i]] + distanceArray[2][permutations[2][i]];
+                    }
+                    double minDistance = distanceSum[0];
+                    int minElement = 0;
+                    for (int i = 0; i < 6; i++) {
+                        if (distanceSum[i] < minDistance) {
+                            minDistance = distanceSum[i];
+                            minElement = i;
+                        }
+                    }
+                    playDefense(enemy1, intToPlayer(permutations[0][minElement], true));
+                    playDefense(enemy2, intToPlayer(permutations[1][minElement], true));
+                    playDefense(enemy3, intToPlayer(permutations[2][minElement], true));
+                }
+                if (!onOffense) {
+                    //Gdx.app.error("Info","playOffense() called");
+                    playOffense();
+                }
+
+
+                if (!player1.hasDisk()) {
+                    disk.setX(disk.getX() + diskVx);
+                    disk.setY(disk.getY() + diskVy);
+                }
+
+
+                if (disk.getX() + diskWd / 2 <= w / 6 && !inLeftEndZone) {
+                    inLeftEndZone = true;
+                    if (enemy1.hasDisk() || enemy2.hasDisk() || enemy3.hasDisk()) {
+                        team2Score++;
+                        resetAfterScore(false);
+                    }
+                } else if (disk.getX() + diskWd / 2 > w / 6) {
+                    inLeftEndZone = false;
+                }
+
+                if (disk.getX() + diskWd / 2 >= w - w / 6 && !inRightEndZone) {
+                    inRightEndZone = true;
+                    if (player1.hasDisk() || cpuPlayer.hasDisk() || cpu2Player.hasDisk()) {
+                        team1Score++;
+                        resetAfterScore(true);
+                    }
+                } else if (disk.getX() + diskWd / 2 < w - w / 6) {
+                    inRightEndZone = false;
+                }
+                if (inRightEndZone && diskHeight == -100) {
+                    disk.setX(w - w / 6 - diskWd / 2);
+                }
+                if (inLeftEndZone && diskHeight == -100) {
+                    disk.setX(w / 6 + diskWd / 2);
+                }
+
             }
-        } else {
-            //enemy1VelocityX = 0;
-            //enemy1VelocityY = 0;
+            if (changingPoss && !stopped) {
+                if (!p1Threw && onOffense) {
+                    float xDist = (disk.getX() + diskWd / 2) - (player1.getPosition().x + playerWd / 2);
+                    float yDist = (disk.getY() + diskHt / 2) - (player1.getPosition().y + playerHt / 2);
+                    float p1Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+                    float p1Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+                    player1VelocityX = p1Vx;
+                    player1VelocityY = p1Vy;
+                    Gdx.app.log("Possession", "" + player1.getVelocity());
+                    //player1.setX((player1.getPosition().x + p1Vx));
+                    //player1.setY((player1.getPosition().y + p1Vy));
+
+                    if (getDistanceToDisk(player1) < catchableDistance) {
+                        changingPoss = false;
+                        //diskInAir =
+                    }
+                } else if ((enemy1distToDisk < enemy2distToDisk) && (enemy1distToDisk < enemy3distToDisk)) {
+                    float xDist = (disk.getX() + diskWd / 2) - (enemy1.getPosition().x + playerWd / 2);
+                    float yDist = (disk.getY() + diskHt / 2) - (enemy1.getPosition().y + playerHt / 2);
+                    float e1Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+                    float e1Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+                    enemy1VelocityX = e1Vx;
+                    enemy1VelocityY = e1Vy;
+                    Gdx.app.log("Possession", "" + enemy1.getVelocity());
+
+                    enemy1Rotation = (float) Math.toDegrees(Math.atan(yDist / xDist));
+                    if (xDist < 0) {
+                        enemy1Rotation += 180;
+                    }
+                    if (enemy1Rotation < 0) {
+                        enemy1Rotation += 360;
+                    }
+                    enemy1.setRot(enemy1Rotation);
+                    Gdx.app.log("enemy1distToDisk", "" + enemy1distToDisk);
+                    if (getDistanceToDisk(enemy1) < catchableDistance) {
+                        changingPoss = false;
+                        enemy1.setHoldingDisk(true);
+                        playerPossData.replace(enemy1, true);
+                        p1Threw = false;
+                    }
+                } else if ((enemy2distToDisk < enemy1distToDisk) && (enemy2distToDisk < enemy3distToDisk)) {
+                    float xDist = (disk.getX() + diskWd / 2) - (enemy2.getPosition().x + playerWd / 2);
+                    float yDist = (disk.getY() + diskHt / 2) - (enemy2.getPosition().y + playerHt / 2);
+                    float p1Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+                    float p1Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+                    enemy2.setX((enemy2.getPosition().x + p1Vx));
+                    enemy2.setY((enemy2.getPosition().y + p1Vy));
+                    enemy2Rotation = (float) Math.toDegrees(Math.atan(yDist / xDist));
+                    if (xDist < 0) {
+                        enemy2Rotation += 180;
+                    }
+                    if (enemy2Rotation < 0) {
+                        enemy2Rotation += 360;
+                    }
+                    enemy2.setRot(enemy2Rotation);
+                    if (getDistanceToDisk(enemy2) < catchableDistance) {
+                        changingPoss = false;
+                        enemy2.setHoldingDisk(true);
+                        playerPossData.replace(enemy2, true);
+                        p1Threw = false;
+                    }
+                } else if ((enemy3distToDisk < enemy1distToDisk) && (enemy3distToDisk < enemy2distToDisk)) {
+                    float xDist = (disk.getX() + diskWd / 2) - (enemy3.getPosition().x + playerWd / 2);
+                    float yDist = (disk.getY() + diskHt / 2) - (enemy3.getPosition().y + playerHt / 2);
+                    float p1Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+                    float p1Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+                    enemy3.setX((enemy3.getPosition().x + p1Vx));
+                    enemy3.setY((enemy3.getPosition().y + p1Vy));
+                    enemy3Rotation = (float) Math.toDegrees(Math.atan(yDist / xDist));
+                    if (xDist < 0) {
+                        enemy3Rotation += 180;
+                    }
+                    if (enemy3Rotation < 0) {
+                        enemy3Rotation += 360;
+                    }
+                    enemy3.setRot(enemy3Rotation);
+                    if (getDistanceToDisk(enemy3) < catchableDistance) {
+                        changingPoss = false;
+                        enemy3.setHoldingDisk(true);
+                        playerPossData.replace(enemy3, true);
+                        p1Threw = false;
+                    }
+                }
+            } else {
+                //enemy1VelocityX = 0;
+                //enemy1VelocityY = 0;
+            }
+        }
+        else {
+            playOffense();
         }
     }
 
@@ -1052,26 +1052,57 @@ class PlayState extends State implements GestureDetector.GestureListener{
 
     private void playOffense(){
         Vector2 enemyPosition;
-        if (getEnemyWithPossession() != null){
-            enemyPosition=new Vector2(getEnemyWithPossession().getPosition().x,getEnemyWithPossession().getPosition().y);
-            Vector2 newPosition=new Vector2(enemyPosition.x-100,enemyPosition.y+100);
-            Player closestEnemy=getClosestEnemy(newPosition);
-            float xDist = (newPosition.x) - (closestEnemy.getPosition().x);
-            float yDist = (newPosition.y) - (closestEnemy.getPosition().y);
-            if (Math.sqrt(xDist*xDist + yDist*yDist)<catchableDistance) {
-                float Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-                float Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
-                closestEnemy.setX(closestEnemy.getPosition().x + Vx);
-                closestEnemy.setY(closestEnemy.getPosition().y + Vy);
-                enemy2.setRotation((float) Math.toDegrees(Math.atan(yDist/xDist)));
-                if(xDist < 0){
-                    enemy2.setRotation(enemy2.getRotation()+180);
+        if (!enemyThrowing) {
+            if (getEnemyWithPossession() != null) {
+                playingOffense=true;
+                enemyPosition = new Vector2(getEnemyWithPossession().getPosition().x, getEnemyWithPossession().getPosition().y);
+                enemyWithPossession = getEnemyWithPossession();
+                int r = 50;
+                disk.setX((float) (enemyWithPossession.getPosition().x + (enemyWithPossession.getWidth()) / 2 - diskWd / 2 + (r * (Math.cos(Math.toRadians(180 - enemy2Rotation))))));
+                disk.setY((float) (enemyWithPossession.getPosition().y + (enemyWithPossession.getHeight()) / 2 - diskHt / 2 + (r * (Math.sin(Math.toRadians(180 - enemy2Rotation))))));
+                Vector2 newPosition = new Vector2(enemyPosition.x - 300, enemyPosition.y + 300);
+                closestEnemy = getClosestEnemy(newPosition);
+                float xDist = (newPosition.x) - (closestEnemy.getPosition().x);
+                float yDist = (newPosition.y) - (closestEnemy.getPosition().y);
+                if (Math.sqrt(xDist * xDist + yDist * yDist) > catchableDistance) {
+                    float Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+                    float Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
+                    closestEnemy.setX(closestEnemy.getPosition().x + Vx);
+                    closestEnemy.setY(closestEnemy.getPosition().y + Vy);
+                    closestEnemy.setRot((float) Math.toDegrees(Math.atan(yDist / xDist)));
                 }
-                if(enemy2.getRotation() < 0){
-                    enemy2.setRotation(enemy2.getRotation()+360);
+                else {
+                    enemyThrowing=true;
+                    Gdx.app.error("Info","Else Called!");
                 }
             }
         }
+        else {
+            enemyWithPossession.setHoldingDisk(false);
+            playerPossData.replace(enemyWithPossession,false);
+            float rotation=(float) Math.toDegrees(Math.atan((closestEnemy.getPosition().y-enemyWithPossession.getPosition().y)/(closestEnemy.getPosition().x-enemyWithPossession.getPosition().x)))+180;
+            enemyWithPossession.setRot(rotation);
+            //float xDistForDisk = (disk.getX()+diskWd/2) - (enemyWithPossession.getPosition().x+enemyWithPossession.getWidth()/2);
+            //float yDistForDisk = (disk.getY()+diskHt/2) - (enemyWithPossession.getPosition().y+enemyWithPossession.getHeight()/2);
+/*               if(xDistForDisk < 0){
+                   enemyWithPossession.setRot(enemyWithPossession.getRot()+180);
+               }
+               if(enemyWithPossession.getRot() < 0){
+                   enemyWithPossession.setRot(enemyWithPossession.getRot()+360);
+               }*/
+            float xDist2 =  (closestEnemy.getPosition().x+closestEnemy.getWidth()/2) - (disk.getX()+diskWd/2);
+            float yDist2 =  (closestEnemy.getPosition().y+closestEnemy.getHeight()/2) - (disk.getY()+diskHt/2);
+            if (Math.sqrt(xDist2*xDist2 + yDist2*yDist2)>catchableDistance) {
+                float Vx = 5f * (xDist2 / ((float) Math.sqrt(xDist2 * xDist2 + yDist2 * yDist2)));
+                float Vy = 5f * (yDist2 / ((float) Math.sqrt(xDist2 * xDist2 + yDist2 * yDist2)));
+                disk.setX(disk.getX() + Vx);
+                disk.setY(disk.getY() + Vy);
+            }
+            else {
+                enemyThrew=false;
+            }
+        }
+
         //Gdx.app.error("Enemy With Possession",enemyPosition.toString());
     }
 
@@ -1090,13 +1121,13 @@ class PlayState extends State implements GestureDetector.GestureListener{
     private Player getClosestEnemy(Vector2 newPosition) {
         Player closestEnemy=null;
         float closestDistance=999999999999f;
-        for (Player player:players){
-            float xDist = (newPosition.x) - (player.getPosition().x);
-            float yDist = (newPosition.y) - (player.getPosition().y);
+        for (int i=3; i<=5; i++){
+            float xDist = (newPosition.x) - (players.get(i).getPosition().x);
+            float yDist = (newPosition.y) - (players.get(i).getPosition().y);
             float distance=(float)Math.sqrt(xDist*xDist + yDist*yDist);
-            if (distance<closestDistance && player != getEnemyWithPossession()){
+            if (distance<closestDistance && players.get(i) != getEnemyWithPossession() ){
                 closestDistance=distance;
-                closestEnemy=player;
+                closestEnemy= players.get(i);
             }
         }
         if (closestEnemy != null) {
@@ -1193,13 +1224,13 @@ class PlayState extends State implements GestureDetector.GestureListener{
     }
 
     private void keepPlayerInBounds() {
-        ArrayList<Player> players = new ArrayList<Player>();
         players.add(player1);
         players.add(cpuPlayer);
         players.add(cpu2Player);
         players.add(enemy1);
         players.add(enemy2);
         players.add(enemy3);
+
 
         for(Player p : players){
             if (p.getPosition().x + playerWd/2 <= 0) {
