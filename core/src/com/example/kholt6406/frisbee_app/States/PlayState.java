@@ -791,6 +791,8 @@ class PlayState extends State implements GestureDetector.GestureListener{
                     enemy2Rotation += 180;
                 }
                 enemy2.setRot(enemy2Rotation);
+                if (playingOffense)
+                Gdx.app.error("Info","setRot() called");
                 if (enemy2distToDisk <= catchableDistance && !enemy2.hasDisk() && diskHeight < 80 && !enemyThrew && !player1.hasDisk()) {
                     enemy2.setHoldingDisk(true);
                     playerPossData.replace(enemy2, true);
@@ -852,6 +854,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 if (!onOffense) {
                     //Gdx.app.error("Info","playOffense() called");
                     playOffense();
+                    //TODO: Add if playingOffense statement
                 }
 
 
@@ -942,7 +945,9 @@ class PlayState extends State implements GestureDetector.GestureListener{
                     if (enemy2Rotation < 0) {
                         enemy2Rotation += 360;
                     }
+                    if (playingOffense)
                     enemy2.setRot(enemy2Rotation);
+                    Gdx.app.error("Info","setRot() called");
                     if (getDistanceToDisk(enemy2) < catchableDistance) {
                         changingPoss = false;
                         enemy2.setHoldingDisk(true);
@@ -1051,19 +1056,21 @@ class PlayState extends State implements GestureDetector.GestureListener{
     }
 
     private void playOffense(){
-        Vector2 enemyPosition;
+        Vector2 enemyPosition=new Vector2(0,0);
         if (!enemyThrowing) {
             if (getEnemyWithPossession() != null) {
                 playingOffense=true;
                 enemyPosition = new Vector2(getEnemyWithPossession().getPosition().x, getEnemyWithPossession().getPosition().y);
                 enemyWithPossession = getEnemyWithPossession();
-                int r = 50;
-                disk.setX((float) (enemyWithPossession.getPosition().x + (enemyWithPossession.getWidth()) / 2 - diskWd / 2 + (r * (Math.cos(Math.toRadians(180 - enemy2Rotation))))));
-                disk.setY((float) (enemyWithPossession.getPosition().y + (enemyWithPossession.getHeight()) / 2 - diskHt / 2 + (r * (Math.sin(Math.toRadians(180 - enemy2Rotation))))));
+                int r = 100;
+                disk.setX((float) (enemyWithPossession.getPosition().x + (playerWd) / 2 - diskWd / 2 + (r * (Math.cos(Math.toRadians(enemyWithPossession.getRot()+180))))));
+                disk.setY((float) (enemyWithPossession.getPosition().y + (playerHt) / 2 - diskHt / 2 + (r * (Math.sin(Math.toRadians(enemyWithPossession.getRot()+180))))));
+                //disk.setX(enemyPosition.x+playerWd/2);
+                //disk.setY(enemyPosition.y+playerHt/2);
                 Vector2 newPosition = new Vector2(enemyPosition.x - 300, enemyPosition.y + 300);
                 closestEnemy = getClosestEnemy(newPosition);
-                float xDist = (newPosition.x) - (closestEnemy.getPosition().x);
-                float yDist = (newPosition.y) - (closestEnemy.getPosition().y);
+                float xDist = (newPosition.x) - (closestEnemy.getPosition().x+playerWd/2);
+                float yDist = (newPosition.y) - (closestEnemy.getPosition().y+playerHt/2);
                 if (Math.sqrt(xDist * xDist + yDist * yDist) > catchableDistance) {
                     float Vx = 5f * (xDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
                     float Vy = 5f * (yDist / ((float) Math.sqrt(xDist * xDist + yDist * yDist)));
@@ -1072,6 +1079,8 @@ class PlayState extends State implements GestureDetector.GestureListener{
                     closestEnemy.setRot((float) Math.toDegrees(Math.atan(yDist / xDist)));
                 }
                 else {
+                    float rotation=(float) Math.toDegrees(Math.atan((enemyPosition.y-closestEnemy.getPosition().y)/(enemyPosition.x-closestEnemy.getPosition().x)));
+                    closestEnemy.setRot(rotation);
                     enemyThrowing=true;
                     Gdx.app.error("Info","Else Called!");
                 }
@@ -1080,7 +1089,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
         else {
             enemyWithPossession.setHoldingDisk(false);
             playerPossData.replace(enemyWithPossession,false);
-            float rotation=(float) Math.toDegrees(Math.atan((closestEnemy.getPosition().y-enemyWithPossession.getPosition().y)/(closestEnemy.getPosition().x-enemyWithPossession.getPosition().x)))+180;
+            float rotation=(float) Math.toDegrees(Math.atan((closestEnemy.getPosition().y-enemyPosition.y)/(closestEnemy.getPosition().x-enemyPosition.x)))+90;
             enemyWithPossession.setRot(rotation);
             //float xDistForDisk = (disk.getX()+diskWd/2) - (enemyWithPossession.getPosition().x+enemyWithPossession.getWidth()/2);
             //float yDistForDisk = (disk.getY()+diskHt/2) - (enemyWithPossession.getPosition().y+enemyWithPossession.getHeight()/2);
@@ -1090,8 +1099,8 @@ class PlayState extends State implements GestureDetector.GestureListener{
                if(enemyWithPossession.getRot() < 0){
                    enemyWithPossession.setRot(enemyWithPossession.getRot()+360);
                }*/
-            float xDist2 =  (closestEnemy.getPosition().x+closestEnemy.getWidth()/2) - (disk.getX()+diskWd/2);
-            float yDist2 =  (closestEnemy.getPosition().y+closestEnemy.getHeight()/2) - (disk.getY()+diskHt/2);
+            float xDist2 =  (closestEnemy.getPosition().x+playerWd/2) - (disk.getX()+diskWd/2);
+            float yDist2 =  (closestEnemy.getPosition().y+playerHt/2) - (disk.getY()+diskHt/2);
             if (Math.sqrt(xDist2*xDist2 + yDist2*yDist2)>catchableDistance) {
                 float Vx = 5f * (xDist2 / ((float) Math.sqrt(xDist2 * xDist2 + yDist2 * yDist2)));
                 float Vy = 5f * (yDist2 / ((float) Math.sqrt(xDist2 * xDist2 + yDist2 * yDist2)));
