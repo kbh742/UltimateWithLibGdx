@@ -1061,6 +1061,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
 
     private void playOffense(){
         Vector2 enemyPosition=new Vector2(0,0);
+        int offset=0;
 /*        if (disk.getX() + diskWd / 2 <= w / 6 && !inLeftEndZone){
             playingOffense=false;
             resetAfterScore(false);
@@ -1098,9 +1099,15 @@ class PlayState extends State implements GestureDetector.GestureListener{
             }
         }
         else {
+            if (enemyPosition.y<=h/2) {
+                offset=0;
+            }
+            else {
+                offset=90;
+            }
             enemyWithPossession.setHoldingDisk(false);
             playerPossData.replace(enemyWithPossession,false);
-            float rotation=(float) Math.toDegrees(Math.atan((closestEnemy.getPosition().y-enemyPosition.y)/(closestEnemy.getPosition().x-enemyPosition.x)))+90;
+            float rotation=(float) Math.toDegrees(Math.atan((closestEnemy.getPosition().y-enemyPosition.y)/(closestEnemy.getPosition().x-enemyPosition.x)))+90+offset;
             enemyWithPossession.setRot(rotation);
             float xDist2 =  (closestEnemy.getPosition().x+playerWd/2) - (disk.getX()+diskWd/2);
             float yDist2 =  (closestEnemy.getPosition().y+playerHt/2) - (disk.getY()+diskHt/2);
