@@ -47,7 +47,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
     static float h = Gdx.graphics.getHeight();
     float scbdWd;
     float scbdHt;
-
+    int indexOfTrue;
     float isJohnGay;
     float xPos;
     float yPos;
@@ -855,8 +855,10 @@ class PlayState extends State implements GestureDetector.GestureListener{
                 if (!onOffense) {
                     //Gdx.app.error("Info","playOffense() called");
                     playOffense();
+
                     if (playingOffense && illgiveyouachance==1){
                         illgiveyouachance=0;
+                        caughtTime=0;
                         return;
                     }
                     else {
@@ -1062,16 +1064,19 @@ class PlayState extends State implements GestureDetector.GestureListener{
     }
 
     private void playOffense(){
-        int offset=0;
-        if (disk.getX() + diskWd / 2 <= w / 6 && !inLeftEndZone && getEnemyWithPossession() != null){
+        int offset;
+        if (disk.getX() + diskWd / 2 <= w / 6 && !inLeftEndZone && getEnemyWithPossession() != null && playingOffense){
             getEnemyWithPossession().setHoldingDisk(false);
             inLeftEndZone=true;
             playingOffense=false;
             team2Score++;
+            stallTime=0;
+            timeOfStall=10;
             resetAfterScore(false);
         }
         if (!enemyThrowing) {
-            if (getEnemyWithPossession() != null) {
+            getEnemyWithPossession();
+            if (indexOfTrue>=3) {
                 playingOffense=true;
                 enemyPosition = new Vector2(getEnemyWithPossession().getPosition().x, getEnemyWithPossession().getPosition().y);
                 enemyWithPossession = getEnemyWithPossession();
@@ -1106,15 +1111,15 @@ class PlayState extends State implements GestureDetector.GestureListener{
             }
         }
         else {
-            if (enemyPosition.y<=h/2) {
+/*            if (enemyPosition.y<=h/2) {
                 offset=90;
             }
             else {
                 offset=90;
-            }
+            }*/
             enemyWithPossession.setHoldingDisk(false);
             playerPossData.replace(enemyWithPossession,false);
-            float rotation=(float) Math.toDegrees(Math.atan((closestEnemy.getPosition().y-enemyPosition.y)/(closestEnemy.getPosition().x-enemyPosition.x)))+90+offset;
+            float rotation=(float) Math.toDegrees(Math.atan((closestEnemy.getPosition().y-enemyPosition.y)/(closestEnemy.getPosition().x-enemyPosition.x)))+180;
             enemyWithPossession.setRot(rotation);
             float xDist2 =  (closestEnemy.getPosition().x+playerWd/2) - (disk.getX()+diskWd/2);
             float yDist2 =  (closestEnemy.getPosition().y+playerHt/2) - (disk.getY()+diskHt/2);
@@ -1135,7 +1140,7 @@ class PlayState extends State implements GestureDetector.GestureListener{
     private Player getEnemyWithPossession (){
         ArrayList<Boolean> valueArray=new ArrayList<>(playerPossData.values());
         ArrayList<Player> keyArray=new ArrayList<>(playerPossData.keySet());
-        int indexOfTrue=valueArray.indexOf(true);
+        indexOfTrue=valueArray.indexOf(true);
         if (indexOfTrue != -1) {
             return keyArray.get(indexOfTrue);
         }
@@ -1287,51 +1292,52 @@ class PlayState extends State implements GestureDetector.GestureListener{
         sb.draw(background, 0,0, w, h);
         float stallWidth = Gdx.graphics.getWidth()/2;
         float stallX = Gdx.graphics.getWidth()/4;
-        if(stallTime>0/* && onOffense*/){
-            if(stallTime<1){
-                sb.draw(stallCount10, stallX, 0, stallWidth, h);
-            } else if (stallTime <2){
-                sb.draw(stallCount9, stallX, 0, stallWidth, h);
-            } else if (stallTime <3){
-                sb.draw(stallCount8, stallX, 0, stallWidth, h);
-            } else if (stallTime <4){
-                sb.draw(stallCount7, stallX, 0, stallWidth, h);
-            } else if (stallTime <5){
-                sb.draw(stallCount6, stallX, 0, stallWidth, h);
-            } else if (stallTime <6){
-                sb.draw(stallCount5, stallX, 0, stallWidth, h);
-            } else if (stallTime <7){
-                sb.draw(stallCount4, stallX, 0, stallWidth, h);
-            } else if (stallTime <8){
-                sb.draw(stallCount3, stallX, 0, stallWidth, h);
-            } else if (stallTime <9){
-                sb.draw(stallCount2, stallX, 0, stallWidth, h);
-            } else if (stallTime <10){
-                sb.draw(stallCount1, stallX, 0, stallWidth, h);
-            } else if (stallTime < 11){
-                timeOfStall = GAME_TIME-playTime;
-                stallTime = 0;
-                airTime = 0;
-                if(onOffense){
-                    changingPoss = true;
-                    p1Threw = true;
+        if (!playingOffense) {
+            if (stallTime > 0/* && onOffense*/) {
+                if (stallTime < 1) {
+                    sb.draw(stallCount10, stallX, 0, stallWidth, h);
+                } else if (stallTime < 2) {
+                    sb.draw(stallCount9, stallX, 0, stallWidth, h);
+                } else if (stallTime < 3) {
+                    sb.draw(stallCount8, stallX, 0, stallWidth, h);
+                } else if (stallTime < 4) {
+                    sb.draw(stallCount7, stallX, 0, stallWidth, h);
+                } else if (stallTime < 5) {
+                    sb.draw(stallCount6, stallX, 0, stallWidth, h);
+                } else if (stallTime < 6) {
+                    sb.draw(stallCount5, stallX, 0, stallWidth, h);
+                } else if (stallTime < 7) {
+                    sb.draw(stallCount4, stallX, 0, stallWidth, h);
+                } else if (stallTime < 8) {
+                    sb.draw(stallCount3, stallX, 0, stallWidth, h);
+                } else if (stallTime < 9) {
+                    sb.draw(stallCount2, stallX, 0, stallWidth, h);
+                } else if (stallTime < 10) {
+                    sb.draw(stallCount1, stallX, 0, stallWidth, h);
+                } else if (stallTime < 11) {
+                    timeOfStall = GAME_TIME - playTime;
+                    stallTime = 0;
+                    airTime = 0;
+                    if (onOffense) {
+                        changingPoss = true;
+                        p1Threw = true;
+                    } else {
+                        enemyThrew = true;
+                    }
+                    turnover();
+                    diskInAir = false;
+
+
+                    airTime = 0;
+
                 } else {
-                    enemyThrew = true;
+
                 }
-                turnover();
-                diskInAir = false;
-
-
-
-                airTime = 0;
-
-            } else {
-
             }
-        }
-        stallStallTime = (GAME_TIME-playTime) - timeOfStall;
-        if(stallStallTime>0 && timeOfStall!= 0 && stallStallTime<1){
-            sb.draw(stallCount0, stallX, 0, stallWidth, h);
+            stallStallTime = (GAME_TIME - playTime) - timeOfStall;
+            if (stallStallTime > 0 && timeOfStall != 0 && stallStallTime < 1) {
+                sb.draw(stallCount0, stallX, 0, stallWidth, h);
+            }
         }
         if(Math.abs(airTime-timeToVertex)<0.05){
             //Gdx.app.log("Time", ""+timeToVertex);
@@ -1491,7 +1497,6 @@ class PlayState extends State implements GestureDetector.GestureListener{
         }
         cpuAIReleased = true;
         cpu2AIReleased = true;
-
 
     }
 
